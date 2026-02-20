@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Models & Policy Study App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 3D Flip Card Styles */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+        .flipped .transform-style-3d {
+            transform: rotateY(180deg);
+        }
+        
+        /* Custom Scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-indigo-600 text-white shadow-md">
+        <div class="max-w-5xl mx-auto px-4 py-6">
+            <h1 class="text-2xl md:text-3xl font-bold flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                Security Models & Policies
+            </h1>
+            <p class="text-indigo-200 mt-2">Interactive Study Companion</p>
+        </div>
+    </header>
+
+    <!-- Tabs Navigation -->
+    <nav class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-10">
+        <div class="max-w-5xl mx-auto px-4 flex">
+            <button onclick="switchTab('flashcards')" id="tab-flashcards" class="flex-1 py-4 text-center font-semibold text-indigo-600 border-b-2 border-indigo-600 transition-colors">
+                Flashcards (25)
+            </button>
+            <button onclick="switchTab('quiz')" id="tab-quiz" class="flex-1 py-4 text-center font-semibold text-slate-500 hover:text-indigo-600 border-b-2 border-transparent transition-colors">
+                Practice Quiz (10)
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-5xl mx-auto w-full px-4 py-8">
+        
+        <!-- Flashcards View -->
+        <div id="view-flashcards" class="block">
+            <div class="flex flex-col items-center justify-center max-w-2xl mx-auto">
+                <div class="mb-4 text-sm font-medium text-slate-500 bg-white px-4 py-1 rounded-full shadow-sm border border-slate-200">
+                    Card <span id="current-card-num">1</span> of 25
+                </div>
+
+                <!-- Flashcard Container -->
+                <div class="perspective-1000 w-full h-80 md:h-96 cursor-pointer group" onclick="toggleFlip()">
+                    <div id="flashcard-inner" class="transform-style-3d relative w-full h-full rounded-2xl shadow-lg border border-slate-200 bg-white group-hover:shadow-xl transition-shadow duration-300">
+                        
+                        <!-- Front of Card -->
+                        <div class="backface-hidden absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
+                            <span class="absolute top-4 right-4 text-slate-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                                </svg>
+                            </span>
+                            <h2 class="text-2xl md:text-3xl font-bold text-slate-800" id="card-front-text">Term</h2>
+                            <p class="text-slate-400 mt-6 text-sm uppercase tracking-widest font-semibold">Click to reveal definition</p>
+                        </div>
+
+                        <!-- Back of Card -->
+                        <div class="backface-hidden rotate-y-180 absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-indigo-50 rounded-2xl border border-indigo-100">
+                            <span class="absolute top-4 right-4 text-indigo-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                            </span>
+                            <p class="text-xl md:text-2xl text-slate-700 leading-relaxed" id="card-back-text">Definition</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="flex justify-between items-center w-full mt-8 gap-4">
+                    <button onclick="prevCard()" class="flex-1 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold py-3 px-6 rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                        </svg>
+                        Previous
+                    </button>
+                    <button onclick="nextCard()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2">
+                        Next
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz View -->
+        <div id="view-quiz" class="hidden max-w-3xl mx-auto pb-12">
+            <div class="flex justify-between items-end mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800">Knowledge Check</h2>
+                    <p class="text-slate-500 mt-1">Select the best answer for each question.</p>
+                </div>
+                <div class="text-right">
+                    <span id="score-display" class="hidden text-lg font-bold text-indigo-600 bg-indigo-50 px-4 py-2 rounded-lg border border-indigo-100">Score: 0/10</span>
+                </div>
+            </div>
+            
+            <div id="quiz-container" class="space-y-8">
+                <!-- Quiz questions will be dynamically injected here -->
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- DATA STRUCTURES ---
+
+        const flashcardsData = [
+            { front: "Definition of a Security Policy", back: "A formal set of rules defining who can access what resources, how, and under what conditions." },
+            { front: "The three components of the CIA Triad", back: "Confidentiality, Integrity, and Availability." },
+            { front: "Primary goal of the Bell-LaPadula (BLP) model", back: "Confidentiality (keeping secrets secret)." },
+            { front: "BLP Simple Security Property", back: "No Read Up: You cannot read data classified above your clearance level." },
+            { front: "BLP Star Property (*-Property)", back: "No Write Down: You cannot write data to a classification level below your own." },
+            { front: "Direction of information flow in Bell-LaPadula", back: "Upward only (from lower classification to higher classification)." },
+            { front: "Primary goal of the Biba Model", back: "Integrity (protecting the trustworthiness of data)." },
+            { front: "Biba Simple Integrity Property", back: "No Read Down: You cannot read data from a lower integrity level." },
+            { front: "Biba Integrity Star Property", back: "No Write Up: You cannot modify data at a higher integrity level." },
+            { front: "Primary focus of the Clark-Wilson Model", back: "Commercial and business integrity, focusing on well-formed transactions." },
+            { front: "Clark-Wilson: CDI", back: "Constrained Data Item: Protected data that must stay accurate (e.g., bank balance)." },
+            { front: "Clark-Wilson: TP", back: "Transformation Procedure: The only approved program allowed to modify a CDI." },
+            { front: "Clark-Wilson: Separation of Duties mechanism", back: "Users cannot access CDIs directly; they must use TPs (Transformation Procedures)." },
+            { front: "Primary purpose of the Chinese Wall (Brewer-Nash) Model", back: "Preventing Conflicts of Interest (COI) between competing companies." },
+            { front: "Unique feature of access rights in the Chinese Wall Model", back: "They are dynamic; permissions change based on what data the user has previously accessed." },
+            { front: "Discretionary Access Control (DAC)", back: "An access control policy where the resource owner decides who has access." },
+            { front: "Mandatory Access Control (MAC)", back: "An access control policy where the system assigns permissions based on security labels; users cannot override them." },
+            { front: "Role-Based Access Control (RBAC)", back: "An access control policy where permissions are assigned to roles, and users are assigned to those roles." },
+            { front: "Major security risk of DAC", back: "Vulnerability to Trojan horses (malware inherits the user's full permissions)." },
+            { front: "Principle of Least Privilege (PoLP)", back: "Granting every subject only the minimum permissions necessary to perform their job function." },
+            { front: "Zero Trust Model Motto", back: "Never trust, always verify." },
+            { front: "Covert Timing Channel", back: "Inferring sensitive data by analyzing how long a system takes to respond to a query." },
+            { front: "Covert Storage Channel", back: "Inferring sensitive data by observing system state, such as whether a file exists or disk space usage." },
+            { front: "The Granularity Problem", back: "The challenge of deciding how fine-grained controls should be (e.g., file-level vs. field-level) to balance security and cost." },
+            { front: "Policy Conflict: Deny-Overrides", back: "A conflict resolution strategy where a single 'deny' rule vetoes any 'allow' rules." }
+        ];
+
+        const quizData = [
+            {
+                qNum: 1,
+                question: "According to the lesson, a security policy provides the foundation for security by formally defining three key elements regarding resource access. What are they?",
+                options: [
+                    { text: "Who, What, and Under what conditions", correct: true, rationale: "A policy must specify the subject (who), the resource (what), and the context or rules (conditions) for access to be meaningful." },
+                    { text: "Confidentiality, Integrity, and Availability", correct: false, rationale: "These are the goals of security (the CIA Triad), not the specific definition of the policy rules themselves." },
+                    { text: "When, Where, and Why", correct: false, rationale: "While context matters, the core definition focuses on the actor, the object, and the rules of engagement." },
+                    { text: "Authentication, Authorization, and Auditing", correct: false, rationale: "These are mechanisms used to enforce policy, often described as the 'AAA' framework, but not the definition of the policy itself." }
+                ],
+                hint: "Think about the three questions the policy answers to remove ambiguity about 'secure' access."
+            },
+            {
+                qNum: 2,
+                question: "The Bell-LaPadula (BLP) model is primarily designed to protect which aspect of the CIA Triad?",
+                options: [
+                    { text: "Confidentiality", correct: true, rationale: "BLP was developed for the DoD specifically to keep secrets secret and prevent classified information from leaking to lower levels." },
+                    { text: "Integrity", correct: false, rationale: "BLP actually ignores integrity; a lower-level user can theoretically write to a higher-level file, potentially corrupting it." },
+                    { text: "Availability", correct: false, rationale: "BLP focuses on access restrictions to prevent leaks, not on ensuring systems remain online or accessible." },
+                    { text: "Accountability", correct: false, rationale: "While logging is important, the primary mathematical goal of BLP is restricting information flow to protect secrecy." }
+                ],
+                hint: "This model was sponsored by the military, where 'keeping secrets' is the highest priority."
+            },
+            {
+                qNum: 3,
+                question: "Which rule in the Bell-LaPadula model prevents a user with 'Top Secret' clearance from accidentally leaking information to a 'Confidential' folder?",
+                options: [
+                    { text: "The Star Property (*-Property) / No Write Down", correct: true, rationale: "This rule specifically forbids moving information from a high level to a lower level, preventing leaks." },
+                    { text: "The Simple Security Property / No Read Up", correct: false, rationale: "This rule prevents a lower-level user from seeing high-level data, but it doesn't stop a high-level user from leaking data downwards." },
+                    { text: "The Simple Integrity Property / No Read Down", correct: false, rationale: "This is a rule from the Biba model concerning integrity, not BLP." },
+                    { text: "The Discretionary Access Rule", correct: false, rationale: "BLP is a Mandatory Access Control (MAC) model, so discretionary rules do not apply to the core constraints." }
+                ],
+                hint: "Think about the direction of information flow; the model ensures data can only move Up, never Down."
+            },
+            {
+                qNum: 4,
+                question: "How does the Biba model differ from the Bell-LaPadula model?",
+                options: [
+                    { text: "Biba is the exact mirror image of BLP, protecting integrity by preventing 'Read Down' and 'Write Up'.", correct: true, rationale: "Biba inverts BLP's rules to prevent unreliable data from contaminating trusted systems (integrity)." },
+                    { text: "Biba allows users to determine their own permissions, whereas BLP is mandatory.", correct: false, rationale: "Both Biba and BLP are typically implemented as Mandatory Access Control (MAC) models." },
+                    { text: "Biba focuses on Conflicts of Interest, whereas BLP focuses on military secrets.", correct: false, rationale: "The Chinese Wall model focuses on Conflicts of Interest; Biba focuses on data integrity." },
+                    { text: "Biba allows information to flow Up, whereas BLP allows information to flow Down.", correct: false, rationale: "Actually, BLP forces info to flow Up (confidentiality), while Biba forces info to flow Down (integrity)." }
+                ],
+                hint: "If BLP is about keeping secrets (military), this model is about keeping data pure (like a clean kitchen)."
+            },
+            {
+                qNum: 5,
+                question: "In the Clark-Wilson model, a user cannot modify a Constrained Data Item (CDI) directly. What must they use to make changes?",
+                options: [
+                    { text: "A Transformation Procedure (TP)", correct: true, rationale: "TPs are the only approved, audited programs allowed to modify protected data, ensuring business integrity." },
+                    { text: "An Unconstrained Data Item (UDI)", correct: false, rationale: "UDIs are untrusted inputs (like a deposit slip), not the mechanism for changing protected data." },
+                    { text: "An Integrity Verification Procedure (IVP)", correct: false, rationale: "IVPs are used to audit and check that data is valid, but they are not the tool users use to perform daily transactions." },
+                    { text: "A Security Label", correct: false, rationale: "Labels are used in MAC models like BLP and Biba, not as the active mechanism for modification in Clark-Wilson." }
+                ],
+                hint: "Think of the bank analogy: you don't walk into the vault; you go to a teller who follows a specific..."
+            },
+            {
+                qNum: 6,
+                question: "What is the unique feature of the Chinese Wall (Brewer-Nash) model compared to other models like DAC or MAC?",
+                options: [
+                    { text: "Access permissions are dynamic and change based on the user's previous actions.", correct: true, rationale: "Once a user accesses data from one company, the model dynamically blocks access to that company's competitors." },
+                    { text: "It is the only model that uses encryption to enforce security.", correct: false, rationale: "Encryption is a tool used in many contexts, not a defining feature of the Chinese Wall model's logic." },
+                    { text: "It completely forbids any user from accessing data from more than one company.", correct: false, rationale: "Users can access multiple companies, provided those companies are not in the same 'Conflict of Interest' class." },
+                    { text: "It relies entirely on the user's discretion to decide what is ethical.", correct: false, rationale: "The system enforces the wall automatically; it does not rely on the user's judgment." }
+                ],
+                hint: "In most models, your permissions are set by an admin and stay the same. In this one, reading file A might suddenly block file B."
+            },
+            {
+                qNum: 7,
+                question: "Which access control philosophy is most vulnerable to 'Trojan horse' attacks because users can inadvertently grant permissions to malware?",
+                options: [
+                    { text: "Discretionary Access Control (DAC)", correct: true, rationale: "In DAC, the resource owner sets permissions. If malware runs as the owner, it inherits their power to change permissions or access data." },
+                    { text: "Mandatory Access Control (MAC)", correct: false, rationale: "MAC is resistant to this because the system enforces labels; a user (or their malware) cannot override the system policy." },
+                    { text: "Role-Based Access Control (RBAC)", correct: false, rationale: "RBAC restricts users to specific roles, reducing the risk compared to the broad discretion allowed in DAC." },
+                    { text: "Zero Trust Architecture", correct: false, rationale: "Zero Trust assumes breach and verifies every request, making it highly resistant to such attacks." }
+                ],
+                hint: "This is the system used on most personal computers where *you* are the owner of your files."
+            },
+            {
+                qNum: 8,
+                question: "The 'Granularity Problem' refers to which real-world difficulty in implementing security policies?",
+                options: [
+                    { text: "Determining how fine-grained access controls should be (e.g., file-level vs. field-level) to balance security and cost.", correct: true, rationale: "If controls are too broad, unauthorized data is exposed; if too specific, the system becomes expensive and complex to manage." },
+                    { text: "The difficulty of effectively destroying data on hard drives so it cannot be recovered.", correct: false, rationale: "This refers to data remanence, not granularity." },
+                    { text: "The challenge of managing passwords for thousands of different users.", correct: false, rationale: "This is an identity management issue, not specifically a granularity issue." },
+                    { text: "The conflict between 'Deny' and 'Allow' rules in a firewall.", correct: false, rationale: "This is a policy conflict or composition problem, not granularity." }
+                ],
+                hint: "Think about the hospital example: Is it enough to give a nurse access to a 'patient file', or do we need to separate the 'medical history' from the 'billing info'?"
+            },
+            {
+                qNum: 9,
+                question: "What is the primary benefit of adhering to the Principle of Least Privilege (PoLP)?",
+                options: [
+                    { text: "It contains the damage if a specific account is compromised.", correct: true, rationale: "By giving users only what they need, a compromised account limits the attacker's reach to just those specific permissions." },
+                    { text: "It ensures that no user can ever access the internet from a work computer.", correct: false, rationale: "PoLP limits access based on job function; if the job requires internet, they get it. It's not a blanket ban." },
+                    { text: "It eliminates the need for passwords and authentication.", correct: false, rationale: "PoLP requires strong authentication to identify who the user is before assigning them limited privileges." },
+                    { text: "It guarantees 100% availability of all system resources.", correct: false, rationale: "PoLP restricts access, which can actually hinder availability if permissions are too tight; it does not guarantee availability." }
+                ],
+                hint: "The hotel key card analogy: If a thief steals your card, they shouldn't be able to open every room in the hotel."
+            },
+            {
+                qNum: 10,
+                question: "A system administrator configures a firewall to block all traffic by default, but accidentally creates a rule allowing all traffic on port 80. This is an example of which policy implementation issue?",
+                options: [
+                    { text: "Administrative Burden & Human Error", correct: true, rationale: "Even with a perfect model, misconfiguration by admins is a leading cause of breaches." },
+                    { text: "Covert Timing Channel", correct: false, rationale: "This involves inferring data from system timing, not a direct misconfiguration of rules." },
+                    { text: "Dynamic Access Control", correct: false, rationale: "This describes a type of access control (like Chinese Wall), not an error type." },
+                    { text: "The Granularity Problem", correct: false, rationale: "This would apply if the admin *wanted* to block specific sites but could only block the whole port; here, it was a mistake." }
+                ],
+                hint: "The Verizon DBIR consistently ranks this 'oops' factor as a top cause of security breaches."
+            }
+        ];
+
+        // --- APP STATE ---
+
+        let currentCardIndex = 0;
+        let isCardFlipped = false;
+        let quizScore = 0;
+        let answeredQuestions = new Set();
+
+        // --- INITIALIZATION ---
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateFlashcard();
+            renderQuiz();
+        });
+
+        // --- TAB LOGIC ---
+
+        function switchTab(tab) {
+            const flashcardTab = document.getElementById('tab-flashcards');
+            const quizTab = document.getElementById('tab-quiz');
+            const viewFlashcards = document.getElementById('view-flashcards');
+            const viewQuiz = document.getElementById('view-quiz');
+
+            if (tab === 'flashcards') {
+                flashcardTab.className = "flex-1 py-4 text-center font-semibold text-indigo-600 border-b-2 border-indigo-600 transition-colors";
+                quizTab.className = "flex-1 py-4 text-center font-semibold text-slate-500 hover:text-indigo-600 border-b-2 border-transparent transition-colors";
+                viewFlashcards.classList.remove('hidden');
+                viewFlashcards.classList.add('block');
+                viewQuiz.classList.remove('block');
+                viewQuiz.classList.add('hidden');
+            } else {
+                quizTab.className = "flex-1 py-4 text-center font-semibold text-indigo-600 border-b-2 border-indigo-600 transition-colors";
+                flashcardTab.className = "flex-1 py-4 text-center font-semibold text-slate-500 hover:text-indigo-600 border-b-2 border-transparent transition-colors";
+                viewQuiz.classList.remove('hidden');
+                viewQuiz.classList.add('block');
+                viewFlashcards.classList.remove('block');
+                viewFlashcards.classList.add('hidden');
+            }
+        }
+
+        // --- FLASHCARD LOGIC ---
+
+        function toggleFlip() {
+            const container = document.getElementById('flashcard-inner').parentElement;
+            container.classList.toggle('flipped');
+            isCardFlipped = !isCardFlipped;
+        }
+
+        function updateFlashcard() {
+            const card = flashcardsData[currentCardIndex];
+            document.getElementById('card-front-text').innerText = card.front;
+            document.getElementById('card-back-text').innerText = card.back;
+            document.getElementById('current-card-num').innerText = currentCardIndex + 1;
+            
+            // Reset flip state when changing cards
+            const container = document.getElementById('flashcard-inner').parentElement;
+            if (isCardFlipped) {
+                container.classList.remove('flipped');
+                isCardFlipped = false;
+            }
+        }
+
+        function nextCard() {
+            currentCardIndex = (currentCardIndex + 1) % flashcardsData.length;
+            // Add a small delay if the card is flipped so they don't see the text swap mid-flip
+            if (isCardFlipped) {
+                toggleFlip();
+                setTimeout(updateFlashcard, 300); 
+            } else {
+                updateFlashcard();
+            }
+        }
+
+        function prevCard() {
+            currentCardIndex = (currentCardIndex - 1 + flashcardsData.length) % flashcardsData.length;
+            if (isCardFlipped) {
+                toggleFlip();
+                setTimeout(updateFlashcard, 300);
+            } else {
+                updateFlashcard();
+            }
+        }
+
+        // --- QUIZ LOGIC ---
+
+        function renderQuiz() {
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = '';
+
+            quizData.forEach((q, index) => {
+                const qId = `q-${index}`;
+                
+                // Shuffle options for display
+                const shuffledOptions = [...q.options].map((opt, i) => ({...opt, originalIndex: i}))
+                                      .sort(() => Math.random() - 0.5);
+
+                let optionsHTML = shuffledOptions.map((opt, i) => `
+                    <button id="btn-${qId}-${i}" onclick="handleAnswer('${qId}', ${index}, ${i}, ${opt.originalIndex})" 
+                            class="w-full text-left p-4 rounded-xl border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 transition-all duration-200 focus:outline-none mb-3">
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 w-6 h-6 rounded-full border border-slate-300 flex items-center justify-center mt-0.5 option-circle"></div>
+                            <span class="text-slate-700">${opt.text}</span>
+                        </div>
+                    </button>
+                `).join('');
+
+                const questionHTML = `
+                    <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200" id="${qId}">
+                        <div class="flex gap-4 items-start mb-6">
+                            <span class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 font-bold text-lg">
+                                ${q.qNum}
+                            </span>
+                            <h3 class="text-xl font-medium text-slate-800 pt-1">${q.question}</h3>
+                        </div>
+                        
+                        <div class="options-container ml-0 md:ml-14">
+                            ${optionsHTML}
+                        </div>
+
+                        <div class="ml-0 md:ml-14 mt-4 flex items-center gap-2">
+                             <button onclick="toggleHint('${qId}')" class="text-sm text-indigo-600 font-medium hover:text-indigo-800 flex items-center gap-1 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                </svg>
+                                Show Hint
+                            </button>
+                        </div>
+                        
+                        <!-- Hint Container -->
+                        <div id="hint-${qId}" class="hidden ml-0 md:ml-14 mt-4 p-4 bg-amber-50 rounded-lg border border-amber-200 text-amber-800 text-sm">
+                            <span class="font-bold">Hint:</span> ${q.hint}
+                        </div>
+
+                        <!-- Feedback Container -->
+                        <div id="feedback-${qId}" class="hidden ml-0 md:ml-14 mt-6 p-4 rounded-xl border">
+                            <h4 id="feedback-title-${qId}" class="font-bold text-lg mb-2 flex items-center gap-2"></h4>
+                            <p id="feedback-rationale-${qId}" class="text-slate-700"></p>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += questionHTML;
+            });
+        }
+
+        function toggleHint(qId) {
+            const hintDiv = document.getElementById(`hint-${qId}`);
+            if (hintDiv.classList.contains('hidden')) {
+                hintDiv.classList.remove('hidden');
+            } else {
+                hintDiv.classList.add('hidden');
+            }
+        }
+
+        function handleAnswer(qId, questionIndex, buttonIndex, originalOptionIndex) {
+            if (answeredQuestions.has(qId)) return; // Prevent multiple answers
+            
+            answeredQuestions.add(qId);
+            const questionData = quizData[questionIndex];
+            const selectedOption = questionData.options[originalOptionIndex];
+            const isCorrect = selectedOption.correct;
+
+            // Update Score
+            if (isCorrect) {
+                quizScore++;
+            }
+            const scoreDisplay = document.getElementById('score-display');
+            scoreDisplay.innerText = `Score: ${quizScore}/${quizData.length}`;
+            scoreDisplay.classList.remove('hidden');
+
+            // Find elements
+            const container = document.getElementById(qId);
+            const buttons = container.querySelectorAll('button[id^="btn-"]');
+            const feedbackDiv = document.getElementById(`feedback-${qId}`);
+            const feedbackTitle = document.getElementById(`feedback-title-${qId}`);
+            const feedbackRationale = document.getElementById(`feedback-rationale-${qId}`);
+
+            // Disable all buttons and style them
+            buttons.forEach((btn, idx) => {
+                btn.disabled = true;
+                btn.classList.remove('hover:border-indigo-400', 'hover:bg-indigo-50', 'cursor-pointer');
+                btn.classList.add('opacity-70', 'cursor-not-allowed');
+
+                // We need to figure out if THIS button was the correct one to highlight it anyway
+                // To do this properly we'd need to map the rendered buttons back to options, 
+                // but since we passed originalOptionIndex to the onclick, we can just extract it from the onclick string if we really needed to.
+                // A simpler way: we'll just evaluate the logic based on the clicked button.
+            });
+
+            // Style the clicked button
+            const clickedBtn = document.getElementById(`btn-${qId}-${buttonIndex}`);
+            clickedBtn.classList.remove('opacity-70', 'border-slate-200');
+            
+            if (isCorrect) {
+                clickedBtn.classList.add('border-green-500', 'bg-green-50', 'ring-1', 'ring-green-500');
+                clickedBtn.querySelector('.option-circle').innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>`;
+                clickedBtn.querySelector('.option-circle').classList.add('border-green-500', 'bg-green-100');
+                
+                feedbackDiv.classList.remove('hidden');
+                feedbackDiv.classList.add('bg-green-50', 'border-green-200');
+                feedbackTitle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> <span class="text-green-800">Correct!</span>`;
+            } else {
+                clickedBtn.classList.add('border-red-500', 'bg-red-50', 'ring-1', 'ring-red-500');
+                clickedBtn.querySelector('.option-circle').innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>`;
+                clickedBtn.querySelector('.option-circle').classList.add('border-red-500', 'bg-red-100');
+                
+                feedbackDiv.classList.remove('hidden');
+                feedbackDiv.classList.add('bg-red-50', 'border-red-200');
+                feedbackTitle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> <span class="text-red-800">Incorrect</span>`;
+            }
+
+            feedbackRationale.innerText = selectedOption.rationale;
+        }
+
+    </script>
+</body>
+</html>
+
+

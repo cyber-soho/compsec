@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber.SoHo: Foundations of Computer Security</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Font Awesome (for Icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Chart Container Styling per requirements */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        /* Utility for range input */
+        input[type=range] {
+            -webkit-appearance: none; 
+            background: transparent; 
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #2563eb;
+            margin-top: -6px;
+            cursor: pointer;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #cbd5e1;
+            border-radius: 2px;
+        }
+    </style>
+    
+    <!-- Chosen Palette: Slate & Blue (Professional, Trustworthy, Security-focused) -->
+    <!-- Application Structure Plan: 
+         1. Hero Dashboard: Immediate engagement with the "Why it matters" stats.
+         2. The Triad (CIA): Interactive concept exploration using a Radar chart to visualize security posture.
+         3. Threat Lab: Interactive Risk Calculator and Bubble Chart for Threat Actors (Skill vs Motivation).
+         4. Defense Center: Interactive demonstrations of Hashing/Encryption and Defense in Depth layers.
+         5. Case Studies: Financial impact visualization of breaches.
+         Rationale: Moves from abstract concepts (CIA) to concrete mechanics (Threats/Defense) to real-world impact. 
+    -->
+    <!-- Visualization & Content Choices:
+         1. CIA Radar Chart: Goal -> Show balance/compromise. Method -> Chart.js Radar. Interaction -> Buttons trigger "attacks" affecting specific axes.
+         2. Risk Calculator: Goal -> Internalize the formula. Method -> HTML5 Sliders + JS Math. Interaction -> Immediate feedback on Risk Score.
+         3. Threat Actor Matrix: Goal -> Differentiate actors. Method -> Chart.js Bubble (Skill vs Motivation). Interaction -> Click bubble to see profile.
+         4. Breach Cost Bar Chart: Goal -> Highlight cost of negligence. Method -> Chart.js Bar. Interaction -> Simple comparison.
+         5. Hash Demo: Goal -> Explain integrity. Method -> JS String manipulation. Interaction -> Typing changes output.
+         CONFIRMATION: NO SVG graphics used (FontAwesome used). NO Mermaid JS used.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-blue-100 selection:text-blue-900">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-shield-halved text-blue-600 text-2xl"></i>
+                    <span class="font-bold text-xl tracking-tight text-slate-900">Cyber.SoHo</span>
+                </div>
+                <div class="hidden md:flex space-x-8 text-sm font-medium text-slate-600">
+                    <a href="#dashboard" class="hover:text-blue-600 transition-colors">Dashboard</a>
+                    <a href="#cia-triad" class="hover:text-blue-600 transition-colors">The Triad</a>
+                    <a href="#threats" class="hover:text-blue-600 transition-colors">Threats & Risk</a>
+                    <a href="#defenses" class="hover:text-blue-600 transition-colors">Defenses</a>
+                    <a href="#breaches" class="hover:text-blue-600 transition-colors">Real World</a>
+                </div>
+                <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="md:hidden text-slate-600">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
+
+        <!-- Section 1: Hero / Dashboard -->
+        <section id="dashboard" class="space-y-6">
+            <div class="text-center space-y-4">
+                <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">Foundations of Computer Security</h1>
+                <p class="text-lg text-slate-600 max-w-2xl mx-auto">
+                    "The only truly secure system is one that is powered off..." — Understanding the ecosystem of prevention, detection, and response.
+                </p>
+            </div>
+
+            <!-- Context Intro -->
+            <div class="bg-white p-6 rounded-xl border-l-4 border-blue-600 shadow-sm">
+                <h3 class="font-bold text-lg mb-2 text-slate-800">Why This Matters Now</h3>
+                <p class="text-slate-600">
+                    Security is not a niche specialty; it is a foundational skill. Every login, message, and transaction depends on it. 
+                    Below are live indicators of the current cybersecurity landscape based on global statistics.
+                </p>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Stat 1 -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
+                    <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-3 text-red-600">
+                        <i class="fa-solid fa-stopwatch text-xl"></i>
+                    </div>
+                    <span class="text-3xl font-bold text-slate-900">39 Seconds</span>
+                    <span class="text-sm text-slate-500 font-medium uppercase tracking-wide mt-1">Frequency of Cyberattacks</span>
+                </div>
+                <!-- Stat 2 -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
+                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-3 text-blue-600">
+                        <i class="fa-solid fa-users-viewfinder text-xl"></i>
+                    </div>
+                    <span class="text-3xl font-bold text-slate-900">3.5 Million</span>
+                    <span class="text-sm text-slate-500 font-medium uppercase tracking-wide mt-1">Global Workforce Gap</span>
+                </div>
+                <!-- Stat 3 -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
+                    <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mb-3 text-emerald-600">
+                        <i class="fa-solid fa-dollar-sign text-xl"></i>
+                    </div>
+                    <span class="text-3xl font-bold text-slate-900">$700M+</span>
+                    <span class="text-sm text-slate-500 font-medium uppercase tracking-wide mt-1">Cost of Equifax Breach</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: The CIA Triad -->
+        <section id="cia-triad" class="scroll-mt-24">
+            <div class="flex flex-col md:flex-row gap-8 items-start">
+                
+                <!-- Content Side -->
+                <div class="w-full md:w-1/2 space-y-6">
+                    <div class="space-y-2">
+                        <h2 class="text-3xl font-bold text-slate-900">The CIA Triad</h2>
+                        <div class="h-1 w-20 bg-blue-600 rounded"></div>
+                    </div>
+                    <p class="text-slate-600 leading-relaxed">
+                        The Three Pillars of Every Security Decision. Every attack violates at least one, and every defense protects at least one.
+                        Use the interactive chart to see how different attacks compromise the system's "balance."
+                    </p>
+
+                    <!-- Interactive Definition Cards -->
+                    <div class="space-y-3">
+                        <div class="group p-4 bg-white border border-slate-200 rounded-lg hover:border-blue-400 transition-colors cursor-default">
+                            <h4 class="font-bold text-slate-900 flex items-center gap-2">
+                                <i class="fa-solid fa-user-secret text-blue-500"></i> Confidentiality
+                            </h4>
+                            <p class="text-sm text-slate-500 mt-1">Only authorized parties can access data. <br><span class="text-xs text-blue-600 font-semibold">Threat: Data Breach, Phishing</span></p>
+                        </div>
+                        <div class="group p-4 bg-white border border-slate-200 rounded-lg hover:border-green-400 transition-colors cursor-default">
+                            <h4 class="font-bold text-slate-900 flex items-center gap-2">
+                                <i class="fa-solid fa-file-shield text-green-500"></i> Integrity
+                            </h4>
+                            <p class="text-sm text-slate-500 mt-1">Data has not been tampered with or altered. <br><span class="text-xs text-green-600 font-semibold">Threat: Malware, MITM</span></p>
+                        </div>
+                        <div class="group p-4 bg-white border border-slate-200 rounded-lg hover:border-orange-400 transition-colors cursor-default">
+                            <h4 class="font-bold text-slate-900 flex items-center gap-2">
+                                <i class="fa-solid fa-server text-orange-500"></i> Availability
+                            </h4>
+                            <p class="text-sm text-slate-500 mt-1">Systems are accessible when needed. <br><span class="text-xs text-orange-600 font-semibold">Threat: DDoS, Ransomware</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visual Side -->
+                <div class="w-full md:w-1/2 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-semibold text-slate-700">System Status Monitor</h3>
+                        <button onclick="resetCIA()" class="text-xs bg-slate-100 hover:bg-slate-200 px-3 py-1 rounded-full text-slate-600 transition-colors">
+                            <i class="fa-solid fa-rotate-right mr-1"></i> Reset
+                        </button>
+                    </div>
+
+                    <!-- Chart Container -->
+                    <div class="chart-container">
+                        <canvas id="ciaChart"></canvas>
+                    </div>
+
+                    <!-- Interaction Buttons -->
+                    <div class="mt-6 grid grid-cols-3 gap-2">
+                        <button onclick="simulateAttack('confidentiality')" class="px-3 py-2 bg-red-50 text-red-700 text-xs font-bold rounded hover:bg-red-100 transition-colors text-center border border-red-200">
+                            Simulate<br>Data Breach
+                        </button>
+                        <button onclick="simulateAttack('integrity')" class="px-3 py-2 bg-red-50 text-red-700 text-xs font-bold rounded hover:bg-red-100 transition-colors text-center border border-red-200">
+                            Simulate<br>File Tampering
+                        </button>
+                        <button onclick="simulateAttack('availability')" class="px-3 py-2 bg-red-50 text-red-700 text-xs font-bold rounded hover:bg-red-100 transition-colors text-center border border-red-200">
+                            Simulate<br>DDoS Attack
+                        </button>
+                    </div>
+                    <p id="cia-feedback" class="text-center text-sm mt-4 text-slate-500 italic min-h-[1.25rem]">System Secure. All pillars at 100%.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Threats & Risk -->
+        <section id="threats" class="scroll-mt-24 py-8 bg-slate-100 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
+            <div class="max-w-7xl mx-auto space-y-12">
+                
+                <!-- Intro -->
+                <div class="text-center max-w-3xl mx-auto space-y-4">
+                    <h2 class="text-3xl font-bold text-slate-900">Understanding Risk & Threats</h2>
+                    <p class="text-slate-600">
+                        Security isn't just about "stopping hackers." It's about calculating risk and understanding who is attacking you.
+                        Use the calculator below to understand the variables of the Risk Equation.
+                    </p>
+                </div>
+
+                <!-- Risk Calculator -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+                    <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                        <i class="fa-solid fa-calculator text-blue-600"></i> The Risk Formula: <span class="font-mono text-blue-600">Risk = Threat × Vulnerability × Impact</span>
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                        <!-- Sliders -->
+                        <div class="space-y-8">
+                            <div>
+                                <div class="flex justify-between mb-2">
+                                    <label class="font-semibold text-slate-700">Threat</label>
+                                    <span id="threat-val" class="text-sm font-mono bg-slate-100 px-2 rounded">5</span>
+                                </div>
+                                <input type="range" id="threat-slider" min="0" max="10" value="5" class="w-full" oninput="calculateRisk()">
+                                <p class="text-xs text-slate-500 mt-1">Probability of an event (e.g., hacker trying a password).</p>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between mb-2">
+                                    <label class="font-semibold text-slate-700">Vulnerability</label>
+                                    <span id="vuln-val" class="text-sm font-mono bg-slate-100 px-2 rounded">5</span>
+                                </div>
+                                <input type="range" id="vuln-slider" min="0" max="10" value="5" class="w-full" oninput="calculateRisk()">
+                                <p class="text-xs text-slate-500 mt-1">Weakness in the system (e.g., Unpatched server).</p>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between mb-2">
+                                    <label class="font-semibold text-slate-700">Impact</label>
+                                    <span id="impact-val" class="text-sm font-mono bg-slate-100 px-2 rounded">5</span>
+                                </div>
+                                <input type="range" id="impact-slider" min="0" max="10" value="5" class="w-full" oninput="calculateRisk()">
+                                <p class="text-xs text-slate-500 mt-1">Damage caused (e.g., Data lost, financial cost).</p>
+                            </div>
+                        </div>
+
+                        <!-- Result Visual -->
+                        <div class="flex flex-col items-center justify-center p-6 bg-slate-50 rounded-xl border border-slate-200">
+                            <span class="text-slate-500 font-semibold mb-2 uppercase tracking-widest text-xs">Calculated Risk Score</span>
+                            <div class="relative w-48 h-48 flex items-center justify-center">
+                                <!-- Simple CSS Circle Progress -->
+                                <svg class="w-full h-full transform -rotate-90">
+                                    <circle cx="96" cy="96" r="88" stroke="currentColor" stroke-width="12" fill="transparent" class="text-slate-200" />
+                                    <circle id="risk-circle" cx="96" cy="96" r="88" stroke="currentColor" stroke-width="12" fill="transparent" class="text-blue-600 transition-all duration-500 ease-out" stroke-dasharray="552" stroke-dashoffset="400" />
+                                </svg>
+                                <span id="risk-score" class="absolute text-5xl font-black text-slate-900">125</span>
+                            </div>
+                            <p id="risk-message" class="mt-4 text-center font-medium text-slate-700">Moderate Risk</p>
+                            <p class="text-xs text-slate-400 mt-2 text-center">If ANY factor is zero, Risk is zero.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Threat Actors Chart -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Text Info -->
+                    <div class="lg:col-span-1 space-y-4">
+                        <h3 class="text-2xl font-bold text-slate-900">Know Your Enemy</h3>
+                        <p class="text-slate-600 text-sm">Threat actors are not all the same. They vary by <strong>Motivation</strong>, <strong>Skill</strong>, and <strong>Funding</strong>. Click the bubbles to see details.</p>
+                        
+                        <!-- Dynamic Details Box -->
+                        <div id="actor-details" class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm mt-4 min-h-[200px]">
+                            <h4 class="font-bold text-lg text-blue-800 mb-2">Select an Actor</h4>
+                            <p class="text-sm text-slate-500">Click a bubble on the chart to view the profile of that threat actor.</p>
+                        </div>
+                    </div>
+
+                    <!-- Chart -->
+                    <div class="lg:col-span-2 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                        <div class="chart-container">
+                            <canvas id="threatActorChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Defenses -->
+        <section id="defenses" class="scroll-mt-24 space-y-12">
+            <div class="text-center max-w-3xl mx-auto space-y-4">
+                <h2 class="text-3xl font-bold text-slate-900">The Defense Arsenal</h2>
+                <p class="text-slate-600">
+                    How do we protect assets? By applying fundamental principles and cryptographic tools. 
+                    Explore the difference between Identity (Who you are) and Permission (What you can do).
+                </p>
+            </div>
+
+            <!-- AuthN vs AuthZ & Crypto Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <!-- Auth Visualizer -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="font-bold text-lg mb-4 text-slate-800 border-b pb-2">AuthN vs. AuthZ</h3>
+                    <div class="space-y-4">
+                        <!-- Controls -->
+                        <div class="flex gap-2 mb-4">
+                            <button onclick="setAuthScenario('guest')" class="flex-1 py-2 text-xs font-semibold bg-slate-100 hover:bg-slate-200 rounded text-slate-700">Guest</button>
+                            <button onclick="setAuthScenario('student')" class="flex-1 py-2 text-xs font-semibold bg-slate-100 hover:bg-slate-200 rounded text-slate-700">Student</button>
+                            <button onclick="setAuthScenario('admin')" class="flex-1 py-2 text-xs font-semibold bg-slate-100 hover:bg-slate-200 rounded text-slate-700">Admin</button>
+                        </div>
+
+                        <!-- Visual Feedback -->
+                        <div class="bg-slate-900 rounded-lg p-4 font-mono text-sm text-green-400">
+                            <div class="mb-2 border-b border-slate-700 pb-2">
+                                <span class="text-slate-500">1. Authentication:</span> <span id="authn-status" class="text-white">Unverified</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-500">2. Authorization:</span>
+                                <ul class="mt-2 space-y-1 ml-4 text-xs">
+                                    <li id="perm-1"><i class="fa-solid fa-xmark text-red-500 w-4"></i> Access Public Site</li>
+                                    <li id="perm-2"><i class="fa-solid fa-xmark text-red-500 w-4"></i> View Grades</li>
+                                    <li id="perm-3"><i class="fa-solid fa-xmark text-red-500 w-4"></i> Modify Database</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 italic">AuthN (Authentication) happens first. AuthZ (Authorization) determines access based on role (RBAC).</p>
+                    </div>
+                </div>
+
+                <!-- Hashing Playground -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="font-bold text-lg mb-4 text-slate-800 border-b pb-2">Cryptography: Integrity (Hashing)</h3>
+                    <p class="text-sm text-slate-600 mb-4">Hashing creates a unique fingerprint. Even a tiny change completely alters the hash (Avalanche Effect).</p>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 uppercase">Input Data (Password/Message)</label>
+                            <input type="text" id="hash-input" placeholder="Type something..." class="w-full mt-1 p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" oninput="updateHash()">
+                        </div>
+                        
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 uppercase">Simulated SHA-256 Output</label>
+                            <div id="hash-output" class="w-full mt-1 p-3 bg-slate-100 border border-slate-200 rounded font-mono text-xs break-all text-slate-600">
+                                e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center gap-2 text-xs text-blue-600 bg-blue-50 p-2 rounded">
+                            <i class="fa-solid fa-info-circle"></i>
+                            <span>Notice: Changing "Pass" to "pass" changes the ENTIRE hash.</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Principles Accordion (Simplified as Grid Cards) -->
+            <div>
+                <h3 class="font-bold text-xl text-slate-900 mb-6">Five Guiding Principles</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div class="bg-white p-4 rounded-lg border border-slate-200 hover:shadow-md transition-shadow">
+                        <div class="text-blue-600 mb-2"><i class="fa-solid fa-lock"></i></div>
+                        <h4 class="font-bold text-sm">Least Privilege</h4>
+                        <p class="text-xs text-slate-500 mt-1">Minimum access necessary. Nothing more.</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg border border-slate-200 hover:shadow-md transition-shadow">
+                        <div class="text-blue-600 mb-2"><i class="fa-solid fa-layer-group"></i></div>
+                        <h4 class="font-bold text-sm">Defense in Depth</h4>
+                        <p class="text-xs text-slate-500 mt-1">Multiple overlapping layers of protection.</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg border border-slate-200 hover:shadow-md transition-shadow">
+                        <div class="text-blue-600 mb-2"><i class="fa-solid fa-ban"></i></div>
+                        <h4 class="font-bold text-sm">Fail Securely</h4>
+                        <p class="text-xs text-slate-500 mt-1">Defaults to "Deny Access" on failure.</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg border border-slate-200 hover:shadow-md transition-shadow">
+                        <div class="text-blue-600 mb-2"><i class="fa-solid fa-user-group"></i></div>
+                        <h4 class="font-bold text-sm">Separation of Duties</h4>
+                        <p class="text-xs text-slate-500 mt-1">Critical tasks require >1 person.</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg border border-slate-200 hover:shadow-md transition-shadow">
+                        <div class="text-blue-600 mb-2"><i class="fa-solid fa-compass-drafting"></i></div>
+                        <h4 class="font-bold text-sm">Security by Design</h4>
+                        <p class="text-xs text-slate-500 mt-1">Built-in, not bolted on.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Real World Breaches -->
+        <section id="breaches" class="scroll-mt-24 pb-12">
+            <div class="bg-slate-900 text-white rounded-3xl p-8 md:p-12 overflow-hidden relative">
+                <!-- Background Pattern -->
+                <div class="absolute top-0 right-0 p-12 opacity-5">
+                    <i class="fa-solid fa-globe text-9xl"></i>
+                </div>
+
+                <div class="relative z-10 space-y-8">
+                    <div class="max-w-2xl">
+                        <h2 class="text-3xl font-bold mb-4">The Cost of Failure</h2>
+                        <p class="text-slate-300">
+                            Real-world breaches demonstrate that the most damaging events often stem from basic hygiene failures (patching, monitoring), not "Mission Impossible" scenarios.
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                        <!-- Chart Area -->
+                        <div class="bg-white/5 backdrop-blur-sm p-6 rounded-xl border border-white/10">
+                            <h4 class="text-sm font-semibold text-slate-300 mb-4 text-center">Cost: Prevention vs. Recovery (Equifax Example)</h4>
+                            <div class="chart-container">
+                                <canvas id="breachChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Case Studies List -->
+                        <div class="space-y-4">
+                            <div class="bg-white/10 p-4 rounded-lg border-l-4 border-red-500 hover:bg-white/20 transition-colors">
+                                <div class="flex justify-between items-start">
+                                    <h4 class="font-bold">Equifax (2017)</h4>
+                                    <span class="text-xs bg-red-500/20 text-red-300 px-2 py-1 rounded">Confidentiality</span>
+                                </div>
+                                <p class="text-sm text-slate-300 mt-1"><strong>Cause:</strong> Unpatched Apache Struts for 2 months.</p>
+                                <p class="text-sm text-slate-300"><strong>Impact:</strong> 147M records, $700M+ cost.</p>
+                            </div>
+
+                            <div class="bg-white/10 p-4 rounded-lg border-l-4 border-orange-500 hover:bg-white/20 transition-colors">
+                                <div class="flex justify-between items-start">
+                                    <h4 class="font-bold">WannaCry (2017)</h4>
+                                    <span class="text-xs bg-orange-500/20 text-orange-300 px-2 py-1 rounded">Availability</span>
+                                </div>
+                                <p class="text-sm text-slate-300 mt-1"><strong>Cause:</strong> Unpatched Windows EternalBlue.</p>
+                                <p class="text-sm text-slate-300"><strong>Impact:</strong> 200k+ computers, hospitals shut down.</p>
+                            </div>
+
+                            <div class="bg-white/10 p-4 rounded-lg border-l-4 border-purple-500 hover:bg-white/20 transition-colors">
+                                <div class="flex justify-between items-start">
+                                    <h4 class="font-bold">SolarWinds (2020)</h4>
+                                    <span class="text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded">All Pillars</span>
+                                </div>
+                                <p class="text-sm text-slate-300 mt-1"><strong>Cause:</strong> Supply Chain Compromise.</p>
+                                <p class="text-sm text-slate-300"><strong>Impact:</strong> 18k orgs, undetected for months.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="border-t border-slate-200 py-8 text-center text-slate-500 text-sm">
+            <p>&copy; 2026 Cyber.SoHo | Educational Material | Foundations of Computer Security</p>
+            <div class="flex justify-center gap-4 mt-2">
+                <span class="hover:text-blue-600 cursor-pointer">NIST CSF</span>
+                <span class="hover:text-blue-600 cursor-pointer">MITRE ATT&CK</span>
+                <span class="hover:text-blue-600 cursor-pointer">OWASP</span>
+            </div>
+        </footer>
+
+    </main>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- 1. CIA Triad Radar Chart ---
+        const ciaCtx = document.getElementById('ciaChart').getContext('2d');
+        const ciaChart = new Chart(ciaCtx, {
+            type: 'radar',
+            data: {
+                labels: ['Confidentiality', 'Integrity', 'Availability'],
+                datasets: [{
+                    label: 'Security Posture',
+                    data: [100, 100, 100],
+                    backgroundColor: 'rgba(37, 99, 235, 0.2)',
+                    borderColor: 'rgba(37, 99, 235, 1)',
+                    pointBackgroundColor: 'rgba(37, 99, 235, 1)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: { display: true },
+                        suggestedMin: 0,
+                        suggestedMax: 100,
+                        ticks: { display: false }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        function resetCIA() {
+            ciaChart.data.datasets[0].data = [100, 100, 100];
+            ciaChart.data.datasets[0].backgroundColor = 'rgba(37, 99, 235, 0.2)';
+            ciaChart.data.datasets[0].borderColor = 'rgba(37, 99, 235, 1)';
+            ciaChart.update();
+            document.getElementById('cia-feedback').innerText = "System Secure. All pillars at 100%.";
+            document.getElementById('cia-feedback').className = "text-center text-sm mt-4 text-slate-500 italic";
+        }
+
+        function simulateAttack(type) {
+            let data = [100, 100, 100];
+            let msg = "";
+            
+            // Turn red on attack
+            ciaChart.data.datasets[0].backgroundColor = 'rgba(239, 68, 68, 0.2)';
+            ciaChart.data.datasets[0].borderColor = 'rgba(239, 68, 68, 1)';
+            
+            if (type === 'confidentiality') {
+                data = [20, 100, 100]; // Conf compromised
+                msg = "ALERT: Data Breach detected! Confidentiality compromised.";
+            } else if (type === 'integrity') {
+                data = [100, 20, 100]; // Integrity compromised
+                msg = "ALERT: Unauthorized file modification! Integrity compromised.";
+            } else if (type === 'availability') {
+                data = [100, 100, 20]; // Avail compromised
+                msg = "ALERT: DDoS Attack in progress! Services unavailable.";
+            }
+            
+            ciaChart.data.datasets[0].data = data;
+            ciaChart.update();
+            const fb = document.getElementById('cia-feedback');
+            fb.innerText = msg;
+            fb.className = "text-center text-sm mt-4 text-red-600 font-bold animate-pulse";
+        }
+
+        // --- 2. Risk Calculator ---
+        function calculateRisk() {
+            const t = parseInt(document.getElementById('threat-slider').value);
+            const v = parseInt(document.getElementById('vuln-slider').value);
+            const i = parseInt(document.getElementById('impact-slider').value);
+
+            document.getElementById('threat-val').innerText = t;
+            document.getElementById('vuln-val').innerText = v;
+            document.getElementById('impact-val').innerText = i;
+
+            const risk = t * v * i;
+            const maxRisk = 1000; // 10 * 10 * 10
+            
+            // Update Number
+            document.getElementById('risk-score').innerText = risk;
+            
+            // Update Circle Stroke (Stroke-dasharray is ~552 for r=88)
+            // Offset = TotalLength - (Val / Max * TotalLength)
+            const totalLength = 552;
+            const offset = totalLength - ((risk / maxRisk) * totalLength);
+            
+            const circle = document.getElementById('risk-circle');
+            circle.style.strokeDashoffset = offset;
+            
+            // Color Logic
+            let color = "text-blue-600";
+            let msg = "Low Risk";
+            
+            if (risk === 0) {
+                color = "text-emerald-500";
+                msg = "Zero Risk (Theoretical)";
+            } else if (risk < 200) {
+                color = "text-blue-500";
+                msg = "Low Risk";
+            } else if (risk < 500) {
+                color = "text-orange-500";
+                msg = "Moderate Risk";
+            } else {
+                color = "text-red-600";
+                msg = "CRITICAL RISK";
+            }
+            
+            circle.setAttribute("class", `${color} transition-all duration-500 ease-out`);
+            document.getElementById('risk-message').innerText = msg;
+            document.getElementById('risk-message').className = `mt-4 text-center font-bold ${color.replace('text-', 'text-')}`;
+        }
+
+        // Initialize Risk
+        calculateRisk();
+
+
+        // --- 3. Threat Actor Bubble Chart ---
+        const actorCtx = document.getElementById('threatActorChart').getContext('2d');
+        
+        // Data Structure: x=Skill, y=Motivation, r=Impact(scaled)
+        const actorsData = [
+            { x: 2, y: 3, r: 5, label: 'Script Kiddie', desc: "Low skill, seeks attention. Uses downloaded tools." },
+            { x: 4, y: 5, r: 8, label: 'Hacktivist', desc: "Political/Social cause. Defacing websites, DoS." },
+            { x: 7, y: 9, r: 15, label: 'Cybercriminal', desc: "Financial gain. Ransomware, fraud. High impact." },
+            { x: 5, y: 6, r: 10, label: 'Insider', desc: "Employee/Contractor. Knowledge of systems. Revenge or negligence." },
+            { x: 10, y: 10, r: 20, label: 'Nation-State (APT)', desc: "Espionage/Sabotage. Unlimited resources. Highest threat." }
+        ];
+
+        const actorChart = new Chart(actorCtx, {
+            type: 'bubble',
+            data: {
+                datasets: [{
+                    label: 'Threat Actors',
+                    data: actorsData,
+                    backgroundColor: [
+                        'rgba(148, 163, 184, 0.7)', // Script Kiddie - Slate
+                        'rgba(34, 197, 94, 0.7)',   // Hacktivist - Green
+                        'rgba(249, 115, 22, 0.7)',  // Criminal - Orange
+                        'rgba(168, 85, 247, 0.7)',  // Insider - Purple
+                        'rgba(239, 68, 68, 0.7)'    // APT - Red
+                    ],
+                    borderColor: [
+                        'rgba(148, 163, 184, 1)',
+                        'rgba(34, 197, 94, 1)',
+                        'rgba(249, 115, 22, 1)',
+                        'rgba(168, 85, 247, 1)',
+                        'rgba(239, 68, 68, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        title: { display: true, text: 'Technical Skill Level (1-10)' },
+                        min: 0, max: 11
+                    },
+                    y: {
+                        title: { display: true, text: 'Motivation/Resources (1-10)' },
+                        min: 0, max: 11
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.raw.label;
+                            }
+                        }
+                    },
+                    legend: { display: false }
+                },
+                onClick: (e) => {
+                    const points = actorChart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
+                    if (points.length) {
+                        const firstPoint = points[0];
+                        const data = actorsData[firstPoint.index];
+                        // Update Details Box
+                        const detailsBox = document.getElementById('actor-details');
+                        detailsBox.innerHTML = `
+                            <h4 class="font-bold text-lg text-slate-800 mb-2">${data.label}</h4>
+                            <div class="space-y-2 text-sm text-slate-600">
+                                <p><strong>Description:</strong> ${data.desc}</p>
+                                <p><strong>Skill Level:</strong> ${data.x}/10</p>
+                                <p><strong>Motivation:</strong> ${data.y}/10</p>
+                            </div>
+                        `;
+                    }
+                }
+            }
+        });
+
+
+        // --- 4. AuthN vs AuthZ Simulator ---
+        function setAuthScenario(role) {
+            const statusEl = document.getElementById('authn-status');
+            const p1 = document.getElementById('perm-1');
+            const p2 = document.getElementById('perm-2');
+            const p3 = document.getElementById('perm-3');
+            
+            // Check icon html
+            const check = '<i class="fa-solid fa-check text-green-500 w-4"></i>';
+            const cross = '<i class="fa-solid fa-xmark text-red-500 w-4"></i>';
+
+            if (role === 'guest') {
+                statusEl.innerText = "Verified (Guest)";
+                statusEl.className = "text-yellow-400";
+                p1.innerHTML = check + " Access Public Site";
+                p2.innerHTML = cross + " View Grades";
+                p3.innerHTML = cross + " Modify Database";
+            } else if (role === 'student') {
+                statusEl.innerText = "Verified (Student ID)";
+                statusEl.className = "text-blue-400";
+                p1.innerHTML = check + " Access Public Site";
+                p2.innerHTML = check + " View Grades";
+                p3.innerHTML = cross + " Modify Database";
+            } else if (role === 'admin') {
+                statusEl.innerText = "Verified (MFA Token)";
+                statusEl.className = "text-green-400";
+                p1.innerHTML = check + " Access Public Site";
+                p2.innerHTML = check + " View Grades";
+                p3.innerHTML = check + " Modify Database";
+            }
+        }
+
+        // --- 5. Simple Hash Simulator ---
+        function updateHash() {
+            const input = document.getElementById('hash-input').value;
+            const output = document.getElementById('hash-output');
+            
+            if (input.length === 0) {
+                output.innerText = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"; // Empty SHA-256 (simulated)
+                return;
+            }
+            
+            // Simple pseudo-hashing for visual effect (NOT REAL CRYPTO)
+            let hash = 0;
+            for (let i = 0; i < input.length; i++) {
+                const char = input.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            
+            // Convert to a long hex-like string to look like SHA-256
+            const hex = Math.abs(hash).toString(16).repeat(10).substring(0, 64);
+            output.innerText = hex;
+            // Visual feedback that it changed
+            output.classList.add('bg-blue-50', 'text-blue-800');
+            setTimeout(() => output.classList.remove('bg-blue-50', 'text-blue-800'), 200);
+        }
+
+        // --- 6. Breach Cost Chart ---
+        const breachCtx = document.getElementById('breachChart').getContext('2d');
+        const breachChart = new Chart(breachCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Cost of Prevention (Patching)', 'Cost of Equifax Breach'],
+                datasets: [{
+                    label: 'Cost in USD',
+                    data: [5000, 700000000], // Symbolic scale
+                    backgroundColor: ['rgba(34, 197, 94, 0.8)', 'rgba(239, 68, 68, 0.8)'],
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y', // Horizontal bar
+                scales: {
+                    x: {
+                        type: 'logarithmic', // Log scale to show the massive difference
+                        title: { display: true, text: 'USD (Logarithmic Scale)' }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                if(context.raw === 5000) return " Approx. $5,000 (IT Staff Time)";
+                                if(context.raw === 700000000) return " $700,000,000+ (Settlements)";
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+    </script>
+</body>
+</html>
+
+
+

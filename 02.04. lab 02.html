@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 2 Lab: Security Models & Policy Issues</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome for Icons (using CDN for standard icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Application Configuration & Styles -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'warm-bg': '#fdfcf8',
+                        'warm-surface': '#f5f2eb',
+                        'warm-border': '#e6e1d6',
+                        'primary': '#8c7b70', // Warm Taupe
+                        'primary-dark': '#5d524a',
+                        'accent-blue': '#64748b', // Slate
+                        'accent-green': '#577c6e', // Sage
+                        'accent-red': '#b35d5d', // Muted Terracotta
+                    },
+                    fontFamily: {
+                        sans: ['Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Chart Container Styling - MANDATORY */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        
+        /* Custom Scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f5f2eb; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d6d3c9; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #8c7b70; 
+        }
+
+        /* Animation Utilities */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+    
+    <!-- Chosen Palette: Warm Neutrals (Stone, Taupe, Sage, Muted Terracotta) -->
+    <!-- Application Structure Plan: 
+         1. Dashboard Layout: A single-page app with a persistent sidebar (desktop) or top bar (mobile) navigation.
+         2. Sections:
+            - "Mission Control": Overview of the week, learning objectives, and grading breakdown.
+            - "Theory Nexus": Interactive exploration of Section A (Models & Policies). Features a dynamic model selector.
+            - "Simulation Lab": A custom interactive tool simulating the Bell-LaPadula model (Task B.1) to give immediate feedback on the concepts, plus guides for the hands-on tasks.
+            - "Reporting Hub": Guidelines for Section C and the Rubric.
+         3. Rationale: The content is dense and process-oriented. Splitting it into "Theory", "Practice", and "Reporting" maps directly to the student's workflow (Learn -> Do -> Write). The simulation adds active learning.
+    -->
+    <!-- Visualization & Content Choices:
+         - Grading Weights: Doughnut Chart (Chart.js) -> Goal: Inform users of priority.
+         - BLP Simulator: Custom JS Logic + UI -> Goal: Change/Interact. Users test "Read Up/Write Down" rules dynamically.
+         - Comparison Matrix: Interactive Cards -> Goal: Compare DAC/MAC/RBAC.
+         - Progress Timeline: Horizontal CSS Flex layout -> Goal: Contextualize Week 2 in the semester.
+         - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+</head>
+<body class="bg-warm-bg text-slate-700 font-sans leading-relaxed selection:bg-primary selection:text-white">
+
+    <!-- Mobile Navigation Toggle -->
+    <div class="lg:hidden bg-warm-surface border-b border-warm-border p-4 flex justify-between items-center sticky top-0 z-50">
+        <span class="font-bold text-lg text-primary-dark"><i class="fas fa-shield-alt mr-2"></i>Cyber.SoHo Lab</span>
+        <button id="mobile-menu-btn" class="text-primary-dark focus:outline-none">
+            <i class="fas fa-bars text-2xl"></i>
+        </button>
+    </div>
+
+    <div class="flex flex-col lg:flex-row min-h-screen">
+        
+        <!-- Sidebar Navigation -->
+        <nav id="sidebar" class="hidden lg:flex flex-col w-full lg:w-72 bg-warm-surface border-r border-warm-border h-auto lg:h-screen lg:sticky lg:top-0 p-6 shadow-sm z-40">
+            <div class="mb-8 hidden lg:block">
+                <h1 class="text-2xl font-bold text-primary-dark tracking-tight">Cyber.SoHo</h1>
+                <p class="text-sm text-gray-500 mt-1">Semester Project • Week 2</p>
+            </div>
+            
+            <div class="space-y-2 flex-1">
+                <button onclick="switchTab('overview')" class="nav-btn w-full text-left px-4 py-3 rounded-lg font-medium transition-all duration-200 hover:bg-white hover:shadow-sm text-primary-dark bg-white shadow-sm border border-warm-border" id="btn-overview">
+                    <i class="fas fa-compass w-6 text-center mr-2"></i> Mission Control
+                </button>
+                <button onclick="switchTab('theory')" class="nav-btn w-full text-left px-4 py-3 rounded-lg font-medium transition-all duration-200 hover:bg-white hover:shadow-sm text-gray-600 hover:text-primary-dark" id="btn-theory">
+                    <i class="fas fa-book-reader w-6 text-center mr-2"></i> Theory Nexus (Sec A)
+                </button>
+                <button onclick="switchTab('lab')" class="nav-btn w-full text-left px-4 py-3 rounded-lg font-medium transition-all duration-200 hover:bg-white hover:shadow-sm text-gray-600 hover:text-primary-dark" id="btn-lab">
+                    <i class="fas fa-flask w-6 text-center mr-2"></i> Simulation Lab (Sec B)
+                </button>
+                <button onclick="switchTab('report')" class="nav-btn w-full text-left px-4 py-3 rounded-lg font-medium transition-all duration-200 hover:bg-white hover:shadow-sm text-gray-600 hover:text-primary-dark" id="btn-report">
+                    <i class="fas fa-file-alt w-6 text-center mr-2"></i> Reporting Hub (Sec C)
+                </button>
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-warm-border text-xs text-gray-500">
+                <p class="font-semibold">Project Status:</p>
+                <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                    <div class="bg-accent-green h-2 rounded-full" style="width: 20%"></div>
+                </div>
+                <p class="mt-1 text-right">Week 2 of 12</p>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 p-4 lg:p-8 lg:overflow-y-auto">
+            
+            <!-- SECTION 1: MISSION CONTROL (Overview) -->
+            <section id="overview" class="tab-content fade-in space-y-6">
+                <header class="mb-8">
+                    <h2 class="text-3xl font-bold text-primary-dark mb-2">Security Models & Policy Issues</h2>
+                    <p class="text-lg text-gray-600">Module 2 • Foundations of Computer Security</p>
+                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mt-4 rounded-r shadow-sm">
+                        <p class="text-sm text-yellow-800">
+                            <strong><i class="fas fa-info-circle"></i> Focus for this Week:</strong> 
+                            Moving from the "What" (CIA Triad) to the "How" (Models & Policies). You will implement BLP, Biba, or other models and audit system privileges.
+                        </p>
+                    </div>
+                </header>
+
+                <!-- Intro Context Paragraph -->
+                <div class="prose max-w-none text-gray-700 mb-6">
+                    <p>
+                        Welcome to the Mission Control center for Week 2. This section outlines your objectives, the grading breakdown, and where this assignment fits into your semester-long portfolio. 
+                        Understanding the difference between a <strong>Policy</strong> (the rules) and a <strong>Model</strong> (the mathematical or logical enforcement of those rules) is critical for the tasks ahead.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Grading Chart -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-warm-border">
+                        <h3 class="text-lg font-semibold text-primary-dark mb-4">Grading Ponderation (1-2-1)</h3>
+                        <div class="chart-container">
+                            <canvas id="gradingChart"></canvas>
+                        </div>
+                        <p class="text-xs text-center text-gray-500 mt-2">Heavy focus on Hands-On Practice (50%)</p>
+                    </div>
+
+                    <!-- Learning Objectives -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-warm-border flex flex-col justify-center">
+                        <h3 class="text-lg font-semibold text-primary-dark mb-4">Learning Objectives</h3>
+                        <ul class="space-y-3">
+                            <li class="flex items-start">
+                                <span class="bg-accent-green text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-3 mt-1 flex-shrink-0">1</span>
+                                <span class="text-sm">Distinguish between Security Policies and Security Models.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="bg-accent-green text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-3 mt-1 flex-shrink-0">2</span>
+                                <span class="text-sm">Implement classic models (BLP, Biba, etc.) in code.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="bg-accent-green text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-3 mt-1 flex-shrink-0">3</span>
+                                <span class="text-sm">Compare DAC, MAC, and RBAC via experimentation.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="bg-accent-green text-white rounded-full w-6 h-6 flex items-center justify-center text-xs mr-3 mt-1 flex-shrink-0">4</span>
+                                <span class="text-sm">Demonstrate the Principle of Least Privilege (PoLP).</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Semester Timeline -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-warm-border overflow-hidden">
+                    <h3 class="text-lg font-semibold text-primary-dark mb-6">Semester Trajectory</h3>
+                    <div class="relative">
+                        <div class="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -translate-y-1/2"></div>
+                        <div class="relative flex justify-between">
+                            <div class="flex flex-col items-center">
+                                <div class="w-8 h-8 rounded-full bg-gray-400 text-white flex items-center justify-center z-10 text-xs">W1</div>
+                                <span class="text-xs mt-2 text-gray-500">Intro & CIA</span>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <div class="w-10 h-10 rounded-full bg-accent-green text-white flex items-center justify-center z-10 shadow-lg ring-4 ring-green-50 font-bold">W2</div>
+                                <span class="text-xs mt-2 font-bold text-accent-green">Models & Policies</span>
+                            </div>
+                            <div class="flex flex-col items-center opacity-50">
+                                <div class="w-8 h-8 rounded-full bg-gray-300 text-white flex items-center justify-center z-10 text-xs">W3</div>
+                                <span class="text-xs mt-2 text-gray-500">Defense</span>
+                            </div>
+                            <div class="flex flex-col items-center opacity-50">
+                                <div class="w-8 h-8 rounded-full bg-gray-300 text-white flex items-center justify-center z-10 text-xs">W4</div>
+                                <span class="text-xs mt-2 text-gray-500">Scanning</span>
+                            </div>
+                            <div class="flex flex-col items-center opacity-50">
+                                <div class="w-8 h-8 rounded-full bg-gray-300 text-white flex items-center justify-center z-10 text-xs">Mid</div>
+                                <span class="text-xs mt-2 text-gray-500">Exam</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: THEORY NEXUS (Section A) -->
+            <section id="theory" class="tab-content hidden fade-in space-y-6">
+                <header class="border-b border-warm-border pb-4">
+                    <h2 class="text-2xl font-bold text-primary-dark">Section A: Research & Foundations</h2>
+                    <p class="text-gray-500 mt-1">Estimated Time: ~1.5 hours | Weight: 25%</p>
+                </header>
+
+                <div class="prose max-w-none text-gray-700">
+                    <p>
+                        Before you code, you must understand the rules. This section helps you visualize the four classic security models and compare access control paradigms. 
+                        Use the <strong>Model Explorer</strong> below to complete Task A.1, and the <strong>Control Matrix</strong> for Task A.2.
+                    </p>
+                </div>
+
+                <!-- Interactive Model Explorer -->
+                <div class="bg-white rounded-xl shadow-sm border border-warm-border overflow-hidden">
+                    <div class="bg-gray-100 p-4 border-b border-warm-border flex flex-wrap gap-2">
+                        <span class="text-sm font-bold text-gray-500 uppercase tracking-wide py-2 mr-2">Select Model:</span>
+                        <button onclick="showModel('blp')" class="model-btn px-4 py-2 rounded-full text-sm font-medium transition-colors bg-primary text-white shadow-md" id="btn-blp">Bell-LaPadula</button>
+                        <button onclick="showModel('biba')" class="model-btn px-4 py-2 rounded-full text-sm font-medium transition-colors bg-white text-gray-600 hover:bg-gray-200" id="btn-biba">Biba Integrity</button>
+                        <button onclick="showModel('clark')" class="model-btn px-4 py-2 rounded-full text-sm font-medium transition-colors bg-white text-gray-600 hover:bg-gray-200" id="btn-clark">Clark-Wilson</button>
+                        <button onclick="showModel('chinese')" class="model-btn px-4 py-2 rounded-full text-sm font-medium transition-colors bg-white text-gray-600 hover:bg-gray-200" id="btn-chinese">Brewer-Nash</button>
+                    </div>
+
+                    <div class="p-6 md:p-8" id="model-display">
+                        <!-- Content dynamically updated via JS -->
+                        <div id="model-content" class="fade-in">
+                            <div class="flex items-center mb-4">
+                                <h3 class="text-2xl font-bold text-primary-dark mr-3">Bell-LaPadula (BLP)</h3>
+                                <span class="bg-accent-blue text-white px-2 py-1 rounded text-xs">Confidentiality</span>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div>
+                                    <h4 class="font-semibold text-gray-800 mb-2">The Rules</h4>
+                                    <ul class="space-y-2">
+                                        <li class="p-3 bg-red-50 rounded border border-red-100 flex items-start">
+                                            <i class="fas fa-eye text-red-400 mt-1 mr-2"></i>
+                                            <div>
+                                                <span class="font-bold text-red-800">No Read Up</span>
+                                                <p class="text-sm text-gray-600">Simple Security Property: Cannot read data at a higher security level.</p>
+                                            </div>
+                                        </li>
+                                        <li class="p-3 bg-green-50 rounded border border-green-100 flex items-start">
+                                            <i class="fas fa-pen text-green-400 mt-1 mr-2"></i>
+                                            <div>
+                                                <span class="font-bold text-green-800">No Write Down</span>
+                                                <p class="text-sm text-gray-600">*-Property (Star Property): Cannot write data to a lower security level (prevents leakage).</p>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-800 mb-2">Context</h4>
+                                    <div class="space-y-3 text-sm text-gray-700">
+                                        <p><strong><i class="fas fa-building text-gray-400"></i> Origin:</strong> U.S. Dept of Defense (DoD)</p>
+                                        <p><strong><i class="fas fa-exchange-alt text-gray-400"></i> Flow:</strong> Information flows UP (or stays level).</p>
+                                        <p><strong><i class="fas fa-exclamation-triangle text-gray-400"></i> Limitation:</strong> Does not address integrity. Data can be modified by lower levels (blind writing up).</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Access Control Comparison Matrix -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-8">
+                    <div class="bg-white p-5 rounded-lg border border-warm-border shadow-sm hover:shadow-md transition-shadow">
+                        <div class="text-center mb-4">
+                            <div class="inline-block p-3 rounded-full bg-blue-50 text-blue-600 mb-2"><i class="fas fa-user"></i></div>
+                            <h3 class="text-lg font-bold">DAC</h3>
+                            <p class="text-xs text-gray-500 uppercase">Discretionary</p>
+                        </div>
+                        <ul class="text-sm space-y-2 text-gray-600">
+                            <li><strong>Decision:</strong> The Object Owner.</li>
+                            <li><strong>Common Use:</strong> Windows/Linux file systems.</li>
+                            <li><strong>Pros:</strong> Flexible, easy to use.</li>
+                            <li><strong>Cons:</strong> Least secure, prone to Trojan horses.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-lg border border-warm-border shadow-sm hover:shadow-md transition-shadow">
+                        <div class="text-center mb-4">
+                            <div class="inline-block p-3 rounded-full bg-red-50 text-red-600 mb-2"><i class="fas fa-lock"></i></div>
+                            <h3 class="text-lg font-bold">MAC</h3>
+                            <p class="text-xs text-gray-500 uppercase">Mandatory</p>
+                        </div>
+                        <ul class="text-sm space-y-2 text-gray-600">
+                            <li><strong>Decision:</strong> The System (OS/Admin).</li>
+                            <li><strong>Common Use:</strong> Military, SELinux.</li>
+                            <li><strong>Pros:</strong> Most secure, strict containment.</li>
+                            <li><strong>Cons:</strong> Rigid, hard to configure.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-lg border border-warm-border shadow-sm hover:shadow-md transition-shadow">
+                        <div class="text-center mb-4">
+                            <div class="inline-block p-3 rounded-full bg-purple-50 text-purple-600 mb-2"><i class="fas fa-users-cog"></i></div>
+                            <h3 class="text-lg font-bold">RBAC</h3>
+                            <p class="text-xs text-gray-500 uppercase">Role-Based</p>
+                        </div>
+                        <ul class="text-sm space-y-2 text-gray-600">
+                            <li><strong>Decision:</strong> Admin assigns Roles.</li>
+                            <li><strong>Common Use:</strong> Enterprise, Cloud (AWS IAM).</li>
+                            <li><strong>Pros:</strong> Best for scaling, mirrors org structure.</li>
+                            <li><strong>Cons:</strong> Role explosion if not managed.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
+                    <h4 class="font-bold text-blue-800 mb-2">Task A.3: Policy Discovery</h4>
+                    <p class="text-sm text-blue-900">
+                        Don't forget to find a <strong>real-world policy document</strong> (NIST, SANS, etc.) and analyze it for CIA properties and model references.
+                    </p>
+                </div>
+            </section>
+
+            <!-- SECTION 3: SIMULATION LAB (Section B) -->
+            <section id="lab" class="tab-content hidden fade-in space-y-6">
+                <header class="border-b border-warm-border pb-4">
+                    <h2 class="text-2xl font-bold text-primary-dark">Section B: Hands-On Practice</h2>
+                    <p class="text-gray-500 mt-1">Estimated Time: ~3.0 hours | Weight: 50%</p>
+                </header>
+
+                <div class="prose max-w-none text-gray-700 mb-6">
+                    <p>
+                        This is the core of the assignment. You need to implement the models in code (B.1), test them on a system (B.2), and audit your own privileges (B.3).
+                        Use the <strong>Interactive BLP Simulator</strong> below to visualize exactly how the logic for Task B.1 should work before you write your Python/script code.
+                    </p>
+                </div>
+
+                <!-- BLP Simulator Tool -->
+                <div class="bg-gray-900 rounded-xl overflow-hidden shadow-lg border border-gray-700 text-white">
+                    <div class="bg-gray-800 p-4 border-b border-gray-700 flex justify-between items-center">
+                        <h3 class="font-mono text-green-400 font-bold"><i class="fas fa-terminal mr-2"></i>BLP Logic Simulator</h3>
+                        <span class="text-xs text-gray-400 font-mono">Status: ACTIVE</span>
+                    </div>
+                    
+                    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Controls -->
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-mono text-gray-400 mb-1">SUBJECT (Your Role)</label>
+                                <select id="sim-subject" class="w-full bg-gray-800 border border-gray-600 rounded p-2 font-mono text-sm focus:border-green-400 focus:outline-none">
+                                    <option value="3">TOP SECRET (Level 3)</option>
+                                    <option value="2">SECRET (Level 2)</option>
+                                    <option value="1">CONFIDENTIAL (Level 1)</option>
+                                    <option value="0">UNCLASSIFIED (Level 0)</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-xs font-mono text-gray-400 mb-1">OBJECT (Target File)</label>
+                                <select id="sim-object" class="w-full bg-gray-800 border border-gray-600 rounded p-2 font-mono text-sm focus:border-green-400 focus:outline-none">
+                                    <option value="3">Nuclear_Codes.txt (TOP SECRET)</option>
+                                    <option value="2">Troop_Movements.pdf (SECRET)</option>
+                                    <option value="1">Staff_Meeting.docx (CONFIDENTIAL)</option>
+                                    <option value="0">Lunch_Menu.jpg (UNCLASSIFIED)</option>
+                                </select>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="simulateBLP('read')" class="bg-blue-600 hover:bg-blue-500 text-white font-mono py-2 rounded transition-colors">ATTEMPT READ</button>
+                                <button onclick="simulateBLP('write')" class="bg-red-600 hover:bg-red-500 text-white font-mono py-2 rounded transition-colors">ATTEMPT WRITE</button>
+                            </div>
+                        </div>
+
+                        <!-- Console Output -->
+                        <div class="bg-black rounded p-4 font-mono text-sm overflow-y-auto h-48 border border-gray-700 relative">
+                            <div class="absolute top-2 right-2 text-xs text-gray-600">SYS.LOG</div>
+                            <div id="sim-log" class="space-y-1">
+                                <p class="text-gray-500">> System initialized...</p>
+                                <p class="text-gray-500">> Ready for access requests.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accordion for Task Details -->
+                <div class="space-y-3 mt-8">
+                    <h3 class="text-lg font-bold text-primary-dark mb-4">Task Instructions</h3>
+                    
+                    <div class="border border-warm-border rounded-lg bg-white overflow-hidden">
+                        <button class="w-full text-left p-4 bg-gray-50 hover:bg-gray-100 font-medium flex justify-between items-center" onclick="toggleAccordion('task-b1')">
+                            <span><i class="fas fa-code mr-2 text-accent-blue"></i>Task B.1: Implement in Code</span>
+                            <i class="fas fa-chevron-down text-gray-400"></i>
+                        </button>
+                        <div id="task-b1" class="hidden p-4 text-gray-600 text-sm bg-white">
+                            <p class="mb-2">Choose <strong>two models</strong> (e.g., BLP and Biba). Write a script (Python, Bash, etc.) that:</p>
+                            <ul class="list-disc pl-5 space-y-1">
+                                <li>Defines 4 subjects & 4 objects.</li>
+                                <li>Implements core rules (No Read Up/No Write Down).</li>
+                                <li>Runs 6 test scenarios.</li>
+                                <li>Prints clear output (like the simulator above!).</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="border border-warm-border rounded-lg bg-white overflow-hidden">
+                        <button class="w-full text-left p-4 bg-gray-50 hover:bg-gray-100 font-medium flex justify-between items-center" onclick="toggleAccordion('task-b2')">
+                            <span><i class="fas fa-desktop mr-2 text-accent-blue"></i>Task B.2: System Experiment</span>
+                            <i class="fas fa-chevron-down text-gray-400"></i>
+                        </button>
+                        <div id="task-b2" class="hidden p-4 text-gray-600 text-sm bg-white">
+                            <p class="mb-2">Pick <strong>one</strong> real-world experiment:</p>
+                            <ul class="list-disc pl-5 space-y-1">
+                                <li><strong>DAC (Linux/Mac):</strong> Create users, use `chmod` to restrict files, try to access them.</li>
+                                <li><strong>MAC (SELinux/AppArmor):</strong> Enable it, check labels (`ls -Z`), try an action allowed by DAC but blocked by MAC.</li>
+                                <li><strong>RBAC (DB/Cloud):</strong> Create roles in SQL or AWS IAM, assign permissions, test access.</li>
+                            </ul>
+                            <p class="mt-2 italic">Deliverable: Annotated screenshots.</p>
+                        </div>
+                    </div>
+
+                    <div class="border border-warm-border rounded-lg bg-white overflow-hidden">
+                        <button class="w-full text-left p-4 bg-gray-50 hover:bg-gray-100 font-medium flex justify-between items-center" onclick="toggleAccordion('task-b3')">
+                            <span><i class="fas fa-search mr-2 text-accent-blue"></i>Task B.3: PoLP Audit</span>
+                            <i class="fas fa-chevron-down text-gray-400"></i>
+                        </button>
+                        <div id="task-b3" class="hidden p-4 text-gray-600 text-sm bg-white">
+                            <p class="mb-2">Audit your own system:</p>
+                            <ol class="list-decimal pl-5 space-y-1">
+                                <li>Run `id` (Linux) or `whoami /all` (Windows).</li>
+                                <li>List privileges you possess but rarely use.</li>
+                                <li>Propose how to enforce Least Privilege better (e.g., separate Admin account).</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 4: REPORTING HUB (Section C) -->
+            <section id="report" class="tab-content hidden fade-in space-y-6">
+                <header class="border-b border-warm-border pb-4">
+                    <h2 class="text-2xl font-bold text-primary-dark">Section C: Reporting & Rubric</h2>
+                    <p class="text-gray-500 mt-1">Weight: 25% | Max Length: 3 Pages</p>
+                </header>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Report Checklist -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-warm-border">
+                        <h3 class="text-lg font-semibold text-primary-dark mb-4">Report Structure Checklist</h3>
+                        <div class="space-y-3">
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="checkbox" class="form-checkbox h-5 w-5 text-primary rounded border-gray-300">
+                                <span class="text-gray-700 text-sm"><strong>Cover Page:</strong> Title, Name, ID, Date (doesn't count to page limit).</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="checkbox" class="form-checkbox h-5 w-5 text-primary rounded border-gray-300">
+                                <span class="text-gray-700 text-sm"><strong>1. Intro:</strong> Objective & Model choices.</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="checkbox" class="form-checkbox h-5 w-5 text-primary rounded border-gray-300">
+                                <span class="text-gray-700 text-sm"><strong>2. Research:</strong> Model summaries + Access Control comparison.</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="checkbox" class="form-checkbox h-5 w-5 text-primary rounded border-gray-300">
+                                <span class="text-gray-700 text-sm"><strong>3. Hands-On:</strong> B.1 (Code), B.2 (Screenshots), B.3 (Audit).</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="checkbox" class="form-checkbox h-5 w-5 text-primary rounded border-gray-300">
+                                <span class="text-gray-700 text-sm"><strong>4. Policy Conflict:</strong> Scenario & Resolution analysis (Task B.4).</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="checkbox" class="form-checkbox h-5 w-5 text-primary rounded border-gray-300">
+                                <span class="text-gray-700 text-sm"><strong>5. Reflection:</strong> Learning moments & Week 1 connection.</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Grading Rubric Visualization -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-warm-border">
+                        <h3 class="text-lg font-semibold text-primary-dark mb-4">Success Criteria</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="font-bold text-gray-700">Excellent (90-100%)</span>
+                                </div>
+                                <p class="text-xs text-gray-500">Thorough explanation, original analysis, working code with clear output, deep PoLP audit, strong connections.</p>
+                            </div>
+                            <div class="w-full bg-gray-100 h-px"></div>
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="font-bold text-gray-700">Good (70-89%)</span>
+                                </div>
+                                <p class="text-xs text-gray-500">Correct explanations, working code, adequate audit, well-structured report.</p>
+                            </div>
+                            <div class="w-full bg-gray-100 h-px"></div>
+                            <div class="bg-yellow-50 p-3 rounded text-xs text-yellow-800 border border-yellow-200">
+                                <strong>Bonus Tip:</strong> Creating your own tool or script from scratch (Python/Bash) instead of just using existing commands is highly valued!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 bg-red-50 border border-red-200 rounded-lg p-4">
+                    <h4 class="font-bold text-red-800 mb-2"><i class="fas fa-exclamation-triangle"></i> Important Disclaimers</h4>
+                    <p class="text-sm text-red-900 mb-2">
+                        <strong>Authorized Systems Only:</strong> Only test on systems you own or have explicit written permission for.
+                    </p>
+                    <p class="text-sm text-red-900">
+                        <strong>Ethical Responsibility:</strong> The goal is to learn defense. Misuse of these skills is strictly prohibited.
+                    </p>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-warm-surface border-t border-warm-border p-6 text-center text-xs text-gray-500">
+        <p>© 2026 Cyber.SoHo. Educational Material for Computer Security Course.</p>
+        <p class="mt-1">Generated based on Week 2 Lab Assignment.</p>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- 1. Tab Navigation Logic ---
+        function switchTab(tabId) {
+            // Hide all contents
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.add('hidden');
+            });
+            // Show selected
+            document.getElementById(tabId).classList.remove('hidden');
+
+            // Update buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-white', 'shadow-sm', 'text-primary-dark', 'border', 'border-warm-border');
+                btn.classList.add('text-gray-600', 'hover:text-primary-dark');
+            });
+            const activeBtn = document.getElementById('btn-' + tabId);
+            activeBtn.classList.remove('text-gray-600', 'hover:text-primary-dark');
+            activeBtn.classList.add('bg-white', 'shadow-sm', 'text-primary-dark', 'border', 'border-warm-border');
+        }
+
+        // Mobile Menu Toggle
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('hidden');
+        });
+
+        // --- 2. Chart.js Initialization ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('gradingChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Research (Sec A)', 'Hands-On (Sec B)', 'Reporting (Sec C)'],
+                    datasets: [{
+                        data: [25, 50, 25],
+                        backgroundColor: [
+                            '#64748b', // Slate (Accent Blue)
+                            '#577c6e', // Sage (Accent Green)
+                            '#8c7b70'  // Taupe (Primary)
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    family: 'Segoe UI'
+                                },
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+        });
+
+        // --- 3. Model Explorer Logic (Section A) ---
+        const modelData = {
+            'blp': {
+                title: 'Bell-LaPadula (BLP)',
+                tag: 'Confidentiality',
+                tagColor: 'bg-accent-blue',
+                rules: [
+                    { icon: 'fa-eye', color: 'red', name: 'No Read Up', desc: 'Simple Security Property: Cannot read data at a higher security level.' },
+                    { icon: 'fa-pen', color: 'green', name: 'No Write Down', desc: '*-Property: Cannot write data to a lower security level (prevents leakage).' }
+                ],
+                origin: 'U.S. Dept of Defense (DoD)',
+                flow: 'Information flows UP.',
+                limit: 'Does not address integrity. Blind writing up is possible.'
+            },
+            'biba': {
+                title: 'Biba Integrity Model',
+                tag: 'Integrity',
+                tagColor: 'bg-accent-green',
+                rules: [
+                    { icon: 'fa-eye', color: 'red', name: 'No Read Down', desc: 'Simple Integrity Property: Cannot read data from a lower integrity level (prevents contamination).' },
+                    { icon: 'fa-pen', color: 'green', name: 'No Write Up', desc: 'Integrity *-Property: Cannot write data to a higher integrity level.' }
+                ],
+                origin: 'Academic / Commercial',
+                flow: 'Information flows DOWN.',
+                limit: 'Does not address confidentiality.'
+            },
+            'clark': {
+                title: 'Clark-Wilson',
+                tag: 'Commercial Integrity',
+                tagColor: 'bg-purple-500',
+                rules: [
+                    { icon: 'fa-check-circle', color: 'purple', name: 'Well-Formed Transactions', desc: 'Users cannot manipulate data directly; must use Transformation Procedures (TPs).' },
+                    { icon: 'fa-user-lock', color: 'purple', name: 'Separation of Duty', desc: 'Certifier vs. Implementer roles.' }
+                ],
+                origin: 'Commercial Sector',
+                flow: 'Transaction-based.',
+                limit: 'Complex to implement in non-commercial OS environments.'
+            },
+            'chinese': {
+                title: 'Brewer-Nash (Chinese Wall)',
+                tag: 'Conflict of Interest',
+                tagColor: 'bg-yellow-600',
+                rules: [
+                    { icon: 'fa-history', color: 'yellow', name: 'Dynamic Access', desc: 'Permissions change based on previous actions.' },
+                    { icon: 'fa-ban', color: 'red', name: 'Conflict Sets', desc: 'If you access Company A data, you are blocked from accessing Competitor B data.' }
+                ],
+                origin: 'Financial Sector (SEC/FCA)',
+                flow: 'Dynamic / History-based.',
+                limit: 'Can lead to resource isolation issues if not managed.'
+            }
+        };
+
+        function showModel(modelKey) {
+            const data = modelData[modelKey];
+            const container = document.getElementById('model-content');
+            
+            // Update buttons styling
+            document.querySelectorAll('.model-btn').forEach(btn => {
+                btn.classList.remove('bg-primary', 'text-white', 'shadow-md');
+                btn.classList.add('bg-white', 'text-gray-600', 'hover:bg-gray-200');
+            });
+            document.getElementById('btn-' + modelKey).classList.add('bg-primary', 'text-white', 'shadow-md');
+            document.getElementById('btn-' + modelKey).classList.remove('bg-white', 'text-gray-600', 'hover:bg-gray-200');
+
+            // Build HTML
+            let rulesHtml = '';
+            data.rules.forEach(r => {
+                // Tailwind dynamic colors for icons need to be mapped or hardcoded safely, using style for simplicity in dynamic strings
+                const iconColorClass = r.color === 'red' ? 'text-red-500' : r.color === 'green' ? 'text-green-500' : r.color === 'purple' ? 'text-purple-500' : 'text-yellow-600';
+                const bgClass = r.color === 'red' ? 'bg-red-50 border-red-100' : r.color === 'green' ? 'bg-green-50 border-green-100' : r.color === 'purple' ? 'bg-purple-50 border-purple-100' : 'bg-yellow-50 border-yellow-100';
+                
+                rulesHtml += `
+                    <li class="p-3 ${bgClass} rounded border flex items-start">
+                        <i class="fas ${r.icon} ${iconColorClass} mt-1 mr-2"></i>
+                        <div>
+                            <span class="font-bold text-gray-800">${r.name}</span>
+                            <p class="text-sm text-gray-600">${r.desc}</p>
+                        </div>
+                    </li>`;
+            });
+
+            container.innerHTML = `
+                <div class="flex items-center mb-4 fade-in">
+                    <h3 class="text-2xl font-bold text-primary-dark mr-3">${data.title}</h3>
+                    <span class="${data.tagColor} text-white px-2 py-1 rounded text-xs">${data.tag}</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 fade-in">
+                    <div>
+                        <h4 class="font-semibold text-gray-800 mb-2">The Rules</h4>
+                        <ul class="space-y-2">${rulesHtml}</ul>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-800 mb-2">Context</h4>
+                        <div class="space-y-3 text-sm text-gray-700">
+                            <p><strong><i class="fas fa-building text-gray-400"></i> Origin:</strong> ${data.origin}</p>
+                            <p><strong><i class="fas fa-exchange-alt text-gray-400"></i> Flow:</strong> ${data.flow}</p>
+                            <p><strong><i class="fas fa-exclamation-triangle text-gray-400"></i> Limitation:</strong> ${data.limit}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- 4. Simulator Logic (Section B) ---
+        // Helper to get name from value
+        function getLevelName(val) {
+            const names = ["UNCLASSIFIED", "CONFIDENTIAL", "SECRET", "TOP SECRET"];
+            return names[val];
+        }
+
+        function simulateBLP(action) {
+            const subjectLevel = parseInt(document.getElementById('sim-subject').value);
+            const objectLevel = parseInt(document.getElementById('sim-object').value);
+            const log = document.getElementById('sim-log');
+            
+            let allowed = false;
+            let rule = "";
+            let message = "";
+
+            if (action === 'read') {
+                // No Read Up: Subject Level must be >= Object Level
+                if (subjectLevel >= objectLevel) {
+                    allowed = true;
+                    rule = "Simple Security Property (Read Down OK)";
+                    message = `ACCESS GRANTED: [${getLevelName(subjectLevel)}] reading [${getLevelName(objectLevel)}].`;
+                } else {
+                    allowed = false;
+                    rule = "No Read Up Violation";
+                    message = `ACCESS DENIED: [${getLevelName(subjectLevel)}] cannot read [${getLevelName(objectLevel)}].`;
+                }
+            } else if (action === 'write') {
+                // No Write Down: Subject Level must be <= Object Level
+                if (subjectLevel <= objectLevel) {
+                    allowed = true;
+                    rule = "*-Property (Write Up OK)";
+                    message = `WRITE PERMITTED: [${getLevelName(subjectLevel)}] writing to [${getLevelName(objectLevel)}].`;
+                } else {
+                    allowed = false;
+                    rule = "No Write Down Violation";
+                    message = `WRITE BLOCKED: [${getLevelName(subjectLevel)}] cannot leak data to [${getLevelName(objectLevel)}].`;
+                }
+            }
+
+            // Update Log UI
+            const colorClass = allowed ? "text-green-400" : "text-red-400";
+            const newEntry = document.createElement('div');
+            newEntry.innerHTML = `
+                <span class="text-gray-500 text-xs">[${new Date().toLocaleTimeString()}]</span>
+                <span class="${colorClass} font-bold">${action.toUpperCase()}: ${allowed ? "ALLOWED" : "DENIED"}</span>
+                <p class="text-xs ml-4 text-gray-300">${message}</p>
+                <p class="text-xs ml-4 text-gray-500 italic">Rule: ${rule}</p>
+            `;
+            log.prepend(newEntry);
+        }
+
+        // --- 5. Accordion Logic ---
+        function toggleAccordion(id) {
+            const el = document.getElementById(id);
+            if (el.classList.contains('hidden')) {
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        }
+
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+

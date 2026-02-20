@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Security Study Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Flashcard Flip Animation Styles */
+        .flip-card {
+            background-color: transparent;
+            perspective: 1000px;
+            width: 100%;
+            height: 350px;
+            cursor: pointer;
+        }
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+        .flip-card.flipped .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .flip-card-front {
+            background-color: #ffffff;
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
+        }
+        .flip-card-back {
+            background-color: #f8fafc;
+            color: #0f172a;
+            transform: rotateY(180deg);
+            border: 1px solid #cbd5e1;
+        }
+        
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-10">
+        <div class="max-w-4xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                Cyber Security Mastery
+            </h1>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        
+        <!-- Tab Navigation -->
+        <div class="flex border-b border-slate-200 mb-8" aria-label="Tabs">
+            <button id="tab-flashcards" onclick="switchTab('flashcards')" class="w-1/2 py-4 px-1 text-center border-b-2 font-medium text-sm transition-colors border-indigo-500 text-indigo-600 bg-indigo-50/30 rounded-tl-lg">
+                Flashcards (25)
+            </button>
+            <button id="tab-quiz" onclick="switchTab('quiz')" class="w-1/2 py-4 px-1 text-center border-b-2 font-medium text-sm transition-colors border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 rounded-tr-lg">
+                Practice Quiz (10)
+            </button>
+        </div>
+
+        <!-- ================= FLASHCARDS SECTION ================= -->
+        <section id="section-flashcards" class="block">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold text-slate-800">Study Flashcards</h2>
+                <p class="text-slate-500 mt-1">Click the card to flip it over. Use arrows to navigate.</p>
+            </div>
+
+            <!-- Flashcard Container -->
+            <div class="relative w-full max-w-2xl mx-auto">
+                <div class="flip-card" id="flashcard" onclick="toggleFlip()">
+                    <div class="flip-card-inner" id="flashcard-inner">
+                        <div class="flip-card-front flex-col gap-4">
+                            <span class="text-xs font-semibold text-indigo-500 uppercase tracking-wider bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">Term</span>
+                            <h3 id="flashcard-front-text" class="text-2xl md:text-3xl font-bold text-slate-800 leading-tight"></h3>
+                        </div>
+                        <div class="flip-card-back flex-col gap-4">
+                            <span class="text-xs font-semibold text-emerald-600 uppercase tracking-wider bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">Definition</span>
+                            <p id="flashcard-back-text" class="text-lg md:text-xl text-slate-700 leading-relaxed"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="flex items-center justify-between mt-8">
+                    <button onclick="prevCard()" class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 rounded-lg shadow-sm text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                        </svg>
+                        Previous
+                    </button>
+                    
+                    <span id="flashcard-counter" class="text-sm font-medium text-slate-500">
+                        1 / 25
+                    </span>
+                    
+                    <button onclick="nextCard()" class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 rounded-lg shadow-sm text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Next
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="mt-6 flex justify-center">
+                    <button onclick="shuffleCards()" class="text-sm text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Shuffle Flashcards
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= QUIZ SECTION ================= -->
+        <section id="section-quiz" class="hidden">
+            <div id="quiz-intro" class="text-center mb-8">
+                <h2 class="text-2xl font-bold text-slate-800">Knowledge Check</h2>
+                <p class="text-slate-500 mt-2 max-w-xl mx-auto">Test your understanding of Threats, Attacks, and Defenses. There are 10 questions in total.</p>
+                <button onclick="startQuiz()" class="mt-6 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow hover:bg-indigo-700 transition-colors">Start Quiz</button>
+            </div>
+
+            <!-- Quiz Active Area -->
+            <div id="quiz-active" class="hidden max-w-3xl mx-auto bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200">
+                
+                <!-- Progress bar -->
+                <div class="mb-6">
+                    <div class="flex justify-between text-sm font-medium text-slate-500 mb-2">
+                        <span id="quiz-progress-text">Question 1 of 10</span>
+                        <span id="quiz-score-text">Score: 0</span>
+                    </div>
+                    <div class="w-full bg-slate-200 rounded-full h-2">
+                        <div id="quiz-progress-bar" class="bg-indigo-600 h-2 rounded-full transition-all duration-300" style="width: 10%"></div>
+                    </div>
+                </div>
+
+                <!-- Question -->
+                <div class="mb-6">
+                    <h3 id="quiz-question-text" class="text-lg md:text-xl font-bold text-slate-800 mb-4 leading-relaxed"></h3>
+                    <div id="quiz-hint-container" class="hidden bg-amber-50 border border-amber-200 p-3 rounded-lg mb-4 text-sm text-amber-800 flex items-start gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0 text-amber-500" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z" />
+                        </svg>
+                        <span id="quiz-hint-text"></span>
+                    </div>
+                    <button id="btn-hint" onclick="showHint()" class="text-xs font-medium text-indigo-600 hover:text-indigo-800 transition-colors mb-4">Show Hint</button>
+                    
+                    <!-- Options -->
+                    <div id="quiz-options" class="space-y-3">
+                        <!-- Options generated by JS -->
+                    </div>
+                </div>
+
+                <!-- Feedback & Next Button -->
+                <div id="quiz-feedback-container" class="hidden mt-6 pt-6 border-t border-slate-200">
+                    <div id="quiz-feedback" class="p-4 rounded-lg mb-4">
+                        <p id="quiz-rationale" class="text-sm font-medium"></p>
+                    </div>
+                    <div class="flex justify-end">
+                        <button id="btn-next-question" onclick="nextQuestion()" class="px-6 py-2 bg-slate-800 text-white font-medium rounded-lg hover:bg-slate-700 transition-colors">
+                            Next Question &rarr;
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Results -->
+            <div id="quiz-results" class="hidden max-w-2xl mx-auto bg-white p-8 rounded-2xl shadow-sm border border-slate-200 text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                    </svg>
+                </div>
+                <h2 class="text-3xl font-bold text-slate-800 mb-2">Quiz Completed!</h2>
+                <p class="text-slate-600 mb-6">You scored <span id="final-score" class="font-bold text-indigo-600 text-xl"></span> out of 10.</p>
+                <div class="flex justify-center gap-4">
+                    <button onclick="startQuiz()" class="px-6 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors">Retry Quiz</button>
+                    <button onclick="switchTab('flashcards')" class="px-6 py-2 bg-white border border-slate-300 text-slate-700 font-medium rounded-lg hover:bg-slate-50 transition-colors">Review Flashcards</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Application Logic -->
+    <script>
+        // ================= DATA =================
+
+        const rawFlashcards = [
+            { front: "IDS (Intrusion Detection System)", back: "A tool that monitors traffic or host activity for suspicious patterns and raises alerts (similar to a smoke detector)." },
+            { front: "SIEM (Security Information & Event Management)", back: "A system that collects logs from multiple sources, correlates events, and surfaces threats." },
+            { front: "Defense in Depth", back: "The strategy of layering multiple defenses (Application, Network, Host, Identity, Human) because no single tool is sufficient." },
+            { front: "RASP (Runtime Application Self-Protection)", back: "Security built directly into an application to detect and block attacks from within." },
+            { front: "Goal of Containment", back: "To stop the incident from getting worse (stopping the bleeding) rather than fixing the root cause immediately." },
+            { front: "Network Segmentation", back: "Placing firewalls between network zones to prevent an infection from spreading laterally across the entire network." },
+            { front: "Difference between Response and Recovery", back: "Response focuses on understanding and fixing the root cause (forensics), while Recovery focuses on restoring normal operations (backups)." },
+            { front: "NIST Incident Response Lifecycle Phases", back: "1. Preparation, 2. Detection & Analysis, 3. Containment, Eradication & Recovery, 4. Post-Incident Activity." },
+            { front: "Passive Reconnaissance", back: "Gathering information without direct contact with target systems (e.g., LinkedIn, WHOIS), leaving no traces in logs." },
+            { front: "Active Reconnaissance", back: "Directly probing target systems (e.g., port scanning), which leaves traces in logs." },
+            { front: "Google Dorking", back: "Using advanced search operators to find exposed confidential information or vulnerable systems indexed by Google." },
+            { front: "Pretexting", back: "A social engineering tactic involving a fabricated scenario to extract info (e.g., pretending to be from the fraud department)." },
+            { front: "Whaling", back: "Phishing attacks specifically targeting senior executives like CEOs or CFOs." },
+            { front: "Smishing", back: "Phishing attacks conducted via SMS text messages." },
+            { front: "Zero-day Vulnerability", back: "A vulnerability unknown to the software vendor, meaning they have had 'zero days' to fix it." },
+            { front: "Exploitation Window", back: "The critical time gap between a patch being released and organizations actually applying it." },
+            { front: "Ransomware", back: "Malware that encrypts files and demands payment for the decryption key." },
+            { front: "Botnet", back: "A network of infected devices controlled remotely by an attacker (C2 server), often used for DDoS attacks." },
+            { front: "Rootkit", back: "Malware that hides deep in the operating system and is extremely difficult to detect or remove." },
+            { front: "Man-in-the-Middle (MitM) Attack", back: "An attack where the attacker secretly intercepts and potentially alters communications between two parties." },
+            { front: "HTTPS vs. HTTP", back: "HTTPS encrypts traffic (ciphertext) making it unreadable to eavesdroppers, whereas HTTP sends data in plain text." },
+            { front: "SQL Injection (SQLi)", back: "Inserting malicious SQL code into application input fields to manipulate the database (e.g., bypass login or dump data)." },
+            { front: "Parameterised Queries", back: "The primary defense against SQL Injection; ensures user input is treated as data, not executable code." },
+            { front: "Tailgating", back: "Physically following someone through a secure door to gain unauthorized access." },
+            { front: "Lesson from Maersk/NotPetya Case Study", back: "Recovery depends entirely on backup quality and a tested recovery plan." }
+        ];
+
+        let flashcards = [...rawFlashcards]; // Copy for shuffling
+
+        const quizData = [
+            {
+                question: "A network security tool identifies a suspicious traffic pattern matching a known attack signature and immediately sends an alert to the system administrator, but does not stop the traffic. Which tool is functioning here?",
+                options: [
+                    { text: "Intrusion Detection System (IDS)", rationale: "An IDS monitors network traffic for suspicious activity and issues alerts when such activity is discovered, acting like a burglar alarm rather than a lock.", isCorrect: true },
+                    { text: "Intrusion Prevention System (IPS)", rationale: "An IPS would actively block the traffic in real-time rather than just alerting.", isCorrect: false },
+                    { text: "Web Application Firewall (WAF)", rationale: "A WAF specifically filters HTTP/HTTPS traffic to web applications, whereas the scenario describes general network pattern detection without blocking.", isCorrect: false },
+                    { text: "Endpoint Detection & Response (EDR)", rationale: "EDR focuses on monitoring individual host devices (endpoints) for suspicious behavior, rather than analyzing network traffic flow for signatures.", isCorrect: false }
+                ],
+                hint: "Think of the difference between a smoke detector that beeps and a sprinkler system that actively puts out the fire."
+            },
+            {
+                question: "During a ransomware attack, an Incident Response team decides to immediately disconnect the infected server from the network before attempting to analyze the malware. Which phase of the NIST lifecycle does this action represent?",
+                options: [
+                    { text: "Containment", rationale: "The priority is to stop the incident from spreading or causing further damage, akin to closing fire doors or isolating a patient.", isCorrect: true },
+                    { text: "Detection & Analysis", rationale: "This phase involves identifying and validating the incident, whereas disconnecting the server is an active step to limit its impact.", isCorrect: false },
+                    { text: "Eradication", rationale: "Eradication involves removing the malware itself, which happens after the system has been successfully isolated.", isCorrect: false },
+                    { text: "Recovery", rationale: "Recovery focuses on restoring systems to normal operation, such as restoring from backups, which occurs after the threat is contained and removed.", isCorrect: false }
+                ],
+                hint: "The goal of this action is to 'stop the bleeding' rather than fix the wound."
+            },
+            {
+                question: "An attacker uses a tool to scan a target company's IP addresses to identify open ports and service versions. This leaves a trail in the company's firewall logs. What type of reconnaissance is this?",
+                options: [
+                    { text: "Active Reconnaissance", rationale: "This involves directly probing the target system, which inevitably generates noise and logs that can be detected by the target.", isCorrect: true },
+                    { text: "Passive Reconnaissance", rationale: "Passive reconnaissance involves gathering information from public sources like LinkedIn or WHOIS without ever touching the target's infrastructure.", isCorrect: false },
+                    { text: "Social Engineering", rationale: "Social engineering targets human psychology to extract information, whereas port scanning targets technical infrastructure.", isCorrect: false },
+                    { text: "Google Dorking", rationale: "Google Dorking is a form of passive reconnaissance that uses search engines to find exposed data without directly querying the target's servers.", isCorrect: false }
+                ],
+                hint: "This method involves 'knocking on the doors' of the target, which the target can hear."
+            },
+            {
+                question: "Why is the 'Exploitation Window' considered the most critical period in vulnerability management?",
+                options: [
+                    { text: "It is the gap between a patch being released and the organization applying it.", rationale: "Once a patch is released, the vulnerability is public knowledge, and attackers race to weaponize it before organizations can update their systems.", isCorrect: true },
+                    { text: "It is the time before the vendor discovers the bug.", rationale: "While dangerous, this period (zero-day) usually involves fewer attackers; the mass race begins once the vulnerability is publicly disclosed.", isCorrect: false },
+                    { text: "It is the time taken to detect an intrusion after it happens.", rationale: "This refers to 'dwell time,' whereas the exploitation window refers to the opportunity for the attack to occur based on patch availability.", isCorrect: false },
+                    { text: "It is the duration of a brute-force password attack.", rationale: "This refers to a specific attack method duration, not the strategic timeline related to software vulnerabilities and patching.", isCorrect: false }
+                ],
+                hint: "Think about the race between the attackers weaponizing a known flaw and the defenders installing the fix."
+            },
+            {
+                question: "An email arrives appearing to be from the CEO, demanding a wire transfer be processed 'within the next 10 minutes' to close a confidential deal. Which psychological levers are primarily being exploited?",
+                options: [
+                    { text: "Authority and Urgency", rationale: "The attacker impersonates a high-ranking figure (Authority) and demands immediate action (Urgency) to bypass critical thinking.", isCorrect: true },
+                    { text: "Familiarity and Trust", rationale: "While trust is involved, the defining characteristics here are the high rank of the sender and the tight time constraint.", isCorrect: false },
+                    { text: "Greed and Curiosity", rationale: "The victim is not being offered a reward or enticed by a mystery, but rather compelled by a direct order.", isCorrect: false },
+                    { text: "Fear and Technical Confusion", rationale: "The scenario relies on social pressure and hierarchy rather than technical intimidation or fear of account deletion.", isCorrect: false }
+                ],
+                hint: "The attacker wants you to obey a superior without thinking, and do it fast."
+            },
+            {
+                question: "How does using HTTPS prevents a Man-in-the-Middle (MitM) attacker from reading sensitive data like passwords?",
+                options: [
+                    { text: "It encrypts the traffic, turning plain text into unreadable ciphertext.", rationale: "Even if the attacker intercepts the data, they cannot read it without the encryption key, effectively receiving a 'sealed envelope'.", isCorrect: true },
+                    { text: "It hides the destination IP address from the attacker.", rationale: "HTTPS encrypts the content, but the destination IP and headers are typically still visible for routing purposes.", isCorrect: false },
+                    { text: "It prevents the attacker from intercepting the packets entirely.", rationale: "An attacker on the same network can still capture the packets (sniffing), but they cannot decrypt the payload.", isCorrect: false },
+                    { text: "It scans the connection for malicious software before connecting.", rationale: "HTTPS is a protocol for secure communication, not an antivirus tool that scans for malware.", isCorrect: false }
+                ],
+                hint: "It transforms the data from a 'postcard' that anyone can read into a 'sealed envelope'."
+            },
+            {
+                question: "In a SQL Injection attack, why does entering `admin' --` into a login field often allow an attacker to bypass authentication?",
+                options: [
+                    { text: "The `--` acts as a comment, causing the database to ignore the password check.", rationale: "The input alters the query logic so that the database only checks the username and comments out the rest of the requirement (AND password = ...).", isCorrect: true },
+                    { text: "It guesses the admin's password using a dictionary attack.", rationale: "SQL injection manipulates the database query structure, it does not involve guessing or cracking the password itself.", isCorrect: false },
+                    { text: "It overflows the buffer, causing the system to crash and fail open.", rationale: "This describes a Buffer Overflow attack, not SQL injection, which relies on interpreting data as code.", isCorrect: false },
+                    { text: "It encrypts the malicious code so the database executes it blindly.", rationale: "The attack relies on the database executing the code because it is *not* distinguished from legitimate commands, not because of encryption.", isCorrect: false }
+                ],
+                hint: "The attacker is trying to tell the database to stop reading the rest of the instruction line."
+            },
+            {
+                question: "Which security measure is the most effective structural defense against the spread of malware like WannaCry across an organization?",
+                options: [
+                    { text: "Network Segmentation", rationale: "By placing firewalls between different network zones, infection is contained within a single segment and cannot jump to others.", isCorrect: true },
+                    { text: "Antivirus Software", rationale: "While important, AV is a host-level defense; if it fails or the malware is unknown, a flat network allows it to spread everywhere.", isCorrect: false },
+                    { text: "Strong Passwords", rationale: "Passwords protect access, but worms often exploit software vulnerabilities to spread without needing user credentials.", isCorrect: false },
+                    { text: "Spam Filters", rationale: "Filters prevent initial entry via email, but do not stop lateral movement inside the network if a device is infected via other means.", isCorrect: false }
+                ],
+                hint: "Think of this as installing firebreaks in a forest or fire doors in a building."
+            },
+            {
+                question: "What is the primary difference between Response and Recovery in the incident handling process?",
+                options: [
+                    { text: "Response focuses on forensics and root cause; Recovery focuses on restoring operations.", rationale: "Response involves diagnosing the issue (the fracture), while Recovery involves getting systems back online (physiotherapy).", isCorrect: true },
+                    { text: "Response happens after the incident is over; Recovery happens during the attack.", rationale: "This is reversed; Response happens during/immediately after detection, while Recovery typically follows containment and eradication.", isCorrect: false },
+                    { text: "Response is technical; Recovery is purely administrative.", rationale: "Both phases require heavy technical involvement; Recovery involves technical tasks like restoring backups and patching.", isCorrect: false },
+                    { text: "Response involves patching; Recovery involves monitoring.", rationale: "Patching is often part of Recovery (to prevent recurrence), and monitoring is continuous; the core distinction is diagnosis vs. restoration.", isCorrect: false }
+                ],
+                hint: "One is about investigating the crime scene, the other is about cleaning it up and reopening the shop."
+            },
+            {
+                question: "What is the primary purpose of a 'Zero-day' exploit in an attacker's toolkit?",
+                options: [
+                    { text: "To attack a vulnerability that the software vendor is not yet aware of.", rationale: "Because the vendor doesn't know about it, there is no patch available, making the attack highly likely to succeed.", isCorrect: true },
+                    { text: "To attack systems that have not applied a patch released 0 days ago.", rationale: "A zero-day refers to the lack of awareness/patch by the vendor, not the speed at which an organization applies a known patch.", isCorrect: false },
+                    { text: "To crack passwords in zero days (instantly).", rationale: "Zero-day refers to software vulnerabilities, not password cracking speed.", isCorrect: false },
+                    { text: "To delete all data on a system, leaving zero days of history.", rationale: "The term refers to the timeline of the vulnerability disclosure, not the destructive outcome of the malware.", isCorrect: false }
+                ],
+                hint: "The name implies the vendor has had zero time to fix it."
+            }
+        ];
+
+
+        // ================= TAB LOGIC =================
+
+        function switchTab(tabId) {
+            // Update buttons
+            document.getElementById('tab-flashcards').className = tabId === 'flashcards' 
+                ? "w-1/2 py-4 px-1 text-center border-b-2 font-medium text-sm transition-colors border-indigo-500 text-indigo-600 bg-indigo-50/30 rounded-tl-lg"
+                : "w-1/2 py-4 px-1 text-center border-b-2 font-medium text-sm transition-colors border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 rounded-tl-lg";
+            
+            document.getElementById('tab-quiz').className = tabId === 'quiz'
+                ? "w-1/2 py-4 px-1 text-center border-b-2 font-medium text-sm transition-colors border-indigo-500 text-indigo-600 bg-indigo-50/30 rounded-tr-lg"
+                : "w-1/2 py-4 px-1 text-center border-b-2 font-medium text-sm transition-colors border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 rounded-tr-lg";
+
+            // Update sections
+            document.getElementById('section-flashcards').style.display = tabId === 'flashcards' ? 'block' : 'none';
+            document.getElementById('section-quiz').style.display = tabId === 'quiz' ? 'block' : 'none';
+        }
+
+
+        // ================= FLASHCARD LOGIC =================
+        
+        let currentCardIndex = 0;
+        const cardElement = document.getElementById('flashcard');
+        const frontText = document.getElementById('flashcard-front-text');
+        const backText = document.getElementById('flashcard-back-text');
+        const counterText = document.getElementById('flashcard-counter');
+
+        function renderCard() {
+            // Remove flip state if flipped
+            cardElement.classList.remove('flipped');
+            
+            // Short timeout to allow animation of flip-back before changing text
+            setTimeout(() => {
+                frontText.textContent = flashcards[currentCardIndex].front;
+                backText.textContent = flashcards[currentCardIndex].back;
+                counterText.textContent = `${currentCardIndex + 1} / ${flashcards.length}`;
+            }, 150);
+        }
+
+        function toggleFlip() {
+            cardElement.classList.toggle('flipped');
+        }
+
+        function nextCard() {
+            currentCardIndex = (currentCardIndex + 1) % flashcards.length;
+            renderCard();
+        }
+
+        function prevCard() {
+            currentCardIndex = (currentCardIndex - 1 + flashcards.length) % flashcards.length;
+            renderCard();
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function shuffleCards() {
+            shuffleArray(flashcards);
+            currentCardIndex = 0;
+            renderCard();
+        }
+
+        // Initialize first card
+        renderCard();
+
+        // Keyboard navigation for flashcards
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('section-flashcards').style.display !== 'none') {
+                if (e.key === 'ArrowRight') nextCard();
+                if (e.key === 'ArrowLeft') prevCard();
+                if (e.key === ' ' || e.key === 'Enter') {
+                    e.preventDefault();
+                    toggleFlip();
+                }
+            }
+        });
+
+
+        // ================= QUIZ LOGIC =================
+
+        let currentQuizIndex = 0;
+        let score = 0;
+        let hasAnsweredCurrent = false;
+
+        function startQuiz() {
+            currentQuizIndex = 0;
+            score = 0;
+            
+            // Shuffle options for each question
+            quizData.forEach(q => shuffleArray(q.options));
+            
+            document.getElementById('quiz-intro').classList.add('hidden');
+            document.getElementById('quiz-results').classList.add('hidden');
+            document.getElementById('quiz-active').classList.remove('hidden');
+            
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            hasAnsweredCurrent = false;
+            const q = quizData[currentQuizIndex];
+            
+            // Update Progress
+            document.getElementById('quiz-progress-text').textContent = `Question ${currentQuizIndex + 1} of ${quizData.length}`;
+            document.getElementById('quiz-score-text').textContent = `Score: ${score}`;
+            document.getElementById('quiz-progress-bar').style.width = `${((currentQuizIndex) / quizData.length) * 100}%`;
+            
+            // Populate text
+            document.getElementById('quiz-question-text').textContent = q.question;
+            
+            // Reset hint
+            document.getElementById('quiz-hint-container').classList.add('hidden');
+            document.getElementById('quiz-hint-text').textContent = q.hint;
+            document.getElementById('btn-hint').classList.remove('hidden');
+            
+            // Clear feedback
+            document.getElementById('quiz-feedback-container').classList.add('hidden');
+            
+            // Generate Options
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+            
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-4 rounded-xl border-2 border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all font-medium text-slate-700 bg-white";
+                btn.innerHTML = `<span class="inline-block w-6 h-6 rounded-full border border-slate-300 text-center text-xs leading-5 mr-3">${String.fromCharCode(65 + idx)}</span> ${opt.text}`;
+                btn.onclick = () => selectOption(idx, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function showHint() {
+            document.getElementById('quiz-hint-container').classList.remove('hidden');
+            document.getElementById('btn-hint').classList.add('hidden');
+        }
+
+        function selectOption(selectedIndex, btnElement) {
+            if (hasAnsweredCurrent) return;
+            hasAnsweredCurrent = true;
+            
+            const q = quizData[currentQuizIndex];
+            const selectedOpt = q.options[selectedIndex];
+            
+            // Disable all buttons and show correct/incorrect states
+            const allButtons = document.getElementById('quiz-options').children;
+            for (let i = 0; i < allButtons.length; i++) {
+                allButtons[i].disabled = true;
+                allButtons[i].classList.remove('hover:border-indigo-300', 'hover:bg-indigo-50/30', 'cursor-pointer');
+                
+                if (q.options[i].isCorrect) {
+                    allButtons[i].classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-900');
+                    allButtons[i].classList.remove('border-slate-200');
+                } else if (i === selectedIndex) {
+                    allButtons[i].classList.add('border-rose-400', 'bg-rose-50', 'text-rose-900');
+                    allButtons[i].classList.remove('border-slate-200');
+                } else {
+                    allButtons[i].classList.add('opacity-50');
+                }
+            }
+            
+            // Update Score
+            if (selectedOpt.isCorrect) score++;
+            document.getElementById('quiz-score-text').textContent = `Score: ${score}`;
+            
+            // Show Feedback
+            const feedbackContainer = document.getElementById('quiz-feedback-container');
+            const feedbackBox = document.getElementById('quiz-feedback');
+            const rationale = document.getElementById('quiz-rationale');
+            
+            feedbackContainer.classList.remove('hidden');
+            
+            if (selectedOpt.isCorrect) {
+                feedbackBox.className = "p-4 rounded-lg mb-4 bg-emerald-100 text-emerald-800 border border-emerald-200";
+                rationale.innerHTML = `<strong>Correct!</strong> ${selectedOpt.rationale}`;
+            } else {
+                feedbackBox.className = "p-4 rounded-lg mb-4 bg-rose-100 text-rose-800 border border-rose-200";
+                rationale.innerHTML = `<strong>Incorrect.</strong> ${selectedOpt.rationale}`;
+            }
+            
+            // Change next button text on last question
+            if (currentQuizIndex === quizData.length - 1) {
+                document.getElementById('btn-next-question').textContent = "Finish Quiz";
+            } else {
+                document.getElementById('btn-next-question').innerHTML = "Next Question &rarr;";
+            }
+        }
+
+        function nextQuestion() {
+            currentQuizIndex++;
+            if (currentQuizIndex < quizData.length) {
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quiz-active').classList.add('hidden');
+            document.getElementById('quiz-results').classList.remove('hidden');
+            document.getElementById('final-score').textContent = score;
+        }
+
+    </script>
+</body>
+</html>
+
+
+

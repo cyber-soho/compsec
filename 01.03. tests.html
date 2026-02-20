@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foundations of Computer Security</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- KaTeX for rendering mathematical notation -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <style>
+        /* Custom styles for 3D card flip effect */
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1); }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col items-center p-4 sm:p-8">
+
+    <!-- Header -->
+    <header class="w-full max-w-3xl text-center mb-8">
+        <h1 class="text-3xl font-bold text-slate-900 flex items-center justify-center gap-3">
+            <i data-lucide="shield-check" class="w-8 h-8 text-blue-600"></i>
+            Foundations of Computer Security
+        </h1>
+        <p class="text-slate-500 mt-2">Study Flashcards & Knowledge Check Quiz</p>
+    </header>
+
+    <!-- Tabs Navigation -->
+    <div class="w-full max-w-3xl flex bg-slate-200 p-1 rounded-xl mb-8">
+        <button id="tab-flashcards" onclick="switchTab('flashcards')" class="flex-1 py-3 text-sm sm:text-base font-semibold rounded-lg bg-white shadow text-blue-600 transition-all flex justify-center items-center gap-2">
+            <i data-lucide="layers" class="w-5 h-5"></i> Flashcards
+        </button>
+        <button id="tab-quiz" onclick="switchTab('quiz')" class="flex-1 py-3 text-sm sm:text-base font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all flex justify-center items-center gap-2">
+            <i data-lucide="list-checks" class="w-5 h-5"></i> Practice Quiz
+        </button>
+    </div>
+
+    <!-- FLASHCARDS VIEW -->
+    <div id="view-flashcards" class="w-full max-w-3xl flex flex-col items-center w-full">
+        <div class="w-full perspective-1000 h-80 sm:h-96 cursor-pointer" onclick="flipCard()">
+            <div id="fc-card" class="relative w-full h-full transform-style-3d shadow-lg rounded-2xl">
+                
+                <!-- Front of Card -->
+                <div class="absolute inset-0 bg-white border-2 border-blue-100 rounded-2xl p-8 flex flex-col justify-center items-center text-center backface-hidden">
+                    <span class="absolute top-4 left-4 text-xs font-bold uppercase tracking-wider text-blue-400">Term / Question</span>
+                    <i data-lucide="help-circle" class="absolute top-4 right-4 w-6 h-6 text-slate-300"></i>
+                    <h2 id="fc-front-text" class="text-2xl sm:text-3xl font-bold text-slate-800 leading-tight"></h2>
+                    <p class="absolute bottom-4 text-sm text-slate-400">Click card to flip</p>
+                </div>
+
+                <!-- Back of Card -->
+                <div class="absolute inset-0 bg-blue-600 text-white border-2 border-blue-700 rounded-2xl p-8 flex flex-col justify-center items-center text-center backface-hidden rotate-y-180 overflow-y-auto hide-scrollbar">
+                    <span class="absolute top-4 left-4 text-xs font-bold uppercase tracking-wider text-blue-300">Answer / Definition</span>
+                    <i data-lucide="check-circle-2" class="absolute top-4 right-4 w-6 h-6 text-blue-300"></i>
+                    <p id="fc-back-text" class="text-xl sm:text-2xl font-medium leading-relaxed"></p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Flashcard Controls -->
+        <div class="flex items-center justify-between w-full mt-8 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+            <button onclick="prevCard()" class="p-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <i data-lucide="chevron-left" class="w-6 h-6"></i>
+            </button>
+            <div class="text-center">
+                <span id="fc-progress" class="font-bold text-lg text-slate-700"></span>
+            </div>
+            <button onclick="nextCard()" class="p-3 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <i data-lucide="chevron-right" class="w-6 h-6"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- QUIZ VIEW -->
+    <div id="view-quiz" class="hidden w-full max-w-3xl flex flex-col">
+        <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-slate-200">
+            
+            <div class="flex justify-between items-center mb-6">
+                <span id="quiz-progress" class="text-sm font-bold uppercase tracking-wider text-slate-500"></span>
+                <span id="quiz-score-badge" class="bg-blue-100 text-blue-800 text-sm font-bold px-3 py-1 rounded-full">Score: 0</span>
+            </div>
+
+            <!-- Question -->
+            <h2 id="quiz-question" class="text-xl sm:text-2xl font-bold text-slate-800 mb-6 leading-relaxed"></h2>
+
+            <!-- Hint -->
+            <div class="mb-6">
+                <button id="btn-show-hint" onclick="toggleHint()" class="flex items-center gap-2 text-sm text-amber-600 hover:text-amber-700 font-medium transition-colors">
+                    <i data-lucide="lightbulb" class="w-4 h-4"></i> Show Hint
+                </button>
+                <div id="quiz-hint-box" class="hidden mt-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
+                    <strong class="font-semibold">Hint:</strong> <span id="quiz-hint-text"></span>
+                </div>
+            </div>
+
+            <!-- Options -->
+            <div id="quiz-options" class="flex flex-col gap-3">
+                <!-- Options injected by JS -->
+            </div>
+
+            <!-- Feedback -->
+            <div id="quiz-feedback" class="hidden mt-6 p-4 rounded-xl border-2">
+                <div class="flex items-center gap-3 mb-2">
+                    <i id="quiz-feedback-icon" data-lucide="" class="w-6 h-6"></i>
+                    <h3 id="quiz-feedback-title" class="text-lg font-bold"></h3>
+                </div>
+                <p id="quiz-feedback-rationale" class="text-slate-700"></p>
+            </div>
+
+        </div>
+
+        <!-- Quiz Controls -->
+        <div class="flex items-center justify-between w-full mt-6">
+            <button id="quiz-prev-btn" onclick="prevQuiz()" class="px-6 py-3 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg font-semibold transition-colors flex items-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i> Previous
+            </button>
+            <button id="quiz-next-btn" onclick="nextQuiz()" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors flex items-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                Next <i data-lucide="arrow-right" class="w-5 h-5"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA ---
+        const flashcards = [
+            {"front": "Definition of Computer Security", "back": "The practice of protecting computer systems, networks, programs, and data from unauthorized access, damage, theft, or disruption."},
+            {"front": "Components of the CIA Triad", "back": "Confidentiality, Integrity, and Availability."},
+            {"front": "Goal of Confidentiality", "back": "Ensuring information is accessible only to authorized parties."},
+            {"front": "Primary tool for ensuring Confidentiality", "back": "Encryption."},
+            {"front": "Goal of Integrity", "back": "Ensuring information has not been tampered with or altered."},
+            {"front": "Primary tools for ensuring Integrity", "back": "Hashing, digital signatures, and checksums."},
+            {"front": "Goal of Availability", "back": "Ensuring systems and data are accessible when needed."},
+            {"front": "Definition of Vulnerability", "back": "A weakness that a threat can exploit (e.g., an unpatched web server)."},
+            {"front": "Definition of Zero-Day", "back": "An unknown vulnerability with no patch available (0 days to fix)."},
+            {"front": "Formula for Calculating Risk", "back": "Risk = Threat × Vulnerability × Impact"},
+            {"front": "Definition of Threat Actor", "back": "A person or group carrying out an attack (e.g., hacker, insider, nation-state)."},
+            {"front": "Advanced Persistent Threat (APT)", "back": "A nation-state or highly skilled group motivated by espionage or sabotage with very high resources."},
+            {"front": "Most common attack vector", "back": "Phishing / Social Engineering."},
+            {"front": "Principle of Least Privilege (PoLP)", "back": "Every user, program, and process gets only the minimum access necessary to perform its function."},
+            {"front": "Defense in Depth strategy", "back": "Using multiple overlapping layers of defense so that if one fails, others still protect the system."},
+            {"front": "Fail Securely principle", "back": "When a system fails, it should deny access by default rather than granting it."},
+            {"front": "Separation of Duties (SoD)", "back": "Requiring more than one person to complete critical tasks to prevent fraud or error."},
+            {"front": "Difference between Authentication and Authorization", "back": "Authentication verifies who you are (Identity); Authorization determines what you are allowed to do (Permissions)."},
+            {"front": "Three Factors of Authentication", "back": "Something you know (password), something you have (token), and something you are (biometric)."},
+            {"front": "Symmetric vs. Asymmetric Encryption", "back": "Symmetric uses the same key for encryption/decryption; Asymmetric uses a public/private key pair."},
+            {"front": "Purpose of Hashing", "back": "To verify integrity by creating a unique fixed-size output where any change to input changes the output."},
+            {"front": "Avalanche Effect in Hashing", "back": "A property where changing even one character in the input produces a completely different hash."},
+            {"front": "Five Functions of NIST CSF", "back": "Identify, Protect, Detect, Respond, Recover."},
+            {"front": "Cause of the 2017 Equifax Breach", "back": "Failure to apply a patch for a known Apache Struts vulnerability for two months."},
+            {"front": "Security by Design", "back": "Building security in from the start rather than bolting it on afterwards."}
+        ];
+
+        const quizData = [
+            {
+                "question": "A hospital's patient database is encrypted by ransomware, preventing doctors from accessing medical records when needed during emergency surgeries. Which pillar of the CIA Triad has been primarily violated?",
+                "hint": "Think about the 'A' in the triad, which guarantees that systems work when you need them to.",
+                "options": [
+                    { "text": "Confidentiality", "rationale": "Confidentiality deals with unauthorized access to view data, but here the issue is that authorized users cannot access it.", "isCorrect": false },
+                    { "text": "Integrity", "rationale": "Integrity involves tampering or altering data; while encryption changes the data, the primary operational failure here is the lack of access.", "isCorrect": false },
+                    { "text": "Availability", "rationale": "Availability ensures that systems and data are accessible to authorized users when needed, which is exactly what ransomware disrupts.", "isCorrect": true },
+                    { "text": "Authentication", "rationale": "Authentication verifies identity, which is not the primary mechanism failing in a ransomware denial-of-service scenario.", "isCorrect": false }
+                ]
+            },
+            {
+                "question": "A security team identifies a critical vulnerability in a legacy server ($V=10$) and knows that sophisticated hackers are targeting it ($T=10$). However, the server contains no data and is completely disconnected from the network ($I=0$). According to the Risk formula, what is the risk level?",
+                "hint": "Recall the mathematical property of multiplying any number by zero.",
+                "options": [
+                    { "text": "Critical (100)", "rationale": "High threat and vulnerability are concerning, but risk calculation requires all three factors to be non-zero.", "isCorrect": false },
+                    { "text": "Moderate (50)", "rationale": "Averages are not used in the standard risk formula; it is a product of the factors.", "isCorrect": false },
+                    { "text": "Zero (0)", "rationale": "Risk is the product of Threat × Vulnerability × Impact; if the Impact is zero, the total Risk is zero regardless of the other factors.", "isCorrect": true },
+                    { "text": "High (20)", "rationale": "This summation approach is incorrect; the risk formula is multiplicative.", "isCorrect": false }
+                ]
+            },
+            {
+                "question": "You swipe your ID badge to enter a building, and the system confirms your identity. Later, you try to open the door to the server room, but the lock remains engaged because you do not have permission to be there. Which security concept denied you entry?",
+                "hint": "This concept answers the question 'What are you allowed to do?' rather than 'Who are you?'",
+                "options": [
+                    { "text": "Authentication", "rationale": "Authentication already occurred when you swiped your badge and the system confirmed who you were.", "isCorrect": false },
+                    { "text": "Authorization", "rationale": "Authorization occurs after identity is proven and determines what specific resources or areas that identity is allowed to access.", "isCorrect": true },
+                    { "text": "Accounting", "rationale": "Accounting tracks what you did (logging), but it does not actively make the decision to deny entry based on permissions.", "isCorrect": false },
+                    { "text": "Identification", "rationale": "Identification is simply claiming an identity (like showing a badge), not the check of permissions.", "isCorrect": false }
+                ]
+            },
+            {
+                "question": "Which of the following email characteristics is a common 'Red Flag' indicating a potential phishing attack?",
+                "hint": "Scammers often try to make you act quickly before you have time to think or verify the request.",
+                "options": [
+                    { "text": "A sense of extreme urgency (e.g., 'Act in 24h or lose access')", "rationale": "Attackers often manufacture urgency to panic victims into bypassing critical thinking and security checks.", "isCorrect": true },
+                    { "text": "Addressing the user by their full specific name", "rationale": "Specific targeting is possible (spear phishing), but generic greetings are the more common 'red flag' for mass campaigns.", "isCorrect": false },
+                    { "text": "A URL where the hover text matches the displayed text", "rationale": "Matching URLs are a sign of legitimacy; a mismatch (hovering reveals a different link) is the red flag.", "isCorrect": false },
+                    { "text": "A request to update a project status report", "rationale": "Routine business requests are normal; requests for sensitive data like passwords or SSNs are the red flags.", "isCorrect": false }
+                ]
+            },
+            {
+                "question": "An administrator grants a temporary intern full administrative access to the entire network 'just in case' they need it, rather than specific access to just the email server they are fixing. Which security principle does this violate?",
+                "hint": "Think about the minimum amount of access required to do the job.",
+                "options": [
+                    { "text": "Defense in Depth", "rationale": "Defense in Depth refers to layering defenses, not necessarily the specific permissions granted to a user.", "isCorrect": false },
+                    { "text": "Security by Design", "rationale": "Security by Design refers to the development phase of systems, not typically daily administrative access decisions.", "isCorrect": false },
+                    { "text": "Principle of Least Privilege", "rationale": "Least Privilege dictates that users should only have the bare minimum access necessary to perform their specific job function.", "isCorrect": true },
+                    { "text": "Separation of Duties", "rationale": "Separation of Duties involves splitting a critical task between two people, which is different from limiting one person's scope of access.", "isCorrect": false }
+                ]
+            },
+            {
+                "question": "A company protects its data using a firewall, an Intrusion Detection System (IDS), antivirus software on endpoints, and encrypted databases. This multi-layered approach is an example of:",
+                "hint": "This concept is often compared to a medieval castle with a moat, walls, and guards.",
+                "options": [
+                    { "text": "Fail Securely", "rationale": "Fail Securely refers to how a system behaves when it crashes, not how it is layered during normal operation.", "isCorrect": false },
+                    { "text": "Defense in Depth", "rationale": "Defense in Depth is the strategy of using multiple overlapping layers of defense so that if one fails, others effectively block the threat.", "isCorrect": true },
+                    { "text": "Least Privilege", "rationale": "Least Privilege focuses on user permissions, not the architectural layering of security tools.", "isCorrect": false },
+                    { "text": "Obscurity", "rationale": "Security through obscurity relies on hiding how things work, whereas these are standard, visible security controls.", "isCorrect": false }
+                ]
+            },
+            {
+                "question": "You need to store user passwords in a database. Even if the database is stolen, the attackers should not be able to reverse the stored data to retrieve the original passwords. Which cryptographic tool is best suited for this?",
+                "hint": "This method works like a food blender: once you mix the ingredients, you can't turn them back into the original items.",
+                "options": [
+                    { "text": "Symmetric Encryption (AES)", "rationale": "Symmetric encryption is reversible if the key is stolen or cracked, making it less suitable for password storage than one-way methods.", "isCorrect": false },
+                    { "text": "Asymmetric Encryption (RSA)", "rationale": "Asymmetric encryption is designed for secure communication and key exchange, and it is reversible with the private key.", "isCorrect": false },
+                    { "text": "Hashing (SHA-256)", "rationale": "Hashing is a one-way function, meaning it cannot be reversed to reveal the original password, making it the standard for password storage.", "isCorrect": true },
+                    { "text": "Digital Signatures", "rationale": "Digital signatures are used to verify the sender and integrity of a message, not to hide data in a non-reversible format.", "isCorrect": false }
+                ]
+            },
+            {
+                "question": "A group of attackers defaces a government website to protest a controversial new environmental law. They do not steal money or sensitive data. How would this group be classified?",
+                "hint": "Combine the words 'Hack' and 'Activism'.",
+                "options": [
+                    { "text": "Cybercriminals", "rationale": "Cybercriminals are primarily motivated by financial gain, not social or political protest.", "isCorrect": false },
+                    { "text": "Script Kiddies", "rationale": "Script kiddies are motivated by curiosity or showing off and lack deep skill; while they might deface sites, the *political* motivation defines a different group.", "isCorrect": false },
+                    { "text": "Hacktivists", "rationale": "Hacktivists are defined by their motivation to promote a political or social cause through cyber attacks.", "isCorrect": true },
+                    { "text": "Nation-State / APT", "rationale": "Nation-State actors focus on espionage or strategic sabotage and typically try to remain undetected rather than making public protests.", "isCorrect": false }
+                ]
+            },
+            {
+                "question": "An electronic smart lock is designed so that if the power fails, the bolt remains in the locked position to prevent unauthorized entry, even though this might inconvenience people inside. This exemplifies which principle?",
+                "hint": "When things go wrong, the system should default to the safest possible state.",
+                "options": [
+                    { "text": "Fail Securely", "rationale": "Fail Securely ensures that when a system fails or crashes, it defaults to a state that denies access/preserves security rather than opening up.", "isCorrect": true },
+                    { "text": "Availability", "rationale": "If the lock remains locked and people cannot exit/enter, availability is technically reduced, not prioritized.", "isCorrect": false },
+                    { "text": "Integrity", "rationale": "Integrity refers to data accuracy, which is not the primary principle governing the physical state of a mechanical failure.", "isCorrect": false },
+                    { "text": "Separation of Duties", "rationale": "This principle involves dividing tasks between people, not the default state of hardware during a failure.", "isCorrect": false }
+                ]
+            },
+            {
+                "question": "The 2017 Equifax breach, which exposed the data of 147 million people, was primarily caused by failing to address which common security maintenance task?",
+                "hint": "This task involves updating software to fix known holes, often compared to fixing a broken lock on a door.",
+                "options": [
+                    { "text": "Training employees on phishing", "rationale": "While phishing is a common vector, the specific root cause of the Equifax breach was technical, not social engineering.", "isCorrect": false },
+                    { "text": "Applying software patches", "rationale": "The breach exploited a known vulnerability in Apache Struts for which a patch had been available for two months but was never applied.", "isCorrect": true },
+                    { "text": "Installing antivirus software", "rationale": "Antivirus might catch malware, but the root cause was an exploitable vulnerability in the web application framework itself.", "isCorrect": false },
+                    { "text": "Using Multi-Factor Authentication", "rationale": "Lack of MFA is a major issue, but the entry point was an unpatched server vulnerability.", "isCorrect": false }
+                ]
+            }
+        ];
+
+        // --- STATE ---
+        let currentFcIndex = 0;
+        let isFlipped = false;
+        
+        let currentQuizIndex = 0;
+        let quizAnswers = new Array(quizData.length).fill(null); // stores { selectedIdx, isCorrect }
+        
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            renderFlashcard();
+            renderQuiz();
+            updateMath();
+        });
+
+        function updateMath() {
+            if (window.renderMathInElement) {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ],
+                    throwOnError : false
+                });
+            }
+        }
+
+        // --- TAB LOGIC ---
+        function switchTab(tabId) {
+            const btnFc = document.getElementById('tab-flashcards');
+            const btnQuiz = document.getElementById('tab-quiz');
+            const viewFc = document.getElementById('view-flashcards');
+            const viewQuiz = document.getElementById('view-quiz');
+
+            if (tabId === 'flashcards') {
+                btnFc.className = "flex-1 py-3 text-sm sm:text-base font-semibold rounded-lg bg-white shadow text-blue-600 transition-all flex justify-center items-center gap-2";
+                btnQuiz.className = "flex-1 py-3 text-sm sm:text-base font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all flex justify-center items-center gap-2";
+                viewFc.classList.remove('hidden');
+                viewQuiz.classList.add('hidden');
+            } else {
+                btnQuiz.className = "flex-1 py-3 text-sm sm:text-base font-semibold rounded-lg bg-white shadow text-blue-600 transition-all flex justify-center items-center gap-2";
+                btnFc.className = "flex-1 py-3 text-sm sm:text-base font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all flex justify-center items-center gap-2";
+                viewFc.classList.add('hidden');
+                viewQuiz.classList.remove('hidden');
+            }
+            updateMath();
+        }
+
+        // --- FLASHCARD LOGIC ---
+        function renderFlashcard() {
+            const fc = flashcards[currentFcIndex];
+            document.getElementById('fc-front-text').innerHTML = fc.front;
+            document.getElementById('fc-back-text').innerHTML = fc.back;
+            document.getElementById('fc-progress').innerText = `${currentFcIndex + 1} / ${flashcards.length}`;
+            
+            // Ensure card is showing front
+            if (isFlipped) {
+                document.getElementById('fc-card').classList.remove('rotate-y-180');
+                isFlipped = false;
+            }
+            updateMath();
+        }
+
+        function flipCard() {
+            const card = document.getElementById('fc-card');
+            if (isFlipped) {
+                card.classList.remove('rotate-y-180');
+            } else {
+                card.classList.add('rotate-y-180');
+            }
+            isFlipped = !isFlipped;
+        }
+
+        function nextCard() {
+            currentFcIndex = (currentFcIndex + 1) % flashcards.length;
+            renderFlashcard();
+        }
+
+        function prevCard() {
+            currentFcIndex = (currentFcIndex - 1 + flashcards.length) % flashcards.length;
+            renderFlashcard();
+        }
+
+        // --- QUIZ LOGIC ---
+        function renderQuiz() {
+            const q = quizData[currentQuizIndex];
+            
+            // Header updates
+            document.getElementById('quiz-progress').innerText = `Question ${currentQuizIndex + 1} of ${quizData.length}`;
+            document.getElementById('quiz-question').innerHTML = q.question;
+            
+            // Hint updates
+            document.getElementById('quiz-hint-box').classList.add('hidden');
+            document.getElementById('quiz-hint-text').innerText = q.hint;
+
+            // Options updates
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+            
+            // Feedback box reset
+            const feedbackBox = document.getElementById('quiz-feedback');
+            feedbackBox.classList.add('hidden');
+            feedbackBox.className = 'hidden mt-6 p-4 rounded-xl border-2';
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left p-4 rounded-xl border-2 border-slate-200 hover:border-blue-400 hover:bg-blue-50 transition-all font-medium text-slate-700 flex justify-between items-center';
+                
+                const textSpan = document.createElement('span');
+                textSpan.innerHTML = opt.text;
+                btn.appendChild(textSpan);
+
+                // Check if already answered
+                const previousAnswer = quizAnswers[currentQuizIndex];
+                if (previousAnswer) {
+                    btn.disabled = true;
+                    btn.classList.remove('hover:border-blue-400', 'hover:bg-blue-50', 'cursor-pointer');
+                    
+                    if (idx === previousAnswer.selectedIdx) {
+                        if (opt.isCorrect) {
+                            btn.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-900');
+                        } else {
+                            btn.classList.add('border-rose-500', 'bg-rose-50', 'text-rose-900');
+                        }
+                    } else if (opt.isCorrect) {
+                        // Highlight the correct answer even if they missed it
+                        btn.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-900');
+                    } else {
+                        btn.classList.add('opacity-50'); // Dim other wrong options
+                    }
+                } else {
+                    btn.onclick = () => selectOption(idx);
+                }
+
+                optionsContainer.appendChild(btn);
+            });
+
+            // Show feedback if already answered
+            if (quizAnswers[currentQuizIndex]) {
+                showFeedback(quizAnswers[currentQuizIndex].selectedIdx);
+            }
+
+            // Buttons state
+            document.getElementById('quiz-prev-btn').disabled = currentQuizIndex === 0;
+            document.getElementById('quiz-next-btn').disabled = currentQuizIndex === quizData.length - 1;
+
+            updateMath();
+            lucide.createIcons();
+        }
+
+        function toggleHint() {
+            const hintBox = document.getElementById('quiz-hint-box');
+            hintBox.classList.toggle('hidden');
+        }
+
+        function selectOption(idx) {
+            const q = quizData[currentQuizIndex];
+            const isCorrect = q.options[idx].isCorrect;
+            
+            // Save answer
+            quizAnswers[currentQuizIndex] = { selectedIdx: idx, isCorrect: isCorrect };
+            
+            // Update score
+            const score = quizAnswers.filter(a => a && a.isCorrect).length;
+            document.getElementById('quiz-score-badge').innerText = `Score: ${score}`;
+
+            renderQuiz(); // Re-render to show colors and disable buttons
+        }
+
+        function showFeedback(selectedIdx) {
+            const q = quizData[currentQuizIndex];
+            const selectedOpt = q.options[selectedIdx];
+            
+            const feedbackBox = document.getElementById('quiz-feedback');
+            const title = document.getElementById('quiz-feedback-title');
+            const rationale = document.getElementById('quiz-feedback-rationale');
+            const icon = document.getElementById('quiz-feedback-icon');
+
+            feedbackBox.classList.remove('hidden');
+
+            if (selectedOpt.isCorrect) {
+                feedbackBox.classList.add('border-emerald-200', 'bg-emerald-50');
+                title.innerText = "Correct!";
+                title.classList.add('text-emerald-800');
+                icon.setAttribute('data-lucide', 'check-circle');
+                icon.classList.add('text-emerald-600');
+                rationale.innerText = selectedOpt.rationale;
+            } else {
+                feedbackBox.classList.add('border-rose-200', 'bg-rose-50');
+                title.innerText = "Not quite";
+                title.classList.add('text-rose-800');
+                icon.setAttribute('data-lucide', 'x-circle');
+                icon.classList.add('text-rose-600');
+                rationale.innerText = selectedOpt.rationale;
+            }
+        }
+
+        function nextQuiz() {
+            if (currentQuizIndex < quizData.length - 1) {
+                currentQuizIndex++;
+                renderQuiz();
+            }
+        }
+
+        function prevQuiz() {
+            if (currentQuizIndex > 0) {
+                currentQuizIndex--;
+                renderQuiz();
+            }
+        }
+    </script>
+</body>
+</html>
+
+
+
+

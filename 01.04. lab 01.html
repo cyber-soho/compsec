@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 1: Intro to Computer Security</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Chart Container Utilities */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px; /* Max width for larger screens */
+            height: 300px;
+            max-height: 300px;
+            margin: 0 auto;
+        }
+
+        /* Mock Terminal Cursor Animation */
+        .cursor-blink {
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Tab Transition */
+        .tab-content {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .tab-content.active {
+            display: block;
+            opacity: 1;
+        }
+        
+        .nav-item.active {
+            border-bottom: 2px solid #0f766e; /* teal-700 */
+            color: #0f766e;
+            font-weight: 600;
+        }
+    </style>
+    <!-- Chosen Palette: Warm Neutrals with Teal Accents. Background: Stone-50 (#fafaf9). Text: Slate-800. Accents: Teal-700. -->
+    <!-- Application Structure Plan: The app is designed as a "Security Analyst Onboarding Dashboard". 
+         1. 'Intel' Tab: Covers theory (Definitions, CIA, Principles) using interactive cards and a risk calculator.
+         2. 'Ops' Tab: Covers the Lab (VM setup, Terminal commands) using a mock terminal and comparison cards.
+         3. 'Analysis' Tab: Covers Research (CVEs, Frameworks) using accordion layouts and external link cards.
+         4. 'Debrief' Tab: Covers Reflection (Checklist, Time Budget) using a chart and interactive checklist.
+         This non-linear structure allows students to jump between "learning concepts" and "doing the lab" without losing context. -->
+    <!-- Visualization & Content Choices:
+         1. Time Budget -> Goal: Inform -> Donut Chart (Chart.js) -> Shows the 1-2-1 breakdown clearly.
+         2. Risk Formula -> Goal: Change -> Interactive Sliders -> Allows user to "feel" how variables affect risk.
+         3. CIA Triad -> Goal: Inform -> Interactive Cards -> Breaks down the acronym into digestible examples.
+         4. Lab Commands -> Goal: Inform/Simulate -> Mock Terminal (HTML/JS) -> Safe environment to see command outputs.
+         5. Principles -> Goal: Organize -> Grid Layout -> distinct cards for each principle.
+         -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="bg-stone-50 text-slate-800 font-sans leading-relaxed selection:bg-teal-100 selection:text-teal-900">
+
+    <!-- Navigation / Header -->
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">🛡️</span>
+                    <div>
+                        <h1 class="text-lg font-bold text-slate-900 leading-none">CS-101: Computer Security</h1>
+                        <p class="text-xs text-slate-500 mt-1">Week 1 · Module 1 · Continuous Project</p>
+                    </div>
+                </div>
+                <nav class="hidden md:flex space-x-8">
+                    <button onclick="switchTab('intel')" id="nav-intel" class="nav-item active px-1 pt-1 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors">
+                        1. Intel (Theory)
+                    </button>
+                    <button onclick="switchTab('ops')" id="nav-ops" class="nav-item px-1 pt-1 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors">
+                        2. Ops (Lab)
+                    </button>
+                    <button onclick="switchTab('analysis')" id="nav-analysis" class="nav-item px-1 pt-1 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors">
+                        3. Analysis (Research)
+                    </button>
+                    <button onclick="switchTab('debrief')" id="nav-debrief" class="nav-item px-1 pt-1 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors">
+                        4. Debrief (Reflection)
+                    </button>
+                </nav>
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden">
+                    <button onclick="toggleMobileMenu()" class="text-slate-500 hover:text-slate-700 focus:outline-none">
+                        ☰
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Nav Panel -->
+        <div id="mobile-menu" class="hidden md:hidden bg-stone-50 border-b border-stone-200 px-4 py-2">
+             <button onclick="switchTab('intel')" class="block w-full text-left py-2 text-sm font-medium text-slate-600">1. Intel (Theory)</button>
+             <button onclick="switchTab('ops')" class="block w-full text-left py-2 text-sm font-medium text-slate-600">2. Ops (Lab)</button>
+             <button onclick="switchTab('analysis')" class="block w-full text-left py-2 text-sm font-medium text-slate-600">3. Analysis (Research)</button>
+             <button onclick="switchTab('debrief')" class="block w-full text-left py-2 text-sm font-medium text-slate-600">4. Debrief (Reflection)</button>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Disclaimer Banner -->
+        <div class="bg-amber-50 border-l-4 border-amber-400 p-4 mb-8 rounded-r shadow-sm">
+            <div class="flex">
+                <div class="flex-shrink-0 text-2xl">⚠️</div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-amber-800">Legal & Ethical Disclaimer</h3>
+                    <div class="mt-1 text-sm text-amber-700">
+                        <p>Techniques are for <strong>educational purposes inside a controlled environment only</strong>. Never test systems you do not own. You are personally accountable.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 1: INTEL (THEORY) -->
+        <div id="intel" class="tab-content active space-y-12">
+            
+            <!-- Intro Section -->
+            <section>
+                <div class="text-center max-w-3xl mx-auto mb-10">
+                    <h2 class="text-3xl font-bold text-slate-900 tracking-tight sm:text-4xl mb-4">Core Concepts</h2>
+                    <p class="text-lg text-slate-600">
+                        Understanding the foundational definitions, the CIA triad, and the relationship between threats and risks is the first step in your security journey.
+                    </p>
+                </div>
+
+                <!-- Definition Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100 hover:border-teal-200 transition-colors">
+                        <h3 class="text-xl font-semibold text-teal-800 mb-2">What is Computer Security?</h3>
+                        <p class="text-slate-600">Also known as InfoSec, it is the discipline of protecting computing systems, networks, and data from unauthorized access, damage, or disruption. It sits at the intersection of technology, human behavior, policy, and law.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100 hover:border-teal-200 transition-colors">
+                        <h3 class="text-xl font-semibold text-teal-800 mb-2">The Researcher's Mindset</h3>
+                        <p class="text-slate-600">Active curiosity is required. Maintain a running vocabulary list of new terms. Use resources like NIST, ENISA, SANS, and OWASP to build your knowledge base.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CIA Triad Interactive -->
+            <section class="bg-white rounded-2xl p-8 shadow-sm border border-stone-200">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+                    <div class="lg:col-span-1">
+                        <h3 class="text-2xl font-bold text-slate-900 mb-4">The CIA Triad</h3>
+                        <p class="text-slate-600 mb-6">The foundational model for information security. Click the buttons below to explore each pillar.</p>
+                        <div class="space-y-3">
+                            <button onclick="updateCIA('c')" class="w-full text-left px-4 py-3 rounded-lg border border-stone-200 hover:bg-teal-50 hover:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all group">
+                                <span class="font-bold text-slate-800 group-hover:text-teal-900">C — Confidentiality</span>
+                            </button>
+                            <button onclick="updateCIA('i')" class="w-full text-left px-4 py-3 rounded-lg border border-stone-200 hover:bg-teal-50 hover:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all group">
+                                <span class="font-bold text-slate-800 group-hover:text-teal-900">I — Integrity</span>
+                            </button>
+                            <button onclick="updateCIA('a')" class="w-full text-left px-4 py-3 rounded-lg border border-stone-200 hover:bg-teal-50 hover:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all group">
+                                <span class="font-bold text-slate-800 group-hover:text-teal-900">A — Availability</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2 bg-stone-50 rounded-xl p-8 border border-stone-100 min-h-[250px] flex items-center justify-center">
+                        <div id="cia-display" class="text-center">
+                            <div class="text-5xl mb-4">🔒</div>
+                            <h4 class="text-xl font-bold text-slate-900 mb-2">Confidentiality</h4>
+                            <p class="text-slate-600 font-medium mb-4">"Only authorised parties can access the information."</p>
+                            <div class="bg-white inline-block px-4 py-2 rounded border border-red-100 text-red-700 text-sm">
+                                <strong>Breach Example:</strong> A hacker reads your private messages without your knowledge.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Risk Equation Interactive -->
+            <section class="bg-white rounded-2xl p-8 shadow-sm border border-stone-200">
+                <h3 class="text-2xl font-bold text-slate-900 mb-2">The Risk Formula</h3>
+                <p class="text-slate-600 mb-8">Risk is the combination of likelihood and impact. Use the sliders to see how Threat, Vulnerability, and Impact interact to create Risk.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div class="space-y-6">
+                        <div>
+                            <label class="flex justify-between text-sm font-medium text-slate-700 mb-1">
+                                <span>Threat (Likelihood of Event)</span>
+                                <span id="val-threat" class="text-teal-700 font-bold">5</span>
+                            </label>
+                            <input type="range" min="1" max="10" value="5" id="slider-threat" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-teal-600">
+                            <p class="text-xs text-slate-500 mt-1">Example: A ransomware gang targeting your sector.</p>
+                        </div>
+                        <div>
+                            <label class="flex justify-between text-sm font-medium text-slate-700 mb-1">
+                                <span>Vulnerability (System Weakness)</span>
+                                <span id="val-vuln" class="text-teal-700 font-bold">5</span>
+                            </label>
+                            <input type="range" min="1" max="10" value="5" id="slider-vuln" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-teal-600">
+                            <p class="text-xs text-slate-500 mt-1">Example: Unpatched web server.</p>
+                        </div>
+                        <div>
+                            <label class="flex justify-between text-sm font-medium text-slate-700 mb-1">
+                                <span>Impact (Consequence)</span>
+                                <span id="val-impact" class="text-teal-700 font-bold">5</span>
+                            </label>
+                            <input type="range" min="1" max="10" value="5" id="slider-impact" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-teal-600">
+                            <p class="text-xs text-slate-500 mt-1">Example: Loss of patient records.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col items-center justify-center bg-stone-900 text-white rounded-xl p-6 shadow-lg">
+                        <div class="text-sm uppercase tracking-widest text-stone-400 mb-2">Calculated Risk Score</div>
+                        <div id="risk-score" class="text-6xl font-black text-teal-400">125</div>
+                        <div class="mt-4 text-center text-sm text-stone-400">
+                            Formula: Risk ≈ T × V × I
+                        </div>
+                        <div id="risk-message" class="mt-4 px-3 py-1 rounded bg-yellow-600 text-white text-xs font-bold">MODERATE RISK</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Security Principles Grid -->
+            <section>
+                <h3 class="text-2xl font-bold text-slate-900 mb-6">Foundational Security Principles</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Cards populated via JS/HTML below -->
+                    <div class="p-5 border border-stone-200 rounded-lg bg-white hover:shadow-md transition-shadow">
+                        <div class="text-2xl mb-2">🔑</div>
+                        <h4 class="font-bold text-slate-800">Least Privilege</h4>
+                        <p class="text-sm text-slate-600 mt-2">Every user/process has only the minimum access rights needed.</p>
+                    </div>
+                    <div class="p-5 border border-stone-200 rounded-lg bg-white hover:shadow-md transition-shadow">
+                        <div class="text-2xl mb-2">🏰</div>
+                        <h4 class="font-bold text-slate-800">Defence in Depth</h4>
+                        <p class="text-sm text-slate-600 mt-2">Layer multiple independent controls (moat, walls, gates).</p>
+                    </div>
+                    <div class="p-5 border border-stone-200 rounded-lg bg-white hover:shadow-md transition-shadow">
+                        <div class="text-2xl mb-2">👥</div>
+                        <h4 class="font-bold text-slate-800">Separation of Duties</h4>
+                        <p class="text-sm text-slate-600 mt-2">No single person controls an entire critical operation.</p>
+                    </div>
+                    <div class="p-5 border border-stone-200 rounded-lg bg-white hover:shadow-md transition-shadow">
+                        <div class="text-2xl mb-2">🛑</div>
+                        <h4 class="font-bold text-slate-800">Fail-Safe Defaults</h4>
+                        <p class="text-sm text-slate-600 mt-2">Default to a secure state. Access is denied unless explicitly allowed.</p>
+                    </div>
+                    <div class="p-5 border border-stone-200 rounded-lg bg-white hover:shadow-md transition-shadow">
+                        <div class="text-2xl mb-2">⚙️</div>
+                        <h4 class="font-bold text-slate-800">Economy of Mechanism</h4>
+                        <p class="text-sm text-slate-600 mt-2">Keep security mechanisms simple. Complexity breeds failure.</p>
+                    </div>
+                    <div class="p-5 border border-stone-200 rounded-lg bg-white hover:shadow-md transition-shadow">
+                        <div class="text-2xl mb-2">📖</div>
+                        <h4 class="font-bold text-slate-800">Open Design</h4>
+                        <p class="text-sm text-slate-600 mt-2">Security should not rely on secrecy of the design (e.g., public algorithms).</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+
+        <!-- TAB 2: OPS (LAB) -->
+        <div id="ops" class="tab-content space-y-12">
+            
+            <section class="text-center max-w-3xl mx-auto mb-10">
+                <h2 class="text-3xl font-bold text-slate-900 tracking-tight sm:text-4xl mb-4">Lab Environment & Recon</h2>
+                <p class="text-lg text-slate-600">
+                    A safe, isolated environment is non-negotiable. In this section, you will review virtualization choices and simulate the initial attack surface scan of your own VM.
+                </p>
+            </section>
+
+            <!-- Virtualization Choices -->
+            <section class="bg-white rounded-2xl p-6 shadow-sm border border-stone-200">
+                <h3 class="text-xl font-bold text-slate-900 mb-6">Step 1: Choose Your Weapon (Hypervisor)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="border border-stone-200 rounded-xl p-5 hover:bg-stone-50">
+                        <div class="font-bold text-teal-800 text-lg mb-1">VirtualBox</div>
+                        <div class="text-xs text-stone-500 mb-3">by Oracle</div>
+                        <p class="text-sm text-slate-700">A widely used, free, and open-source option. Good for beginners.</p>
+                    </div>
+                    <div class="border border-stone-200 rounded-xl p-5 hover:bg-stone-50">
+                        <div class="font-bold text-teal-800 text-lg mb-1">VMware Player</div>
+                        <div class="text-xs text-stone-500 mb-3">Free for personal use</div>
+                        <p class="text-sm text-slate-700">Industry standard stability. Slightly more restrictive license.</p>
+                    </div>
+                    <div class="border border-stone-200 rounded-xl p-5 hover:bg-stone-50">
+                        <div class="font-bold text-teal-800 text-lg mb-1">QEMU/KVM</div>
+                        <div class="text-xs text-stone-500 mb-3">Linux Native</div>
+                        <p class="text-sm text-slate-700">Preferred for Linux hosts. Highly performant but steeper learning curve.</p>
+                    </div>
+                </div>
+                <div class="mt-8">
+                    <h3 class="text-xl font-bold text-slate-900 mb-4">Step 2: Choose Your OS</h3>
+                    <div class="flex flex-wrap gap-4">
+                        <span class="px-4 py-2 bg-slate-800 text-white rounded-full text-sm font-medium">Kali Linux (Standard)</span>
+                        <span class="px-4 py-2 bg-slate-700 text-white rounded-full text-sm font-medium">Parrot OS (Lightweight)</span>
+                        <span class="px-4 py-2 bg-slate-700 text-white rounded-full text-sm font-medium">BlackArch (Advanced)</span>
+                    </div>
+                    <p class="mt-4 text-sm text-amber-700 font-medium">⚠️ Always verify the checksum (SHA-256) of your download!</p>
+                </div>
+            </section>
+
+            <!-- Mock Terminal -->
+            <section class="bg-slate-900 rounded-2xl overflow-hidden shadow-xl border border-slate-700">
+                <div class="bg-slate-800 px-4 py-2 flex items-center gap-2 border-b border-slate-700">
+                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                    <div class="ml-2 text-xs text-slate-400 font-mono">student@lab-vm: ~</div>
+                </div>
+                <div class="p-6 font-mono text-sm min-h-[400px] text-slate-300">
+                    <div id="terminal-history" class="space-y-4">
+                        <div class="text-slate-500"># Welcome to the Lab Simulator.</div>
+                        <div class="text-slate-500"># Click the buttons below to run commands safely.</div>
+                    </div>
+                    <div class="mt-4 flex items-center">
+                        <span class="text-green-400 mr-2">student@lab-vm:$</span>
+                        <span id="terminal-input" class="text-white"></span>
+                        <span class="cursor-blink w-2 h-5 bg-slate-400 ml-1"></span>
+                    </div>
+                </div>
+                <div class="bg-slate-800 p-4 border-t border-slate-700 grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <button onclick="runCommand('ip')" class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded text-xs font-mono border border-slate-600 transition-colors text-left">
+                        1. ip addr show
+                        <div class="text-[10px] text-slate-400 mt-1">Show network interfaces</div>
+                    </button>
+                    <button onclick="runCommand('ss')" class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded text-xs font-mono border border-slate-600 transition-colors text-left">
+                        2. ss -tulnp
+                        <div class="text-[10px] text-slate-400 mt-1">Show active connections</div>
+                    </button>
+                    <button onclick="runCommand('ps')" class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded text-xs font-mono border border-slate-600 transition-colors text-left">
+                        3. ps aux
+                        <div class="text-[10px] text-slate-400 mt-1">List running processes</div>
+                    </button>
+                    <button onclick="runCommand('nmap')" class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded text-xs font-mono border border-slate-600 transition-colors text-left">
+                        4. nmap -sV 127.0.0.1
+                        <div class="text-[10px] text-slate-400 mt-1">Scan local ports</div>
+                    </button>
+                    <button onclick="clearTerminal()" class="px-3 py-2 bg-red-900/50 hover:bg-red-900 text-red-200 rounded text-xs font-mono border border-red-900/50 transition-colors col-span-2 md:col-span-4 mt-2">
+                        Clear Terminal
+                    </button>
+                </div>
+            </section>
+        </div>
+
+
+        <!-- TAB 3: ANALYSIS (RESEARCH) -->
+        <div id="analysis" class="tab-content space-y-12">
+            
+            <section class="text-center max-w-3xl mx-auto mb-10">
+                <h2 class="text-3xl font-bold text-slate-900 tracking-tight sm:text-4xl mb-4">Mapping the Landscape</h2>
+                <p class="text-lg text-slate-600">
+                    Security practitioners never stop reading. This section guides your research into vulnerabilities (CVEs), frameworks (NIST/ISO), and your personal threat model.
+                </p>
+            </section>
+
+            <!-- External Resources Grid -->
+            <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                <a href="https://csrc.nist.gov" target="_blank" class="block p-6 bg-white border border-stone-200 rounded-xl hover:shadow-lg hover:-translate-y-1 transition-all">
+                    <div class="text-teal-700 font-bold mb-2">NIST CSRC</div>
+                    <p class="text-xs text-slate-500">US Standards & Guidelines (SP 800-series).</p>
+                </a>
+                <a href="https://www.enisa.europa.eu" target="_blank" class="block p-6 bg-white border border-stone-200 rounded-xl hover:shadow-lg hover:-translate-y-1 transition-all">
+                    <div class="text-teal-700 font-bold mb-2">ENISA</div>
+                    <p class="text-xs text-slate-500">EU Agency. Annual Threat Landscape report.</p>
+                </a>
+                <a href="https://owasp.org" target="_blank" class="block p-6 bg-white border border-stone-200 rounded-xl hover:shadow-lg hover:-translate-y-1 transition-all">
+                    <div class="text-teal-700 font-bold mb-2">OWASP</div>
+                    <p class="text-xs text-slate-500">Web App Security. Famous "Top Ten" list.</p>
+                </a>
+                <a href="https://www.cve.org" target="_blank" class="block p-6 bg-white border border-stone-200 rounded-xl hover:shadow-lg hover:-translate-y-1 transition-all">
+                    <div class="text-teal-700 font-bold mb-2">CVE Database</div>
+                    <p class="text-xs text-slate-500">Catalog of known vulnerabilities.</p>
+                </a>
+            </section>
+
+            <!-- Frameworks & CVEs -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Frameworks -->
+                <div class="bg-white p-6 rounded-xl border border-stone-200">
+                    <h3 class="text-xl font-bold text-slate-900 mb-4">Frameworks Explained</h3>
+                    <div class="space-y-4">
+                        <div class="p-4 bg-stone-50 rounded-lg border-l-4 border-blue-500">
+                            <h4 class="font-bold text-slate-800">NIST Cybersecurity Framework (CSF)</h4>
+                            <p class="text-sm text-slate-600 mt-1">A voluntary guidance based on existing standards to help organizations manage cybersecurity risk. Used widely in US and industry.</p>
+                        </div>
+                        <div class="p-4 bg-stone-50 rounded-lg border-l-4 border-indigo-500">
+                            <h4 class="font-bold text-slate-800">ISO/IEC 27001</h4>
+                            <p class="text-sm text-slate-600 mt-1">International standard for Information Security Management Systems (ISMS). Focuses on process and certification.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Personal Threat Model Guide -->
+                <div class="bg-white p-6 rounded-xl border border-stone-200">
+                    <h3 class="text-xl font-bold text-slate-900 mb-4">Personal Threat Model</h3>
+                    <p class="text-sm text-slate-600 mb-4">Ask yourself these 5 questions to build your model:</p>
+                    <ol class="list-decimal list-inside space-y-3 text-sm text-slate-700">
+                        <li class="pl-2"><strong>Assets:</strong> What do you have that is valuable? (Data, Accounts)</li>
+                        <li class="pl-2"><strong>Threats:</strong> Who wants it and why?</li>
+                        <li class="pl-2"><strong>Paths:</strong> How would they get in? (Phishing, weak password)</li>
+                        <li class="pl-2"><strong>Controls:</strong> What stops them? (2FA, Encryption)</li>
+                        <li class="pl-2"><strong>Gaps:</strong> What are you missing?</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- TAB 4: DEBRIEF (REFLECTION) -->
+        <div id="debrief" class="tab-content space-y-12">
+            
+            <section class="text-center max-w-3xl mx-auto mb-10">
+                <h2 class="text-3xl font-bold text-slate-900 tracking-tight sm:text-4xl mb-4">Course Ponderation & Reflection</h2>
+                <p class="text-lg text-slate-600">
+                    Review the grading criteria, ensure your report meets the specifications, and prepare for next week.
+                </p>
+            </section>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                <!-- Time Budget Chart -->
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-stone-200 flex flex-col items-center">
+                    <h3 class="text-xl font-bold text-slate-900 mb-6 w-full text-center">Time Budget (≈ 6 Hours)</h3>
+                    <div class="chart-container">
+                        <canvas id="timeChart"></canvas>
+                    </div>
+                    <p class="text-center text-sm text-slate-500 mt-6">
+                        The course follows a 1-2-1 rhythm: Theory, Lab, Reflection.
+                    </p>
+                </div>
+
+                <!-- Grading Checklist -->
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-stone-200">
+                    <h3 class="text-xl font-bold text-slate-900 mb-6">Self-Assessment Checklist</h3>
+                    <div class="space-y-3">
+                        <label class="flex items-center space-x-3 p-3 hover:bg-stone-50 rounded-lg cursor-pointer transition-colors">
+                            <input type="checkbox" class="w-5 h-5 text-teal-600 rounded focus:ring-teal-500 border-gray-300">
+                            <span class="text-slate-700 text-sm">Max 3 Pages (A4) + References</span>
+                        </label>
+                        <label class="flex items-center space-x-3 p-3 hover:bg-stone-50 rounded-lg cursor-pointer transition-colors">
+                            <input type="checkbox" class="w-5 h-5 text-teal-600 rounded focus:ring-teal-500 border-gray-300">
+                            <span class="text-slate-700 text-sm">CIA Triad defined accurately</span>
+                        </label>
+                        <label class="flex items-center space-x-3 p-3 hover:bg-stone-50 rounded-lg cursor-pointer transition-colors">
+                            <input type="checkbox" class="w-5 h-5 text-teal-600 rounded focus:ring-teal-500 border-gray-300">
+                            <span class="text-slate-700 text-sm">VM Setup documented with screenshots</span>
+                        </label>
+                        <label class="flex items-center space-x-3 p-3 hover:bg-stone-50 rounded-lg cursor-pointer transition-colors">
+                            <input type="checkbox" class="w-5 h-5 text-teal-600 rounded focus:ring-teal-500 border-gray-300">
+                            <span class="text-slate-700 text-sm">Lab 2.2 commands run & interpreted</span>
+                        </label>
+                        <label class="flex items-center space-x-3 p-3 hover:bg-stone-50 rounded-lg cursor-pointer transition-colors">
+                            <input type="checkbox" class="w-5 h-5 text-teal-600 rounded focus:ring-teal-500 border-gray-300">
+                            <span class="text-slate-700 text-sm">2 Real CVEs included</span>
+                        </label>
+                        <label class="flex items-center space-x-3 p-3 hover:bg-stone-50 rounded-lg cursor-pointer transition-colors">
+                            <input type="checkbox" class="w-5 h-5 text-teal-600 rounded focus:ring-teal-500 border-gray-300">
+                            <span class="text-slate-700 text-sm">Personal Threat Model (Categories only)</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Future Look -->
+            <section class="bg-teal-900 text-white rounded-2xl p-8 shadow-lg">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-2">Looking Ahead: Week 2</h3>
+                        <p class="text-teal-100 max-w-xl">
+                            Threats, Attacks, and Defences. Get ready to explore Reconnaissance, the Cyber Kill Chain, and the MITRE ATT&CK framework.
+                        </p>
+                    </div>
+                    <div class="text-4xl">🔭</div>
+                </div>
+            </section>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-stone-200 mt-12 py-8">
+        <div class="max-w-7xl mx-auto px-4 text-center text-slate-400 text-sm">
+            <p>Introduction to Computer Security | Week 1</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Navigation Logic ---
+        function switchTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.remove('active');
+                setTimeout(() => {
+                   if(!el.classList.contains('active')) el.style.display = 'none'; 
+                }, 300); // Wait for transition
+            });
+            
+            // Deactivate nav items
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+            // Show selected tab (with slight delay for fade effect if needed, but keeping it snappy here)
+            const activeTab = document.getElementById(tabId);
+            activeTab.style.display = 'block';
+            // Force reflow
+            void activeTab.offsetWidth;
+            activeTab.classList.add('active');
+
+            // Activate nav item
+            const navItem = document.getElementById('nav-' + tabId);
+            if(navItem) navItem.classList.add('active');
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // --- CIA Interaction Logic ---
+        const ciaData = {
+            c: {
+                icon: "🔒",
+                title: "Confidentiality",
+                desc: "Only authorised parties can access the information.",
+                example: "A hacker reads your private messages without your knowledge.",
+                color: "text-red-700",
+                bg: "bg-red-50",
+                border: "border-red-100"
+            },
+            i: {
+                icon: "⚖️",
+                title: "Integrity",
+                desc: "Information is accurate and unaltered unless changed by an authorised process.",
+                example: "An attacker modifies a bank transaction amount in transit.",
+                color: "text-blue-700",
+                bg: "bg-blue-50",
+                border: "border-blue-100"
+            },
+            a: {
+                icon: "⏱️",
+                title: "Availability",
+                desc: "Authorised users can access systems and data when they need them.",
+                example: "A DDoS attack takes a hospital's patient records system offline.",
+                color: "text-green-700",
+                bg: "bg-green-50",
+                border: "border-green-100"
+            }
+        };
+
+        function updateCIA(key) {
+            const data = ciaData[key];
+            const display = document.getElementById('cia-display');
+            
+            // Fade out
+            display.style.opacity = '0';
+            
+            setTimeout(() => {
+                display.innerHTML = `
+                    <div class="text-5xl mb-4 transition-transform hover:scale-110 duration-200">${data.icon}</div>
+                    <h4 class="text-xl font-bold text-slate-900 mb-2">${data.title}</h4>
+                    <p class="text-slate-600 font-medium mb-4">"${data.desc}"</p>
+                    <div class="bg-white inline-block px-4 py-2 rounded border ${data.border} ${data.color} text-sm shadow-sm">
+                        <strong>Breach Example:</strong> ${data.example}
+                    </div>
+                `;
+                // Fade in
+                display.style.opacity = '1';
+                display.style.transition = 'opacity 0.3s ease';
+            }, 200);
+        }
+
+        // --- Risk Calculator Logic ---
+        const sliders = ['threat', 'vuln', 'impact'];
+        sliders.forEach(id => {
+            const slider = document.getElementById('slider-' + id);
+            slider.addEventListener('input', (e) => {
+                document.getElementById('val-' + id).innerText = e.target.value;
+                calculateRisk();
+            });
+        });
+
+        function calculateRisk() {
+            const t = parseInt(document.getElementById('slider-threat').value);
+            const v = parseInt(document.getElementById('slider-vuln').value);
+            const i = parseInt(document.getElementById('slider-impact').value);
+            
+            const risk = t * v * i;
+            const riskDisplay = document.getElementById('risk-score');
+            const msgDisplay = document.getElementById('risk-message');
+            
+            riskDisplay.innerText = risk;
+
+            let colorClass = "text-teal-400";
+            let msgText = "LOW RISK";
+            let msgColor = "bg-teal-600";
+
+            if (risk > 100) {
+                colorClass = "text-yellow-400";
+                msgText = "MODERATE RISK";
+                msgColor = "bg-yellow-600";
+            }
+            if (risk > 500) {
+                colorClass = "text-red-500";
+                msgText = "CRITICAL RISK";
+                msgColor = "bg-red-600";
+            }
+
+            riskDisplay.className = `text-6xl font-black ${colorClass}`;
+            msgDisplay.className = `mt-4 px-3 py-1 rounded ${msgColor} text-white text-xs font-bold`;
+            msgDisplay.innerText = msgText;
+        }
+
+        // --- Mock Terminal Logic ---
+        const commandOutputs = {
+            'ip': `
+<span class='text-blue-300'>$ ip addr show</span>
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN 
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP 
+    link/ether 08:00:27:12:34:56 brd ff:ff:ff:ff:ff:ff
+    inet 192.168.1.42/24 brd 192.168.1.255 scope global dynamic eth0`,
+            'ss': `
+<span class='text-blue-300'>$ ss -tulnp</span>
+Netid  State   Recv-Q  Send-Q   Local Address:Port   Peer Address:Port  Process
+udp    UNCONN  0       0        0.0.0.0:68           0.0.0.0:* users:(("dhclient",pid=542,fd=6))
+tcp    LISTEN  0       128      127.0.0.1:631        0.0.0.0:* users:(("cupsd",pid=488,fd=7))
+tcp    LISTEN  0       4096     0.0.0.0:22           0.0.0.0:* users:(("sshd",pid=602,fd=3))`,
+            'ps': `
+<span class='text-blue-300'>$ ps aux | head -n 5</span>
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root           1  0.0  0.1 168348 11664 ?        Ss   09:21   0:01 /sbin/init
+root           2  0.0  0.0      0     0 ?        S    09:21   0:00 [kthreadd]
+root         602  0.0  0.0  14420  6820 ?        Ss   09:21   0:00 sshd: /usr/sbin/sshd -D
+student     1337  0.1  0.4 220500 34120 pts/0    Ss   10:45   0:00 /bin/bash`,
+            'nmap': `
+<span class='text-blue-300'>$ nmap -sV 127.0.0.1</span>
+Starting Nmap 7.94 ( https://nmap.org ) at 2026-02-20 14:35 EST
+Nmap scan report for localhost (127.0.0.1)
+Host is up (0.000040s latency).
+Not shown: 997 closed tcp ports (reset)
+PORT    STATE SERVICE VERSION
+22/tcp  open  ssh     OpenSSH 8.9p1 Ubuntu 3 (Ubuntu Linux; protocol 2.0)
+80/tcp  open  http    Apache httpd 2.4.52 ((Ubuntu))
+631/tcp open  ipp     CUPS 2.4
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 6.34 seconds`
+        };
+
+        function runCommand(cmdKey) {
+            const history = document.getElementById('terminal-history');
+            const newOutput = document.createElement('div');
+            newOutput.className = "mt-4 text-slate-300 whitespace-pre-wrap font-mono text-sm border-l-2 border-slate-700 pl-3";
+            
+            // Typewriter effect simulation for the command
+            document.getElementById('terminal-input').innerText = cmdKey === 'nmap' ? 'nmap -sV 127.0.0.1' : (cmdKey === 'ip' ? 'ip addr show' : (cmdKey === 'ss' ? 'ss -tulnp' : 'ps aux'));
+            
+            setTimeout(() => {
+                document.getElementById('terminal-input').innerText = '';
+                newOutput.innerHTML = commandOutputs[cmdKey];
+                history.appendChild(newOutput);
+                // Scroll to bottom
+                const terminalContainer = document.querySelector('.bg-slate-900 > .p-6');
+                terminalContainer.scrollTop = terminalContainer.scrollHeight;
+            }, 400);
+        }
+
+        function clearTerminal() {
+            document.getElementById('terminal-history').innerHTML = '<div class="text-slate-500"># Terminal cleared. Ready for input.</div>';
+        }
+
+        // --- Chart.js Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const ctx = document.getElementById('timeChart').getContext('2d');
+            
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Phase 1: Theory (1.5h)', 'Phase 2: Lab (3h)', 'Phase 3: Reflection (1.5h)'],
+                    datasets: [{
+                        data: [1.5, 3, 1.5],
+                        backgroundColor: [
+                            '#ccfbf1', // teal-100
+                            '#0f766e', // teal-700
+                            '#5eead4'  // teal-300
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    family: 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+                                }
+                            }
+                        },
+                        title: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.label}: ~${context.raw} hours`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+
+            // Initialize Risk on Load
+            calculateRisk();
+        });
+    </script>
+</body>
+</html>
+
+

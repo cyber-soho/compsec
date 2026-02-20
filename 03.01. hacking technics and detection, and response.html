@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Security: Threats, Attacks & Defenses</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome for Icons (Unicode replacement fallback available if needed, but using CDN for web app icons is standard/allowed if no SVG tags directly used) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Chosen Palette: Warm Neutral (Stone) with Strategic Red/Blue Accents -->
+    <!-- Application Structure Plan: 
+         The app is divided into two main interactive hubs: "The Blue Team (Defense)" and "The Red Team (Offense)".
+         1. Hero Section: Sets the stage with the core conflict.
+         2. Defense Hub (Blue Team): Focuses on the Incident Response Lifecycle using an interactive Doughnut chart to navigate the 4 phases (NIST). It also includes a "Defense in Depth" explorer using a layered visual.
+         3. Offense Hub (Red Team): Focuses on Hacker Techniques. Uses a Line Chart to visualize the "Exploit Lifecycle" and "Time to Patch". Includes interactive modules for Social Engineering (Attack Chain) and Malware (Taxonomy Filter).
+         4. Case Study Vault: A tabbed interface to explore real-world impacts (Maersk, Twitter, Log4Shell).
+         5. Simulation Lab: A safe, interactive SQL Injection visualizer to demonstrate the concept.
+         6. Master Quiz: A quick review to test knowledge retention.
+         This structure transforms the linear report into a role-based exploration (Attacker vs. Defender), making the concepts more concrete.
+    -->
+    
+    <!-- Visualization & Content Choices:
+         1. NIST Lifecycle -> Chart.js Doughnut -> Goal: Show the cyclical nature of IR. Interaction: Click segments to reveal details about Preparation, Detection, etc.
+         2. Exploit Lifecycle -> Chart.js Line Chart -> Goal: Visualize the critical "Window of Exposure". Interaction: Hover points to see descriptions of Zero-day, Patch Tuesday, etc.
+         3. Defense Layers -> HTML/CSS Interactive Stack -> Goal: Visualize "Defense in Depth". Interaction: Hover layers to see tools (WAF, IDS, EDR).
+         4. Malware Taxonomy -> Filterable Grid -> Goal: Organize the many types of malware. Interaction: Filter by behavior (Replicates vs. Hides vs. Encrypts).
+         5. SQL Injection -> Interactive Input/Code Block -> Goal: Demonstrate the mechanics of the attack safely. Interaction: Type in a field, see the query string break in real-time.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used directly (FontAwesome used via class/CSS, or Chart.js canvas). NO Mermaid JS used. -->
+
+    <style>
+        /* Custom Chart Container Styling as per requirements */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px; /* max-w-xl/2xl equivalent */
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Custom utility for tab active state */
+        .tab-active {
+            border-bottom: 2px solid #ea580c; /* orange-600 */
+            color: #ea580c;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800 font-sans antialiased">
+
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-stone-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <span class="text-xl font-bold text-stone-900"><i class="fas fa-shield-alt mr-2 text-orange-600"></i>Cyber.SoHo</span>
+                    </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="#defense" class="border-transparent text-stone-500 hover:border-stone-300 hover:text-stone-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Defense & Response</a>
+                        <a href="#offense" class="border-transparent text-stone-500 hover:border-stone-300 hover:text-stone-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Hacker Techniques</a>
+                        <a href="#cases" class="border-transparent text-stone-500 hover:border-stone-300 hover:text-stone-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Case Studies</a>
+                        <a href="#simulation" class="border-transparent text-stone-500 hover:border-stone-300 hover:text-stone-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">SQLi Sim</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="relative bg-white overflow-hidden">
+        <div class="max-w-7xl mx-auto">
+            <div class="relative z-10 pb-8 bg-white sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32">
+                <main class="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
+                    <div class="sm:text-center lg:text-left">
+                        <h1 class="text-4xl tracking-tight font-extrabold text-stone-900 sm:text-5xl md:text-6xl">
+                            <span class="block xl:inline">Threats, Attacks</span>
+                            <span class="block text-orange-600 xl:inline">& Defenses</span>
+                        </h1>
+                        <p class="mt-3 text-base text-stone-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                            Introduction to Computer Security — Part II. Explore the constant battle between Detection, Containment, and the Techniques used by Hackers. From the Incident Response Lifecycle to the anatomy of a SQL Injection.
+                        </p>
+                        <div class="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
+                            <div class="rounded-md shadow">
+                                <a href="#defense" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 md:py-4 md:text-lg md:px-10 transition-colors">
+                                    Start Defense
+                                </a>
+                            </div>
+                            <div class="mt-3 sm:mt-0 sm:ml-3">
+                                <a href="#offense" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-orange-700 bg-orange-100 hover:bg-orange-200 md:py-4 md:text-lg md:px-10 transition-colors">
+                                    Explore Attacks
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+        <div class="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2 bg-stone-100 flex items-center justify-center">
+             <!-- Abstract representation using pure CSS/HTML instead of image -->
+             <div class="p-10 grid grid-cols-2 gap-4 opacity-50">
+                 <div class="w-32 h-32 bg-blue-200 rounded-lg flex items-center justify-center text-4xl text-blue-600"><i class="fas fa-shield-virus"></i></div>
+                 <div class="w-32 h-32 bg-red-200 rounded-lg flex items-center justify-center text-4xl text-red-600"><i class="fas fa-bug"></i></div>
+                 <div class="w-32 h-32 bg-amber-200 rounded-lg flex items-center justify-center text-4xl text-amber-600"><i class="fas fa-lock"></i></div>
+                 <div class="w-32 h-32 bg-stone-200 rounded-lg flex items-center justify-center text-4xl text-stone-600"><i class="fas fa-user-secret"></i></div>
+             </div>
+        </div>
+    </div>
+
+    <!-- SECTION 1: DEFENSE & RESPONSE -->
+    <section id="defense" class="py-16 bg-stone-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-extrabold text-stone-900">The Blue Team: Detection, Containment & Response</h2>
+                <p class="mt-4 text-xl text-stone-600 max-w-3xl mx-auto">
+                    Security is not a static wall; it is a lifecycle. This section breaks down the <strong>NIST Incident Response Lifecycle</strong> and the concept of <strong>Defense in Depth</strong>. Interact with the models below to understand how organizations prepare for, detect, and recover from attacks.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+                
+                <!-- NIST Lifecycle Interactive Chart -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-stone-800 mb-4 border-b pb-2">The Incident Response Lifecycle (NIST)</h3>
+                    <p class="text-sm text-stone-500 mb-6">Click on a phase in the chart to see details below.</p>
+                    
+                    <div class="chart-container mb-6">
+                        <canvas id="nistChart"></canvas>
+                    </div>
+
+                    <div id="nist-details" class="bg-stone-50 p-4 rounded-lg border border-stone-200 min-h-[160px]">
+                        <h4 class="font-bold text-lg text-orange-600 mb-2" id="nist-title">Phase 1: Preparation</h4>
+                        <p class="text-stone-700" id="nist-desc">This is the foundation. It involves writing the IR plan, training staff, setting up SIEM/EDR, and defining roles. Preparation allows for a calm, organized reaction when chaos strikes.</p>
+                        <div class="mt-3 flex flex-wrap gap-2" id="nist-tags">
+                            <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">IR Plan</span>
+                            <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Training</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Defense in Depth / Containment -->
+                <div class="space-y-8">
+                    <!-- Defense Layers -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-stone-800 mb-4 border-b pb-2">Defense in Depth (Detection Layers)</h3>
+                        <p class="text-sm text-stone-600 mb-4">No single tool catches everything. Hover over the layers to reveal the tools used at each level.</p>
+                        
+                        <div class="space-y-2" id="defense-layers">
+                            <!-- Layers generated by JS -->
+                        </div>
+                        <div id="layer-info" class="mt-4 p-3 bg-blue-50 border-l-4 border-blue-500 text-stone-700 text-sm hidden">
+                            <span class="font-bold block mb-1" id="layer-title">Title</span>
+                            <span id="layer-desc">Description</span>
+                        </div>
+                    </div>
+
+                    <!-- Containment Strategies -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-stone-800 mb-4 border-b pb-2">Containment: Stopping the Bleeding</h3>
+                        <div class="flex space-x-4 mb-4">
+                            <button onclick="switchContainment('short')" id="btn-short" class="flex-1 py-2 bg-stone-800 text-white rounded shadow transition-colors">Short-Term</button>
+                            <button onclick="switchContainment('long')" id="btn-long" class="flex-1 py-2 bg-stone-200 text-stone-700 rounded hover:bg-stone-300 transition-colors">Long-Term</button>
+                        </div>
+                        <div id="containment-content" class="bg-stone-50 p-4 rounded border border-stone-200">
+                            <!-- Content injected by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: OFFENSE (HACKER TECHNIQUES) -->
+    <section id="offense" class="py-16 bg-white border-t border-stone-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-extrabold text-stone-900">The Red Team: Hacker Techniques</h2>
+                <p class="mt-4 text-xl text-stone-600 max-w-3xl mx-auto">
+                    To defend, you must think like an attacker. This section explores the <strong>Exploit Lifecycle</strong>, the psychological manipulation of <strong>Social Engineering</strong>, and the taxonomy of <strong>Malware</strong>.
+                </p>
+            </div>
+
+            <!-- Exploit Lifecycle Chart -->
+            <div class="mb-16">
+                <h3 class="text-2xl font-bold text-stone-800 mb-4 px-4 border-l-4 border-red-600">The Exploitation Window</h3>
+                <p class="mb-6 text-stone-600 px-4">This chart visualizes the risk level over time for a vulnerability. The "Exploitation Window" is the critical gap between patch release and application.</p>
+                <div class="bg-stone-50 rounded-xl p-4 shadow-inner border border-stone-200">
+                    <div class="chart-container">
+                        <canvas id="exploitChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                
+                <!-- Reconnaissance Card -->
+                <div class="bg-stone-50 rounded-lg shadow p-6 border-t-4 border-purple-500">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-binoculars text-2xl text-purple-600 mr-3"></i>
+                        <h4 class="text-lg font-bold">Reconnaissance</h4>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="bg-white p-3 rounded shadow-sm">
+                            <h5 class="font-bold text-stone-800 text-sm">Passive Recon (Silent)</h5>
+                            <p class="text-xs text-stone-600 mt-1">LinkedIn, WHOIS, Google Dorking. Target has <strong>no idea</strong>.</p>
+                        </div>
+                        <div class="bg-white p-3 rounded shadow-sm">
+                            <h5 class="font-bold text-stone-800 text-sm">Active Recon (Noisy)</h5>
+                            <p class="text-xs text-stone-600 mt-1">Port scanning, Banner grabbing. Leaves traces in logs.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phishing & Social Engineering -->
+                <div class="bg-stone-50 rounded-lg shadow p-6 border-t-4 border-amber-500 md:col-span-2">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-user-friends text-2xl text-amber-600 mr-3"></i>
+                        <h4 class="text-lg font-bold">Social Engineering: Hacking the Human</h4>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h5 class="font-bold text-sm uppercase tracking-wide text-stone-500 mb-2">The Attack Chain</h5>
+                            <ol class="relative border-l border-stone-300 ml-3">                  
+                                <li class="mb-6 ml-4">
+                                    <div class="absolute w-3 h-3 bg-amber-500 rounded-full mt-1.5 -left-1.5 border border-white"></div>
+                                    <h3 class="text-sm font-semibold text-stone-900">1. Research</h3>
+                                    <p class="mb-1 text-xs font-normal text-stone-500">Study LinkedIn, news, corporate site.</p>
+                                </li>
+                                <li class="mb-6 ml-4">
+                                    <div class="absolute w-3 h-3 bg-amber-500 rounded-full mt-1.5 -left-1.5 border border-white"></div>
+                                    <h3 class="text-sm font-semibold text-stone-900">2. Build Pretext</h3>
+                                    <p class="mb-1 text-xs font-normal text-stone-500">Construct cover story with insider terms.</p>
+                                </li>
+                                <li class="mb-6 ml-4">
+                                    <div class="absolute w-3 h-3 bg-amber-500 rounded-full mt-1.5 -left-1.5 border border-white"></div>
+                                    <h3 class="text-sm font-semibold text-stone-900">3. Hook</h3>
+                                    <p class="mb-1 text-xs font-normal text-stone-500">Contact via email/phone. Uses Authority/Urgency.</p>
+                                </li>
+                                <li class="ml-4">
+                                    <div class="absolute w-3 h-3 bg-red-600 rounded-full mt-1.5 -left-1.5 border border-white"></div>
+                                    <h3 class="text-sm font-semibold text-stone-900">4. Extraction</h3>
+                                    <p class="text-xs font-normal text-stone-500">Stolen credentials used for access.</p>
+                                </li>
+                            </ol>
+                        </div>
+                        <div>
+                            <h5 class="font-bold text-sm uppercase tracking-wide text-stone-500 mb-2">Phishing Types</h5>
+                            <div class="space-y-2" id="phishing-list">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Malware Taxonomy Filter -->
+                <div class="bg-stone-50 rounded-lg shadow p-6 border-t-4 border-stone-800 md:col-span-3">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-4">
+                        <div class="flex items-center mb-2 md:mb-0">
+                            <i class="fas fa-biohazard text-2xl text-stone-800 mr-3"></i>
+                            <h4 class="text-lg font-bold">Malware Taxonomy</h4>
+                        </div>
+                        <div class="flex space-x-2 text-xs">
+                            <button onclick="filterMalware('all')" class="malware-filter px-3 py-1 bg-stone-800 text-white rounded-full">All</button>
+                            <button onclick="filterMalware('spread')" class="malware-filter px-3 py-1 bg-stone-200 text-stone-600 rounded-full hover:bg-stone-300">Spreads</button>
+                            <button onclick="filterMalware('stealth')" class="malware-filter px-3 py-1 bg-stone-200 text-stone-600 rounded-full hover:bg-stone-300">Stealthy</button>
+                            <button onclick="filterMalware('damage')" class="malware-filter px-3 py-1 bg-stone-200 text-stone-600 rounded-full hover:bg-stone-300">Destructive</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="malware-grid">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 3: CASE STUDIES -->
+    <section id="cases" class="py-16 bg-stone-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-extrabold text-stone-900 text-center mb-8">Real World Impact: Case Studies</h2>
+            
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="flex border-b border-stone-200 overflow-x-auto">
+                    <button onclick="showCase('maersk')" class="case-tab flex-1 py-4 px-6 text-center hover:bg-stone-50 focus:outline-none font-medium text-stone-500 tab-active" id="tab-maersk">Maersk (NotPetya)</button>
+                    <button onclick="showCase('twitter')" class="case-tab flex-1 py-4 px-6 text-center hover:bg-stone-50 focus:outline-none font-medium text-stone-500" id="tab-twitter">Twitter (2020)</button>
+                    <button onclick="showCase('log4j')" class="case-tab flex-1 py-4 px-6 text-center hover:bg-stone-50 focus:outline-none font-medium text-stone-500" id="tab-log4j">Log4Shell</button>
+                    <button onclick="showCase('mirai')" class="case-tab flex-1 py-4 px-6 text-center hover:bg-stone-50 focus:outline-none font-medium text-stone-500" id="tab-mirai">Mirai Botnet</button>
+                </div>
+                
+                <div class="p-8" id="case-content">
+                    <!-- Content Injected via JS -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 4: SQL INJECTION SIMULATION -->
+    <section id="simulation" class="py-16 bg-stone-800 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-3xl font-bold mb-4">SQL Injection (SQLi) Simulator</h2>
+                    <p class="text-stone-300 mb-6">
+                        SQLi happens when user input is treated as code. See how a simple text box can manipulate a database query.
+                    </p>
+                    <ul class="space-y-3 text-sm text-stone-400 mb-6">
+                        <li><i class="fas fa-check text-green-500 mr-2"></i> <strong>Normal:</strong> Input is just data.</li>
+                        <li><i class="fas fa-times text-red-500 mr-2"></i> <strong>Injection:</strong> Input contains special characters (<code>'</code>, <code>--</code>) that alter the SQL logic.</li>
+                        <li><i class="fas fa-shield-alt text-blue-500 mr-2"></i> <strong>Fix:</strong> Parameterised Queries.</li>
+                    </ul>
+                    <div class="bg-stone-900 p-4 rounded-lg border-l-4 border-red-500">
+                        <h4 class="font-bold text-red-400 mb-2">Try these inputs:</h4>
+                        <ul class="text-sm font-mono space-y-2">
+                            <li class="cursor-pointer hover:text-white" onclick="setInput('alice')">alice</li>
+                            <li class="cursor-pointer hover:text-white" onclick="setInput('admin\' --')">admin' --</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-white text-stone-900 rounded-lg p-6 shadow-2xl">
+                    <h3 class="font-bold text-lg mb-4 border-b pb-2">Vulnerable Login Form</h3>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-stone-700">Username</label>
+                        <input type="text" id="sqli-input" class="mt-1 block w-full border-stone-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 border p-2 bg-stone-50" placeholder="Enter username..." oninput="updateSQLSim()">
+                    </div>
+                    
+                    <div class="bg-stone-900 text-green-400 font-mono text-sm p-4 rounded mt-6 overflow-x-auto">
+                        <div class="text-stone-500 mb-1">// Backend Database Query</div>
+                        <div>SELECT * FROM users</div>
+                        <div>WHERE username = '<span id="query-val" class="text-white font-bold"></span>'</div>
+                        <div>AND password = '...';</div>
+                    </div>
+
+                    <div id="sqli-result" class="mt-4 p-3 rounded font-bold text-center text-sm bg-stone-100 text-stone-500">
+                        Result: Waiting for input...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer / Quiz Link -->
+    <footer class="bg-stone-900 text-stone-400 py-12 border-t border-stone-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h3 class="text-2xl font-bold text-white mb-6">Key Takeaways</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-left text-sm mb-12">
+                <div class="p-4 bg-stone-800 rounded">
+                    <strong class="text-white block mb-2">Defense in Depth</strong>
+                    Use layers. No single tool catches everything. WAF, IDS, EDR, and Humans must work together.
+                </div>
+                <div class="p-4 bg-stone-800 rounded">
+                    <strong class="text-white block mb-2">Patching is Survival</strong>
+                    The window between a CVE release and exploitation is measured in hours, not weeks.
+                </div>
+                <div class="p-4 bg-stone-800 rounded">
+                    <strong class="text-white block mb-2">Humans are Targets</strong>
+                    Phishing & Social Engineering exploit trust and urgency. Verify before you click.
+                </div>
+                <div class="p-4 bg-stone-800 rounded">
+                    <strong class="text-white block mb-2">Recovery Plan</strong>
+                    Containment stops the bleeding. Recovery depends entirely on clean, tested backups.
+                </div>
+            </div>
+            <p class="text-xs">&copy; Cyber.SoHo | Introduction to Computer Security</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- DATA OBJECTS ---
+
+        const nistData = {
+            prep: {
+                title: "Phase 1: Preparation",
+                desc: "The most important phase. Writing the IR plan, training staff, setting up SIEM/EDR, and defining roles. Preparation allows for a calm, organized reaction when chaos strikes.",
+                tags: ["IR Plan", "Training", "Roles", "SIEM Setup"]
+            },
+            detect: {
+                title: "Phase 2: Detection & Analysis",
+                desc: "Alerts fire. Analysts investigate to recognize something unusual is happening. Is it burning toast or a house fire? Events are classified by severity (Low/Medium/Critical).",
+                tags: ["IDS/IPS", "SIEM Alerts", "Triage", "Classification"]
+            },
+            contain: {
+                title: "Phase 3: Containment, Eradication & Recovery",
+                desc: "First, stop the bleeding (Containment) - isolate devices. Then, remove the malware (Eradication). Finally, restore from clean backups and patch vulnerabilities (Recovery).",
+                tags: ["Isolate", "Patch", "Restore Backups", "Rebuild"]
+            },
+            post: {
+                title: "Phase 4: Post-Incident Activity",
+                desc: "The 'Lessons Learned' phase. Review what happened, update the IR plan, and report to management. This feeds back into Preparation for the next cycle.",
+                tags: ["Lessons Learned", "Report", "Update Plan", "Feedback Loop"]
+            }
+        };
+
+        const defenseLayers = [
+            { layer: 7, name: "Application", tools: "WAF, RASP", desc: "Filters HTTP traffic, blocks attacks within the app." },
+            { layer: 4, name: "Network", tools: "IDS/IPS, NetFlow", desc: "Monitors traffic patterns, blocks suspicious packets." },
+            { layer: 3, name: "Host / OS", tools: "EDR, AV, Syslog", desc: "Monitors endpoints, captures telemetry, antivirus." },
+            { layer: 2, name: "Identity", tools: "MFA, UEBA", desc: "Verifies users, detects anomalous behavior." },
+            { layer: 1, name: "Human", tools: "SOC Analysts, IR Teams", desc: "The final line of defense. Investigation & Decision." }
+        ];
+
+        const containmentData = {
+            short: {
+                title: "Short-Term Containment (Minutes)",
+                items: [
+                    "Disconnect infected device from network",
+                    "Block suspicious IP at firewall",
+                    "Disable compromised user account",
+                    "Take forensic memory snapshot (before power-off)"
+                ],
+                analogy: "Hospital: Isolate TB patient immediately."
+            },
+            long: {
+                title: "Long-Term Containment (Planned)",
+                items: [
+                    "Rebuild server from known-good image",
+                    "Patch the exploited vulnerability",
+                    "Replace workarounds with permanent fixes",
+                    "Rotate all potentially exposed credentials"
+                ],
+                analogy: "Hospital: Test the whole ward, preserve evidence."
+            }
+        };
+
+        const malwareData = [
+            { name: "Virus", type: "spread", desc: "Attaches to legitimate files; spreads on execution." },
+            { name: "Worm", type: "spread", desc: "Self-replicating; spreads via network automatically." },
+            { name: "Trojan", type: "stealth", desc: "Disguised as legitimate software; opens backdoors." },
+            { name: "Ransomware", type: "damage", desc: "Encrypts files; demands payment for key." },
+            { name: "Spyware", type: "stealth", desc: "Silently monitors activity; steals data." },
+            { name: "Adware", type: "stealth", desc: "Displays unwanted ads; tracks browsing." },
+            { name: "Rootkit", type: "stealth", desc: "Hides deep in OS; hard to detect." },
+            { name: "Botnet", type: "spread", desc: "Network of infected devices controlled by C2." },
+            { name: "Cryptojacker", type: "damage", desc: "Hijacks CPU/GPU to mine crypto." }
+        ];
+
+        const caseStudies = {
+            maersk: {
+                title: "Maersk & NotPetya (2017)",
+                stats: "$300M Cost | 10 Days Downtime",
+                content: "NotPetya destroyed nearly every Windows machine (49,000 laptops). Maersk handles 20% of world shipping. They were saved by <strong>one server in Ghana</strong> that was offline during the attack due to a power outage. <br><br><strong>Lesson:</strong> Recovery depends entirely on backup quality and a tested recovery plan.",
+                icon: "fa-ship"
+            },
+            twitter: {
+                title: "Twitter Hack (2020)",
+                stats: "High Profile Account Takeover",
+                content: "Attackers called employees posing as IT staff (Vishing/Social Engineering). They convinced staff to hand over internal tool credentials. Accounts of Obama, Biden, Musk were compromised by a 17-year-old. <br><br><strong>Lesson:</strong> Humans are the weakest link. Authority + Urgency = Compliance.",
+                icon: "fa-dove"
+            },
+            log4j: {
+                title: "Log4Shell (CVE-2021-44228)",
+                stats: "CVSS 10.0 | Global Impact",
+                content: "A vulnerability in a Java logging library used by millions. Allowed Remote Code Execution (RCE) via a simple HTTP header. Active exploitation began within 12 hours of disclosure. <br><br><strong>Lesson:</strong> Patch management is survival. The window is hours, not weeks.",
+                icon: "fa-code"
+            },
+            mirai: {
+                title: "Mirai Botnet (2016)",
+                stats: "600k+ Devices | 1.2 Tbps Attack",
+                content: "Scanned the internet for IoT devices (cameras, routers) using default passwords. Launched massive DDoS attacks taking down Dyn DNS (Twitter, Netflix, Reddit). <br><br><strong>Lesson:</strong> IoT is a massive attack surface. Change default passwords immediately.",
+                icon: "fa-network-wired"
+            }
+        };
+
+        const phishingTypes = [
+            { name: "Phishing", desc: "Mass/Generic email attacks.", icon: "envelope" },
+            { name: "Spear Phishing", desc: "Targeted, personalized email.", icon: "bullseye" },
+            { name: "Whaling", desc: "Targets Senior Execs (CEO/CFO).", icon: "user-tie" },
+            { name: "Smishing", desc: "SMS/Text message attacks.", icon: "sms" },
+            { name: "Vishing", desc: "Voice/Phone call attacks.", icon: "phone" }
+        ];
+
+        // --- INIT CHARTS & UI ---
+
+        document.addEventListener("DOMContentLoaded", () => {
+            initNistChart();
+            renderDefenseLayers();
+            switchContainment('short');
+            initExploitChart();
+            renderPhishingList();
+            filterMalware('all');
+            showCase('maersk');
+            updateSQLSim(); // Init empty state
+        });
+
+        // --- CHART: NIST LIFECYCLE ---
+        let nistChartInstance = null;
+        function initNistChart() {
+            const ctx = document.getElementById('nistChart').getContext('2d');
+            nistChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Preparation', 'Detection & Analysis', 'Containment, Eradication, Recovery', 'Post-Incident'],
+                    datasets: [{
+                        data: [25, 25, 25, 25],
+                        backgroundColor: ['#3b82f6', '#f59e0b', '#ef4444', '#10b981'],
+                        hoverOffset: 10,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label;
+                                }
+                            }
+                        }
+                    },
+                    onClick: (evt, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            updateNistDetails(index);
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateNistDetails(index) {
+            const keys = ['prep', 'detect', 'contain', 'post'];
+            const key = keys[index];
+            const data = nistData[key];
+            
+            document.getElementById('nist-title').textContent = data.title;
+            document.getElementById('nist-desc').textContent = data.desc;
+            
+            // Color coding title based on index
+            const colors = ['text-blue-600', 'text-amber-600', 'text-red-600', 'text-emerald-600'];
+            document.getElementById('nist-title').className = `font-bold text-lg mb-2 ${colors[index]}`;
+
+            const tagContainer = document.getElementById('nist-tags');
+            tagContainer.innerHTML = '';
+            data.tags.forEach(tag => {
+                const span = document.createElement('span');
+                span.className = "px-2 py-1 bg-stone-200 text-stone-800 text-xs rounded-full";
+                span.textContent = tag;
+                tagContainer.appendChild(span);
+            });
+        }
+
+        // --- UI: DEFENSE LAYERS ---
+        function renderDefenseLayers() {
+            const container = document.getElementById('defense-layers');
+            defenseLayers.forEach((item, index) => {
+                const div = document.createElement('div');
+                // Calculate opacity for visual stacking effect (darker at bottom)
+                const lightness = 100 - (index * 10); 
+                div.className = "p-3 rounded border border-stone-200 cursor-pointer hover:bg-blue-50 transition-colors flex justify-between items-center group";
+                div.innerHTML = `
+                    <div class="flex items-center">
+                        <span class="w-6 h-6 rounded-full bg-stone-800 text-white flex items-center justify-center text-xs mr-3 font-mono">${item.layer}</span>
+                        <span class="font-semibold text-stone-700 group-hover:text-blue-700">${item.name}</span>
+                    </div>
+                    <div class="text-xs text-stone-400 group-hover:text-blue-600 font-mono">${item.tools}</div>
+                `;
+                div.addEventListener('mouseenter', () => {
+                    const info = document.getElementById('layer-info');
+                    info.classList.remove('hidden');
+                    document.getElementById('layer-title').textContent = `${item.name} Layer (${item.tools})`;
+                    document.getElementById('layer-desc').textContent = item.desc;
+                });
+                container.appendChild(div);
+            });
+        }
+
+        // --- UI: CONTAINMENT ---
+        function switchContainment(type) {
+            const data = containmentData[type];
+            const contentDiv = document.getElementById('containment-content');
+            const btnShort = document.getElementById('btn-short');
+            const btnLong = document.getElementById('btn-long');
+
+            // Toggle Button Styles
+            if (type === 'short') {
+                btnShort.className = "flex-1 py-2 bg-stone-800 text-white rounded shadow transition-colors";
+                btnLong.className = "flex-1 py-2 bg-stone-200 text-stone-700 rounded hover:bg-stone-300 transition-colors";
+            } else {
+                btnShort.className = "flex-1 py-2 bg-stone-200 text-stone-700 rounded hover:bg-stone-300 transition-colors";
+                btnLong.className = "flex-1 py-2 bg-stone-800 text-white rounded shadow transition-colors";
+            }
+
+            // Render Content
+            let html = `<h4 class="font-bold text-stone-800 mb-2">${data.title}</h4>`;
+            html += `<ul class="list-disc list-inside space-y-1 text-sm text-stone-600 mb-4">`;
+            data.items.forEach(i => html += `<li>${i}</li>`);
+            html += `</ul>`;
+            html += `<div class="bg-blue-50 p-2 rounded text-xs text-blue-800 italic border-l-2 border-blue-400"><strong>Analogy:</strong> ${data.analogy}</div>`;
+            contentDiv.innerHTML = html;
+        }
+
+        // --- CHART: EXPLOIT LIFECYCLE ---
+        function initExploitChart() {
+            const ctx = document.getElementById('exploitChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Bug Intro', 'Discovery (0-Day)', 'CVE Assigned', 'Patch Released', 'Attackers Weaponize', 'Orgs Patch'],
+                    datasets: [{
+                        label: 'Risk Level',
+                        data: [10, 80, 90, 95, 100, 20],
+                        borderColor: '#dc2626',
+                        backgroundColor: 'rgba(220, 38, 38, 0.1)',
+                        tension: 0.3,
+                        fill: true,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#dc2626',
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { 
+                            beginAtZero: true, 
+                            max: 110,
+                            title: { display: true, text: 'Risk Exposure' },
+                            ticks: { display: false }
+                        },
+                        x: {
+                            ticks: { maxRotation: 45, minRotation: 45, font: {size: 10} }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                footer: (items) => {
+                                    const index = items[0].dataIndex;
+                                    const notes = [
+                                        "Code flaw created. Hidden.",
+                                        "Found by researchers or hackers.",
+                                        "Vendor acknowledges. Public ID created.",
+                                        "The race begins.",
+                                        "Exploits sold/used. Critical Window.",
+                                        "Risk drops only after patching."
+                                    ];
+                                    return notes[index];
+                                }
+                            }
+                        },
+                        annotation: {
+                            // Note: Annotation plugin not loaded to keep simple, but Logic represented by data points
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- UI: PHISHING LIST ---
+        function renderPhishingList() {
+            const container = document.getElementById('phishing-list');
+            phishingTypes.forEach(p => {
+                container.innerHTML += `
+                    <div class="flex items-start p-2 hover:bg-stone-200 rounded transition-colors">
+                        <i class="fas fa-${p.icon} w-6 text-stone-500 mt-1"></i>
+                        <div>
+                            <span class="font-bold text-stone-800 text-sm block">${p.name}</span>
+                            <span class="text-xs text-stone-600">${p.desc}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // --- UI: MALWARE FILTER ---
+        function filterMalware(filter) {
+            const grid = document.getElementById('malware-grid');
+            grid.innerHTML = ''; // Clear
+            
+            // Update buttons
+            document.querySelectorAll('.malware-filter').forEach(btn => {
+                if(btn.textContent.toLowerCase() === filter || (filter === 'all' && btn.textContent === 'All')) {
+                    btn.className = "malware-filter px-3 py-1 bg-stone-800 text-white rounded-full";
+                } else if (btn.textContent.toLowerCase().includes(filter)) { // Handle match
+                     btn.className = "malware-filter px-3 py-1 bg-stone-800 text-white rounded-full";
+                } else {
+                    btn.className = "malware-filter px-3 py-1 bg-stone-200 text-stone-600 rounded-full hover:bg-stone-300";
+                }
+            });
+
+            const filtered = filter === 'all' ? malwareData : malwareData.filter(m => m.type === filter);
+
+            filtered.forEach(m => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-3 rounded shadow-sm border border-stone-100 hover:shadow-md transition-shadow";
+                // Color strip based on type
+                let color = "bg-stone-400";
+                if(m.type === 'spread') color = "bg-orange-400";
+                if(m.type === 'stealth') color = "bg-purple-400";
+                if(m.type === 'damage') color = "bg-red-500";
+
+                card.innerHTML = `
+                    <div class="h-1 w-8 ${color} rounded mb-2"></div>
+                    <h5 class="font-bold text-stone-800">${m.name}</h5>
+                    <p class="text-xs text-stone-500 mt-1 leading-relaxed">${m.desc}</p>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // --- UI: CASE STUDIES ---
+        function showCase(key) {
+            const data = caseStudies[key];
+            const content = document.getElementById('case-content');
+            
+            // Update tabs
+            document.querySelectorAll('.case-tab').forEach(t => t.classList.remove('tab-active'));
+            document.getElementById(`tab-${key}`).classList.add('tab-active');
+
+            // Animate content change
+            content.style.opacity = 0;
+            setTimeout(() => {
+                content.innerHTML = `
+                    <div class="flex flex-col md:flex-row items-start gap-6">
+                        <div class="bg-stone-100 p-6 rounded-full shrink-0 mx-auto md:mx-0">
+                            <i class="fas ${data.icon} text-4xl text-stone-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-stone-900">${data.title}</h3>
+                            <div class="text-sm font-bold text-orange-600 uppercase tracking-wide mb-4 mt-1">${data.stats}</div>
+                            <p class="text-stone-700 text-lg leading-relaxed">${data.content}</p>
+                        </div>
+                    </div>
+                `;
+                content.style.opacity = 1;
+            }, 150);
+        }
+
+        // --- UI: SQLi SIMULATOR ---
+        function setInput(val) {
+            document.getElementById('sqli-input').value = val;
+            updateSQLSim();
+        }
+
+        function updateSQLSim() {
+            const input = document.getElementById('sqli-input').value;
+            const queryVal = document.getElementById('query-val');
+            const resultBox = document.getElementById('sqli-result');
+
+            queryVal.textContent = input;
+
+            // Simple Logic for simulation
+            if (input === '') {
+                resultBox.className = "mt-4 p-3 rounded font-bold text-center text-sm bg-stone-100 text-stone-500";
+                resultBox.innerHTML = "Waiting for input...";
+            } else if (input.includes("'") && input.includes("--")) {
+                // Successful Injection Simulation
+                queryVal.className = "text-red-400 font-bold";
+                resultBox.className = "mt-4 p-3 rounded font-bold text-center text-sm bg-red-100 text-red-800 border border-red-200";
+                resultBox.innerHTML = `<i class="fas fa-exclamation-triangle mr-2"></i> INJECTION SUCCESSFUL: Password check bypassed!`;
+            } else if (input.toLowerCase() === 'alice') {
+                queryVal.className = "text-green-400 font-bold";
+                resultBox.className = "mt-4 p-3 rounded font-bold text-center text-sm bg-green-100 text-green-800 border border-green-200";
+                resultBox.innerHTML = `<i class="fas fa-check-circle mr-2"></i> Valid User Found. Password checked normally.`;
+            } else {
+                queryVal.className = "text-white font-bold";
+                resultBox.className = "mt-4 p-3 rounded font-bold text-center text-sm bg-stone-100 text-stone-500";
+                resultBox.innerHTML = `Query format valid. No injection detected.`;
+            }
+        }
+    </script>
+</body>
+</html>
+
+
+

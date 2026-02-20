@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Models & Policy Issues | Interactive Module</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chosen Palette: Warm Neutrals & Academic Tones -->
+    <!-- Background: #FDFBF7 (Warm Off-white) -->
+    <!-- Text: #1F2937 (Gray-800) -->
+    <!-- Accents: #D97706 (Amber), #059669 (Emerald), #2563EB (Blue) -->
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF7;
+            color: #1F2937;
+        }
+        
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Flashcard Styles */
+        .flip-card {
+            background-color: transparent;
+            perspective: 1000px;
+            cursor: pointer;
+            height: 200px; /* Fixed height for uniformity */
+        }
+
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .flip-card.flipped .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .flip-card-front {
+            background-color: #ffffff;
+            color: #1F2937;
+            border: 1px solid #E5E7EB;
+        }
+
+        .flip-card-back {
+            background-color: #4B5563; /* Gray-600 */
+            color: white;
+            transform: rotateY(180deg);
+            overflow-y: auto; /* Allow scroll for long text */
+        }
+
+        .nav-active {
+            border-bottom: 2px solid #D97706;
+            color: #D97706;
+            font-weight: 600;
+        }
+
+        /* Quiz Styles */
+        .option-btn {
+            transition: all 0.2s;
+        }
+        .option-btn:hover {
+            background-color: #F3F4F6;
+        }
+        .correct-answer {
+            background-color: #D1FAE5 !important; /* Emerald-100 */
+            border-color: #059669 !important; /* Emerald-600 */
+            color: #065F46 !important;
+        }
+        .wrong-answer {
+            background-color: #FEE2E2 !important; /* Red-100 */
+            border-color: #DC2626 !important; /* Red-600 */
+            color: #991B1B !important;
+        }
+        .disabled-option {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header / Navigation -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-xl font-bold tracking-tight text-gray-900">🛡️ Cyber.SoHo <span class="text-gray-500 font-normal text-sm ml-2">| Week 2 Lesson 2</span></span>
+                </div>
+                <div class="hidden sm:flex space-x-8 items-center" id="nav-menu">
+                    <button onclick="scrollToSection('foundations')" class="nav-btn text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium">Foundations</button>
+                    <button onclick="scrollToSection('models')" class="nav-btn text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium">Security Models</button>
+                    <button onclick="scrollToSection('access-control')" class="nav-btn text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium">Access Control</button>
+                    <button onclick="scrollToSection('real-world')" class="nav-btn text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium">Real World</button>
+                    <button onclick="scrollToSection('knowledge-check')" class="nav-btn bg-gray-900 text-white hover:bg-gray-800 px-4 py-2 rounded-md text-sm font-medium transition">Quiz & Flashcards</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="bg-[#F3F4F6] py-12 border-b border-gray-200">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl font-extrabold text-gray-900 sm:text-5xl mb-4">Security Models & Policy Issues</h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">From the CIA Triad to Zero Trust: Mastering the rules and blueprints that protect modern systems.</p>
+            <div class="mt-8 flex justify-center gap-4 text-sm text-gray-500">
+                <span class="flex items-center">⏱️ Duration: 1 Hour</span>
+                <span class="flex items-center">🎓 Level: Undergraduate</span>
+                <span class="flex items-center">📅 Date: Feb 2026</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-24">
+
+        <!-- SECTION 1: FOUNDATIONS -->
+        <section id="foundations" class="scroll-mt-24">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-gray-900">1. Foundations of Policy</h2>
+                <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
+                    Before we build defenses, we must define the rules. A <strong>Policy</strong> is the "what", and a <strong>Model</strong> is the "how".
+                </p>
+            </div>
+
+            <!-- Policy vs Model Split -->
+            <div class="grid md:grid-cols-2 gap-8 mb-12">
+                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm card-hover">
+                    <div class="flex items-center mb-4">
+                        <span class="text-3xl mr-3">📜</span>
+                        <h3 class="text-xl font-bold text-gray-900">Security Policy</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">The written <strong>rulebook</strong>. It defines who can access what resources and under what conditions.</p>
+                    <ul class="text-sm text-gray-500 space-y-2 bg-gray-50 p-4 rounded-lg">
+                        <li>• "Building Code" analogy</li>
+                        <li>• Written in natural language</li>
+                        <li>• Defines the <strong>GOAL</strong></li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm card-hover">
+                    <div class="flex items-center mb-4">
+                        <span class="text-3xl mr-3">📐</span>
+                        <h3 class="text-xl font-bold text-gray-900">Security Model</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">The formal <strong>blueprint</strong>. A mathematical representation used to implement the policy.</p>
+                    <ul class="text-sm text-gray-500 space-y-2 bg-gray-50 p-4 rounded-lg">
+                        <li>• "Architect's Blueprint" analogy</li>
+                        <li>• Defined with formal logic/math</li>
+                        <li>• Specifies the <strong>METHOD</strong></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Interactive CIA Triad -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="p-6 border-b border-gray-100">
+                    <h3 class="text-lg font-bold text-gray-900">The CIA Triad</h3>
+                    <p class="text-sm text-gray-500">Click a pillar to explore its definition and examples.</p>
+                </div>
+                <div class="grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100">
+                    <!-- C -->
+                    <button onclick="selectCIA('confidentiality')" class="p-8 hover:bg-amber-50 transition text-left group focus:outline-none w-full">
+                        <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-lg flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition">👁️</div>
+                        <h4 class="text-xl font-bold text-gray-900 mb-2">Confidentiality</h4>
+                        <p class="text-sm text-gray-500">Can only the right people <strong>see</strong> the data?</p>
+                        <div id="cia-c-detail" class="hidden mt-4 pt-4 border-t border-amber-200 text-sm text-amber-800">
+                            <strong>Example:</strong> Encrypted medical records.<br>
+                            <strong>Attack:</strong> Data Breach / Leak.
+                        </div>
+                    </button>
+                    <!-- I -->
+                    <button onclick="selectCIA('integrity')" class="p-8 hover:bg-emerald-50 transition text-left group focus:outline-none w-full">
+                        <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition">🛡️</div>
+                        <h4 class="text-xl font-bold text-gray-900 mb-2">Integrity</h4>
+                        <p class="text-sm text-gray-500">Can only the right people <strong>change</strong> the data?</p>
+                        <div id="cia-i-detail" class="hidden mt-4 pt-4 border-t border-emerald-200 text-sm text-emerald-800">
+                            <strong>Example:</strong> Tamper-proof audit logs.<br>
+                            <strong>Attack:</strong> Unauthorized Modification.
+                        </div>
+                    </button>
+                    <!-- A -->
+                    <button onclick="selectCIA('availability')" class="p-8 hover:bg-blue-50 transition text-left group focus:outline-none w-full">
+                        <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition">⚡</div>
+                        <h4 class="text-xl font-bold text-gray-900 mb-2">Availability</h4>
+                        <p class="text-sm text-gray-500">Can authorized people <strong>reach</strong> the data?</p>
+                        <div id="cia-a-detail" class="hidden mt-4 pt-4 border-t border-blue-200 text-sm text-blue-800">
+                            <strong>Example:</strong> Redundant servers.<br>
+                            <strong>Attack:</strong> Denial of Service (DoS).
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: SECURITY MODELS SIMULATOR -->
+        <section id="models" class="scroll-mt-24">
+            <div class="mb-8">
+                <span class="text-amber-600 font-bold tracking-wider uppercase text-xs">The Blueprint</span>
+                <h2 class="text-3xl font-bold text-gray-900 mt-2">2. Security Models Simulator</h2>
+                <p class="mt-4 text-gray-600">
+                    Assume a role and test the rules yourself.
+                </p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+                <!-- Simulator Tabs -->
+                <div class="flex border-b border-gray-200 overflow-x-auto">
+                    <button onclick="switchSimulator('blp')" id="tab-blp" class="flex-1 py-4 px-6 text-sm font-medium text-center hover:bg-gray-50 border-b-2 border-amber-500 text-amber-700 bg-amber-50 transition whitespace-nowrap">Bell-LaPadula</button>
+                    <button onclick="switchSimulator('biba')" id="tab-biba" class="flex-1 py-4 px-6 text-sm font-medium text-center hover:bg-gray-50 border-b-2 border-transparent text-gray-500 transition whitespace-nowrap">Biba</button>
+                    <button onclick="switchSimulator('cw')" id="tab-cw" class="flex-1 py-4 px-6 text-sm font-medium text-center hover:bg-gray-50 border-b-2 border-transparent text-gray-500 transition whitespace-nowrap">Clark-Wilson</button>
+                    <button onclick="switchSimulator('bn')" id="tab-bn" class="flex-1 py-4 px-6 text-sm font-medium text-center hover:bg-gray-50 border-b-2 border-transparent text-gray-500 transition whitespace-nowrap">Chinese Wall</button>
+                </div>
+
+                <!-- Content Area -->
+                <div class="p-8 min-h-[400px]">
+                    <!-- BLP SIMULATOR -->
+                    <div id="sim-blp" class="simulator-content block">
+                        <div class="grid lg:grid-cols-3 gap-8">
+                            <div class="lg:col-span-1 space-y-6">
+                                <div class="bg-amber-50 p-4 rounded-lg border border-amber-100">
+                                    <h4 class="font-bold text-amber-900 mb-2">📜 The Rules (DoD)</h4>
+                                    <ul class="text-sm text-amber-800 space-y-2">
+                                        <li><strong>No Read Up:</strong> You can't read above your level.</li>
+                                        <li><strong>No Write Down:</strong> You can't leak secrets to lower levels.</li>
+                                        <li><em>Protects Confidentiality only.</em></li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Select Your Clearance Level:</label>
+                                    <select id="blp-user-level" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 p-2 border bg-white" onchange="resetBLP()">
+                                        <option value="4">Top Secret (TS)</option>
+                                        <option value="3">Secret (S)</option>
+                                        <option value="2">Confidential (C)</option>
+                                        <option value="1">Unclassified (U)</option>
+                                    </select>
+                                </div>
+                                <div id="blp-feedback" class="p-4 rounded-lg bg-gray-100 text-gray-600 text-sm min-h-[80px]">
+                                    Select a file action to see the result...
+                                </div>
+                            </div>
+
+                            <div class="lg:col-span-2">
+                                <h4 class="font-bold text-gray-900 mb-4">🗄️ Classified Files Database</h4>
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-between p-3 bg-red-50 border border-red-100 rounded-md">
+                                        <div class="flex items-center">
+                                            <span class="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded mr-3">TOP SECRET</span>
+                                            <span class="text-sm font-medium text-gray-900">Nuclear Launch Codes</span>
+                                        </div>
+                                        <div class="space-x-2">
+                                            <button onclick="testBLP('read', 4)" class="px-3 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50">Read</button>
+                                            <button onclick="testBLP('write', 4)" class="px-3 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50">Write</button>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between p-3 bg-orange-50 border border-orange-100 rounded-md">
+                                        <div class="flex items-center">
+                                            <span class="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded mr-3">SECRET</span>
+                                            <span class="text-sm font-medium text-gray-900">Troop Movements</span>
+                                        </div>
+                                        <div class="space-x-2">
+                                            <button onclick="testBLP('read', 3)" class="px-3 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50">Read</button>
+                                            <button onclick="testBLP('write', 3)" class="px-3 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50">Write</button>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between p-3 bg-yellow-50 border border-yellow-100 rounded-md">
+                                        <div class="flex items-center">
+                                            <span class="bg-yellow-400 text-white text-xs font-bold px-2 py-1 rounded mr-3">CONFIDENTIAL</span>
+                                            <span class="text-sm font-medium text-gray-900">Training Manuals</span>
+                                        </div>
+                                        <div class="space-x-2">
+                                            <button onclick="testBLP('read', 2)" class="px-3 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50">Read</button>
+                                            <button onclick="testBLP('write', 2)" class="px-3 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50">Write</button>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-md">
+                                        <div class="flex items-center">
+                                            <span class="bg-gray-400 text-white text-xs font-bold px-2 py-1 rounded mr-3">UNCLASSIFIED</span>
+                                            <span class="text-sm font-medium text-gray-900">Lunch Menu</span>
+                                        </div>
+                                        <div class="space-x-2">
+                                            <button onclick="testBLP('read', 1)" class="px-3 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50">Read</button>
+                                            <button onclick="testBLP('write', 1)" class="px-3 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50">Write</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BIBA SIMULATOR -->
+                    <div id="sim-biba" class="simulator-content hidden">
+                         <div class="grid lg:grid-cols-3 gap-8">
+                            <div class="lg:col-span-1 space-y-6">
+                                <div class="bg-emerald-50 p-4 rounded-lg border border-emerald-100">
+                                    <h4 class="font-bold text-emerald-900 mb-2">📜 The Rules (Integrity)</h4>
+                                    <ul class="text-sm text-emerald-800 space-y-2">
+                                        <li><strong>No Read Down:</strong> Don't trust info from below.</li>
+                                        <li><strong>No Write Up:</strong> Don't corrupt high-quality data.</li>
+                                        <li><em>Protects Integrity only.</em></li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Select Integrity Level:</label>
+                                    <select id="biba-user-level" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border bg-white" onchange="resetBiba()">
+                                        <option value="3">High Integrity (Chef)</option>
+                                        <option value="2">Medium Integrity (Waiter)</option>
+                                        <option value="1">Low Integrity (Customer)</option>
+                                    </select>
+                                </div>
+                                <div id="biba-feedback" class="p-4 rounded-lg bg-gray-100 text-gray-600 text-sm min-h-[80px]">
+                                    Select an action...
+                                </div>
+                            </div>
+                            <div class="lg:col-span-2">
+                                <h4 class="font-bold text-gray-900 mb-4">🍽️ Restaurant Kitchen Systems</h4>
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-between p-3 bg-emerald-50 border border-emerald-100 rounded-md">
+                                        <span class="text-sm font-medium text-gray-900">Top Secret Recipe (High Integrity)</span>
+                                        <div class="space-x-2">
+                                            <button onclick="testBiba('read', 3)" class="px-3 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50">Read</button>
+                                            <button onclick="testBiba('write', 3)" class="px-3 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50">Write</button>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-md">
+                                        <span class="text-sm font-medium text-gray-900">Table Order (Medium Integrity)</span>
+                                        <div class="space-x-2">
+                                            <button onclick="testBiba('read', 2)" class="px-3 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50">Read</button>
+                                            <button onclick="testBiba('write', 2)" class="px-3 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50">Write</button>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between p-3 bg-red-50 border border-red-100 rounded-md">
+                                        <span class="text-sm font-medium text-gray-900">Yelp Review (Low Integrity)</span>
+                                        <div class="space-x-2">
+                                            <button onclick="testBiba('read', 1)" class="px-3 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50">Read</button>
+                                            <button onclick="testBiba('write', 1)" class="px-3 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50">Write</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CLARK-WILSON VISUALIZATION -->
+                    <div id="sim-cw" class="simulator-content hidden">
+                         <div class="text-center mb-8">
+                             <h4 class="text-xl font-bold text-gray-900">Commercial Integrity: The "Bank Teller" Model</h4>
+                             <p class="text-gray-500">Users cannot touch data directly. They must go through a procedure.</p>
+                         </div>
+                         <div class="flex flex-col md:flex-row items-center justify-center gap-4 relative">
+                             <!-- Step 1 -->
+                             <div class="p-6 bg-gray-50 border border-gray-200 rounded-lg w-full md:w-48 text-center relative">
+                                 <div class="text-4xl mb-2">👤</div>
+                                 <div class="font-bold text-gray-900">User</div>
+                                 <div class="text-xs text-gray-500">Cannot access DB directly</div>
+                             </div>
+                             
+                             <!-- Arrow -->
+                             <div class="hidden md:block text-2xl text-gray-300">➜</div>
+                             <div class="block md:hidden text-2xl text-gray-300 rotate-90">➜</div>
+
+                             <!-- Step 2 -->
+                             <div class="p-6 bg-blue-50 border border-blue-200 rounded-lg w-full md:w-48 text-center ring-2 ring-blue-500 ring-offset-2">
+                                 <div class="text-4xl mb-2">⚙️</div>
+                                 <div class="font-bold text-blue-900">TP</div>
+                                 <div class="text-xs text-blue-700">Transformation Procedure (The App)</div>
+                                 <div class="mt-2 text-[10px] bg-white rounded px-2 py-1 text-blue-800">Logs & Validates</div>
+                             </div>
+
+                             <!-- Arrow -->
+                             <div class="hidden md:block text-2xl text-gray-300">➜</div>
+                             <div class="block md:hidden text-2xl text-gray-300 rotate-90">➜</div>
+
+                             <!-- Step 3 -->
+                             <div class="p-6 bg-emerald-50 border border-emerald-200 rounded-lg w-full md:w-48 text-center">
+                                 <div class="text-4xl mb-2">💰</div>
+                                 <div class="font-bold text-emerald-900">CDI</div>
+                                 <div class="text-xs text-emerald-700">Constrained Data Item (The DB)</div>
+                             </div>
+                         </div>
+                    </div>
+
+                    <!-- CHINESE WALL SIMULATOR -->
+                    <div id="sim-bn" class="simulator-content hidden">
+                        <div class="grid lg:grid-cols-3 gap-8">
+                            <div class="lg:col-span-1 space-y-4">
+                                <h4 class="font-bold text-gray-900">Dynamic Conflicts of Interest</h4>
+                                <p class="text-sm text-gray-600">Access changes based on your history. Once you touch one company in a conflict set, the others become blocked.</p>
+                                <button onclick="resetCW()" class="w-full mt-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded transition">Reset Consultant History</button>
+                            </div>
+                            <div class="lg:col-span-2 grid grid-cols-2 gap-4">
+                                <div class="col-span-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Conflict Set: Soft Drinks</div>
+                                <button id="cw-coke" onclick="accessCW('coke', 'soda')" class="cw-btn p-4 border border-gray-200 rounded bg-white hover:bg-gray-50 flex items-center justify-between">
+                                    <span>Coca-Cola</span>
+                                    <span class="status-icon">⚪</span>
+                                </button>
+                                <button id="cw-pepsi" onclick="accessCW('pepsi', 'soda')" class="cw-btn p-4 border border-gray-200 rounded bg-white hover:bg-gray-50 flex items-center justify-between">
+                                    <span>Pepsi</span>
+                                    <span class="status-icon">⚪</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: ACCESS CONTROL -->
+        <section id="access-control" class="scroll-mt-24">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6">3. Access Control Philosophies</h2>
+                    <p class="text-gray-600 mb-8">Who decides who gets in?</p>
+                    
+                    <div class="space-y-4">
+                        <div class="p-4 border-l-4 border-blue-500 bg-white shadow-sm">
+                            <h4 class="font-bold text-gray-900">DAC (Discretionary)</h4>
+                            <p class="text-sm text-gray-500">The <strong>Owner</strong> decides. Flexible but risky. Used in Windows/Linux.</p>
+                        </div>
+                        <div class="p-4 border-l-4 border-red-500 bg-white shadow-sm">
+                            <h4 class="font-bold text-gray-900">MAC (Mandatory)</h4>
+                            <p class="text-sm text-gray-500">The <strong>System</strong> decides via labels. Rigid, secure. Military/SELinux.</p>
+                        </div>
+                        <div class="p-4 border-l-4 border-purple-500 bg-white shadow-sm">
+                            <h4 class="font-bold text-gray-900">RBAC (Role-Based)</h4>
+                            <p class="text-sm text-gray-500">The <strong>Admin</strong> decides via Roles. Scalable. Enterprises/Cloud.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+                    <h3 class="text-center font-bold text-gray-700 mb-4">Trade-off Comparison</h3>
+                    <div class="chart-container">
+                        <canvas id="accessChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: REAL WORLD & TRUST -->
+        <section id="real-world" class="scroll-mt-24">
+            <h2 class="text-3xl font-bold text-gray-900 mb-10 text-center">4. Reality & Trust</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Real World Problems -->
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-6">Common Issues</h3>
+                    <div class="space-y-3">
+                        <details class="group p-4 bg-white border border-gray-200 rounded-lg cursor-pointer">
+                            <summary class="font-medium text-gray-900 list-none flex justify-between items-center">
+                                Granularity Problem
+                                <span class="transition group-open:rotate-180">▼</span>
+                            </summary>
+                            <p class="text-gray-600 text-sm mt-3">How fine-grained? Too fine = expensive; too coarse = insecure.</p>
+                        </details>
+                        <details class="group p-4 bg-white border border-gray-200 rounded-lg cursor-pointer">
+                            <summary class="font-medium text-gray-900 list-none flex justify-between items-center">
+                                Policy Conflicts
+                                <span class="transition group-open:rotate-180">▼</span>
+                            </summary>
+                            <p class="text-gray-600 text-sm mt-3">What happens when one rule says "Allow" and another says "Deny"?</p>
+                        </details>
+                        <details class="group p-4 bg-white border border-gray-200 rounded-lg cursor-pointer">
+                            <summary class="font-medium text-gray-900 list-none flex justify-between items-center">
+                                Covert Channels
+                                <span class="transition group-open:rotate-180">▼</span>
+                            </summary>
+                            <p class="text-gray-600 text-sm mt-3">Hidden communication paths (e.g., timing delays) to leak data.</p>
+                        </details>
+                    </div>
+                </div>
+
+                <!-- Trust Models Visual -->
+                <div class="bg-gray-900 text-white p-8 rounded-2xl shadow-xl flex flex-col justify-center">
+                    <h3 class="text-xl font-bold text-white mb-6">Zero Trust Model</h3>
+                    <div class="mb-8">
+                        <div class="flex items-center text-emerald-400 mb-2">
+                            <span class="text-2xl mr-3">🔍</span>
+                            <span class="font-bold">"Never trust, always verify"</span>
+                        </div>
+                        <p class="text-gray-400 text-sm">Assume the network is already breached. Check every request.</p>
+                    </div>
+                    <div class="h-2 w-full bg-emerald-900 rounded-full overflow-hidden">
+                        <div class="h-full w-3/4 bg-emerald-500"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: KNOWLEDGE CHECK (TABBED) -->
+        <section id="knowledge-check" class="pb-24 scroll-mt-24">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-gray-900">5. Knowledge Check</h2>
+                <p class="text-gray-600">Test your understanding with Flashcards or a Quiz.</p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex justify-center mb-8">
+                <div class="bg-white p-1 rounded-lg border border-gray-200 inline-flex shadow-sm">
+                    <button onclick="switchKnowledgeTab('flashcards')" id="btn-flashcards" class="px-6 py-2 rounded-md text-sm font-medium bg-gray-900 text-white shadow">Flashcards</button>
+                    <button onclick="switchKnowledgeTab('quiz')" id="btn-quiz" class="px-6 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900">Quiz</button>
+                </div>
+            </div>
+
+            <!-- Tab Content: Flashcards -->
+            <div id="content-flashcards" class="block">
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6" id="flashcard-grid">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- Tab Content: Quiz -->
+            <div id="content-quiz" class="hidden max-w-3xl mx-auto">
+                <div id="quiz-container" class="space-y-8">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-900 text-white py-12 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="font-bold text-lg">Cyber.SoHo</p>
+            <p class="text-gray-500 text-sm mt-2">Part I: Foundations of Computer Security</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- DATA SETS ---
+        const flashcardsData = [
+            { q: "Definition of Security Policy", a: "A formal set of rules defining who can access what resources, how, and under what conditions." },
+            { q: "CIA Triad Components", a: "Confidentiality, Integrity, and Availability." },
+            { q: "Goal of Bell-LaPadula Model", a: "To protect confidentiality (keeping secrets secret)." },
+            { q: "Bell-LaPadula 'No Read Up'", a: "Simple Security Property: You cannot read data classified above your clearance." },
+            { q: "Bell-LaPadula 'No Write Down'", a: "Star Property (*): You cannot write data below your clearance level." },
+            { q: "Goal of Biba Model", a: "To protect integrity (trustworthiness of data)." },
+            { q: "Biba 'No Read Down'", a: "Simple Integrity Property: You cannot read data less trustworthy than your level." },
+            { q: "Biba 'No Write Up'", a: "Integrity Star Property: You cannot modify data more trustworthy than your level." },
+            { q: "Difference between Policy and Model", a: "Policy states the goal (what), Model specifies the method (how)." },
+            { q: "Clark-Wilson Model Focus", a: "Protecting commercial integrity via well-formed transactions." },
+            { q: "Constrained Data Item (CDI)", a: "Protected data in Clark-Wilson that must stay accurate (e.g., bank balance)." },
+            { q: "Transformation Procedure (TP)", a: "Approved program in Clark-Wilson; the only way to modify a CDI." },
+            { q: "Chinese Wall Model Goal", a: "To prevent conflicts of interest between competing clients." },
+            { q: "DAC Decision Maker", a: "The resource owner decides who has access." },
+            { q: "MAC Decision Maker", a: "The system decides based on labels (admins configure it)." },
+            { q: "RBAC Mechanism", a: "Permissions assigned to Roles; Users assigned to Roles." },
+            { q: "Principle of Least Privilege", a: "Giving subjects only the minimum permissions needed for their job." },
+            { q: "Zero Trust Motto", a: "\"Never trust, always verify.\"" },
+            { q: "Covert Channel", a: "A hidden communication path (timing/storage) not intended for data transfer." },
+            { q: "The Granularity Problem", a: "Balancing security vs complexity when deciding how fine-grained controls should be." }
+        ];
+
+        const quizData = [
+            {
+                question: "A Colonel (Secret) needs to send a report to a General (Top Secret). Under Bell-LaPadula (BLP), is this allowed?",
+                options: [
+                    { text: "Yes, this is allowed.", correct: true, rationale: "BLP allows 'Writing Up' because moving info to a higher level doesn't leak secrets." },
+                    { text: "No, blocked by Simple Security Property.", correct: false, rationale: "Simple Security Property is 'No Read Up', not write." },
+                    { text: "No, blocked by Star Property.", correct: false, rationale: "Star Property is 'No Write Down'; it permits writing up." },
+                    { text: "Only if General lowers clearance.", correct: false, rationale: "Models don't rely on temporary downgrades for standard ops." }
+                ],
+                hint: "Does moving data from a lower secret bucket to a higher one risk a leak?"
+            },
+            {
+                question: "A junior developer (Low Integrity) tries to overwrite a critical config file (High Integrity). Under Biba, what happens?",
+                options: [
+                    { text: "Blocked by Integrity Star Property.", correct: true, rationale: "Integrity Star Property enforces 'No Write Up' to prevent corruption." },
+                    { text: "Blocked by Simple Integrity Property.", correct: false, rationale: "Simple Integrity is 'No Read Down'." },
+                    { text: "Allowed because Biba only restricts reading.", correct: false, rationale: "Biba restricts both reading and writing." },
+                    { text: "Allowed if developer has 'Secret' clearance.", correct: false, rationale: "Clearance is for BLP (Confidentiality), not Biba (Integrity)." }
+                ],
+                hint: "Biba prevents 'contamination' of trustworthy systems."
+            },
+            {
+                question: "In Clark-Wilson, how must a teller update a customer's balance?",
+                options: [
+                    { text: "Must use a Transformation Procedure (TP).", correct: true, rationale: "Users modify CDIs only through approved TPs." },
+                    { text: "Edit database table directly.", correct: false, rationale: "Direct access is prohibited in Clark-Wilson." },
+                    { text: "Request an Integrity Verification Procedure.", correct: false, rationale: "IVPs are for auditing, not transactions." },
+                    { text: "Obtain customer password.", correct: false, rationale: "This is a model about process, not just authentication." }
+                ],
+                hint: "Users cannot touch data directly; they need an approved 'window'."
+            },
+            {
+                question: "A consultant accessed Coca-Cola data. Now they try to access Pepsi. Under Chinese Wall model:",
+                options: [
+                    { text: "Access is denied.", correct: true, rationale: "Accessing one company in a Conflict Set blocks the others." },
+                    { text: "Access is granted (same industry).", correct: false, rationale: "Same industry is exactly why it's blocked." },
+                    { text: "Access granted if Top Secret.", correct: false, rationale: "Chinese Wall relies on history, not clearance." },
+                    { text: "Denied only if labeled 'Exclusive'.", correct: false, rationale: "Restriction is automatic based on Conflict Sets." }
+                ],
+                hint: "Permissions are dynamic; picking a side closes the other doors."
+            },
+            {
+                question: "Which model allows the resource owner to decide permissions?",
+                options: [
+                    { text: "Discretionary Access Control (DAC)", correct: true, rationale: "DAC allows the owner to use discretion." },
+                    { text: "Mandatory Access Control (MAC)", correct: false, rationale: "In MAC, the system/admin decides." },
+                    { text: "Role-Based Access Control (RBAC)", correct: false, rationale: "In RBAC, admins assign permissions to roles." },
+                    { text: "Zero Trust", correct: false, rationale: "Zero Trust is a verification posture, not an ownership model." }
+                ],
+                hint: "Like sharing a folder on your personal computer."
+            },
+            {
+                question: "An employee logs in from a company laptop inside HQ. Under Zero Trust:",
+                options: [
+                    { text: "Treated as untrusted until verified.", correct: true, rationale: "Zero Trust assumes no traffic is safe by default." },
+                    { text: "Trusted because device is issued.", correct: false, rationale: "Devices aren't inherently trusted." },
+                    { text: "Trusted because inside perimeter.", correct: false, rationale: "Zero Trust eliminates the 'trusted perimeter' concept." },
+                    { text: "Trusted with badge.", correct: false, rationale: "Physical badges don't equal digital trust." }
+                ],
+                hint: "Motto: 'Never trust, always verify'."
+            },
+            {
+                question: "Admin misconfigures a firewall, blocking legitimate traffic. This represents:",
+                options: [
+                    { text: "Administrative Burden & Human Error", correct: true, rationale: "Misconfiguration is a top cause of failure." },
+                    { text: "Covert Channels", correct: false, rationale: "Covert channels are hidden paths, not mistakes." },
+                    { text: "Granularity Problem", correct: false, rationale: "Granularity is about precision, not error." },
+                    { text: "Policy Conflict", correct: false, rationale: "Conflict implies opposing rules, not a single error." }
+                ],
+                hint: "Models fail if the human typing commands makes a mistake."
+            },
+             {
+                question: "In Clark-Wilson, what component acts as the 'auditor'?",
+                options: [
+                    { text: "Integrity Verification Procedure (IVP)", correct: true, rationale: "IVPs check and validate data integrity." },
+                    { text: "Transformation Procedure (TP)", correct: false, rationale: "TPs change data, they don't audit it." },
+                    { text: "Unconstrained Data Item (UDI)", correct: false, rationale: "UDIs are untrusted inputs." },
+                    { text: "Access Control List (ACL)", correct: false, rationale: "ACLs are for permissions, not auditing." }
+                ],
+                hint: "Like end-of-day reconciliation."
+            },
+            {
+                question: "Difference between Model and Policy?",
+                options: [
+                    { text: "Policy states Goal, Model specifies Method.", correct: true, rationale: "Policy = Rulebook (What), Model = Blueprint (How)." },
+                    { text: "Policy for computers, Model for humans.", correct: false, rationale: "Reverse is true." },
+                    { text: "Policy protects Integrity, Model Confidentiality.", correct: false, rationale: "Both can address any CIA aspect." },
+                    { text: "Policy optional, Model mandatory.", correct: false, rationale: "Both are essential." }
+                ],
+                hint: "Building Code (English) vs Blueprint (Logic)."
+            },
+            {
+                question: "Biba is the 'mirror image' of BLP because:",
+                options: [
+                    { text: "BLP prevents Read Up, Biba prevents Read Down.", correct: true, rationale: "BLP flows up (Secrets), Biba flows down (Trust)." },
+                    { text: "BLP protects Integrity, Biba Confidentiality.", correct: false, rationale: "Backwards." },
+                    { text: "BLP is military, Biba commercial.", correct: false, rationale: "Clark-Wilson is commercial." },
+                    { text: "BLP uses roles, Biba labels.", correct: false, rationale: "Both use labels." }
+                ],
+                hint: "Compare arrow directions: Secrets go up, Trust goes down."
+            }
+        ];
+
+        // --- RENDER FLASHCARDS ---
+        function renderFlashcards() {
+            const grid = document.getElementById('flashcard-grid');
+            grid.innerHTML = '';
+            flashcardsData.forEach(card => {
+                const el = document.createElement('div');
+                el.className = 'flip-card';
+                el.innerHTML = `
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <h5 class="font-bold text-lg leading-tight px-2">${card.q}</h5>
+                        </div>
+                        <div class="flip-card-back">
+                            <p class="font-medium text-sm leading-relaxed">${card.a}</p>
+                        </div>
+                    </div>
+                `;
+                el.addEventListener('click', function() {
+                    this.classList.toggle('flipped');
+                });
+                grid.appendChild(el);
+            });
+        }
+
+        // --- RENDER QUIZ ---
+        function renderQuiz() {
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = '';
+            
+            quizData.forEach((item, index) => {
+                const qEl = document.createElement('div');
+                qEl.className = 'bg-white p-6 rounded-xl border border-gray-200 shadow-sm';
+                qEl.innerHTML = `
+                    <div class="flex items-start mb-4">
+                        <span class="bg-gray-100 text-gray-600 text-xs font-bold px-2 py-1 rounded mr-3 mt-1">Q${index + 1}</span>
+                        <h4 class="text-lg font-bold text-gray-900">${item.question}</h4>
+                    </div>
+                    
+                    <div class="space-y-2 mb-4">
+                        ${item.options.map((opt, i) => `
+                            <button onclick="checkAnswer(this, ${index}, ${i})" class="option-btn w-full text-left p-3 rounded-lg border border-gray-200 text-gray-700 text-sm font-medium focus:outline-none">
+                                ${opt.text}
+                            </button>
+                        `).join('')}
+                    </div>
+
+                    <div id="feedback-${index}" class="hidden p-4 rounded-lg text-sm mb-4"></div>
+
+                    <div class="flex justify-end">
+                        <button onclick="toggleHint(${index})" class="text-xs text-blue-600 hover:text-blue-800 font-medium">Need a hint?</button>
+                    </div>
+                    <div id="hint-${index}" class="hidden mt-2 text-xs text-gray-500 italic bg-gray-50 p-2 rounded">
+                        💡 Hint: ${item.hint}
+                    </div>
+                `;
+                container.appendChild(qEl);
+            });
+        }
+
+        function checkAnswer(btn, qIndex, optIndex) {
+            const question = quizData[qIndex];
+            const option = question.options[optIndex];
+            const feedbackEl = document.getElementById(`feedback-${qIndex}`);
+            const parent = btn.parentElement;
+
+            // Disable all buttons in this question
+            const buttons = parent.querySelectorAll('button');
+            buttons.forEach(b => b.classList.add('disabled-option'));
+            buttons.forEach(b => b.disabled = true);
+
+            // Style the clicked button
+            if (option.correct) {
+                btn.classList.add('correct-answer');
+                feedbackEl.className = "p-4 rounded-lg text-sm mb-4 bg-emerald-50 text-emerald-800 border border-emerald-200";
+                feedbackEl.innerHTML = `<strong>Correct!</strong> ${option.rationale}`;
+            } else {
+                btn.classList.add('wrong-answer');
+                feedbackEl.className = "p-4 rounded-lg text-sm mb-4 bg-red-50 text-red-800 border border-red-200";
+                feedbackEl.innerHTML = `<strong>Incorrect.</strong> ${option.rationale}`;
+                
+                // Highlight the correct one
+                question.options.forEach((opt, i) => {
+                    if (opt.correct) {
+                        buttons[i].classList.add('correct-answer');
+                    }
+                });
+            }
+            feedbackEl.classList.remove('hidden');
+        }
+
+        function toggleHint(index) {
+            document.getElementById(`hint-${index}`).classList.toggle('hidden');
+        }
+
+        // --- TAB LOGIC ---
+        function switchKnowledgeTab(tab) {
+            const btnFlash = document.getElementById('btn-flashcards');
+            const btnQuiz = document.getElementById('btn-quiz');
+            const contentFlash = document.getElementById('content-flashcards');
+            const contentQuiz = document.getElementById('content-quiz');
+
+            if (tab === 'flashcards') {
+                btnFlash.className = "px-6 py-2 rounded-md text-sm font-medium bg-gray-900 text-white shadow transition";
+                btnQuiz.className = "px-6 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 transition";
+                contentFlash.classList.remove('hidden');
+                contentQuiz.classList.add('hidden');
+            } else {
+                btnQuiz.className = "px-6 py-2 rounded-md text-sm font-medium bg-gray-900 text-white shadow transition";
+                btnFlash.className = "px-6 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 transition";
+                contentQuiz.classList.remove('hidden');
+                contentFlash.classList.add('hidden');
+            }
+        }
+
+        // --- INIT ---
+        document.addEventListener('DOMContentLoaded', function() {
+            // Chart init (existing code)
+            const ctx = document.getElementById('accessChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Flexibility', 'Security Level', 'Scalability', 'Ease for Owner', 'Central Control'],
+                    datasets: [
+                        { label: 'DAC', data: [5, 2, 2, 5, 1], fill: true, backgroundColor: 'rgba(59, 130, 246, 0.2)', borderColor: 'rgb(59, 130, 246)', pointBackgroundColor: 'rgb(59, 130, 246)' },
+                        { label: 'MAC', data: [1, 5, 2, 1, 5], fill: true, backgroundColor: 'rgba(239, 68, 68, 0.2)', borderColor: 'rgb(239, 68, 68)', pointBackgroundColor: 'rgb(239, 68, 68)' },
+                        { label: 'RBAC', data: [3, 4, 5, 2, 4], fill: true, backgroundColor: 'rgba(168, 85, 247, 0.2)', borderColor: 'rgb(168, 85, 247)', pointBackgroundColor: 'rgb(168, 85, 247)' }
+                    ]
+                },
+                options: { maintainAspectRatio: false, scales: { r: { angleLines: { color: '#E5E7EB' }, grid: { color: '#E5E7EB' }, ticks: { display: false, max: 5 } } } }
+            });
+
+            // Init Knowledge Check
+            renderFlashcards();
+            renderQuiz();
+        });
+
+        // --- NAVIGATION & SIMULATOR LOGIC (PRESERVED) ---
+        function scrollToSection(id) { document.getElementById(id).scrollIntoView({ behavior: 'smooth' }); }
+        
+        function selectCIA(type) {
+            document.getElementById('cia-c-detail').classList.add('hidden');
+            document.getElementById('cia-i-detail').classList.add('hidden');
+            document.getElementById('cia-a-detail').classList.add('hidden');
+            if (type === 'confidentiality') document.getElementById('cia-c-detail').classList.remove('hidden');
+            if (type === 'integrity') document.getElementById('cia-i-detail').classList.remove('hidden');
+            if (type === 'availability') document.getElementById('cia-a-detail').classList.remove('hidden');
+        }
+
+        function switchSimulator(simId) {
+            document.querySelectorAll('.simulator-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.simulator-content').forEach(el => el.classList.remove('block'));
+            const tabs = ['blp', 'biba', 'cw', 'bn'];
+            tabs.forEach(t => {
+                const tabBtn = document.getElementById(`tab-${t}`);
+                tabBtn.classList.remove('border-amber-500', 'text-amber-700', 'bg-amber-50');
+                tabBtn.classList.add('border-transparent', 'text-gray-500');
+            });
+            document.getElementById(`sim-${simId}`).classList.remove('hidden');
+            document.getElementById(`sim-${simId}`).classList.add('block');
+            const activeTab = document.getElementById(`tab-${simId}`);
+            activeTab.classList.remove('border-transparent', 'text-gray-500');
+            activeTab.classList.add('border-amber-500', 'text-amber-700', 'bg-amber-50');
+        }
+
+        function resetBLP() { document.getElementById('blp-feedback').innerHTML = "User level changed. Select a file action..."; document.getElementById('blp-feedback').className = "p-4 rounded-lg bg-gray-100 text-gray-600 text-sm min-h-[80px]"; }
+        function testBLP(action, fileLevel) {
+            const userLevel = parseInt(document.getElementById('blp-user-level').value);
+            const feedback = document.getElementById('blp-feedback');
+            let allowed = false, reason = "";
+            if (action === 'read') {
+                if (userLevel >= fileLevel) { allowed = true; reason = "Access Granted: You can read data at or below your clearance."; }
+                else { allowed = false; reason = "Access Denied (No Read Up): You cannot read data classified above you."; }
+            } else if (action === 'write') {
+                if (userLevel <= fileLevel) { allowed = true; reason = "Access Granted: You can write to a container at or above your level."; }
+                else { allowed = false; reason = "Access Denied (No Write Down): writing here would leak secrets to a lower level."; }
+            }
+            if (allowed) { feedback.innerHTML = `<strong>✅ ${reason}</strong>`; feedback.className = "p-4 rounded-lg bg-emerald-100 text-emerald-800 text-sm min-h-[80px] border border-emerald-200"; }
+            else { feedback.innerHTML = `<strong>🚫 ${reason}</strong>`; feedback.className = "p-4 rounded-lg bg-red-100 text-red-800 text-sm min-h-[80px] border border-red-200"; }
+        }
+
+        function resetBiba() { document.getElementById('biba-feedback').innerHTML = "Integrity level changed. Select an action..."; document.getElementById('biba-feedback').className = "p-4 rounded-lg bg-gray-100 text-gray-600 text-sm min-h-[80px]"; }
+        function testBiba(action, fileLevel) {
+            const userLevel = parseInt(document.getElementById('biba-user-level').value);
+            const feedback = document.getElementById('biba-feedback');
+            let allowed = false, reason = "";
+            if (action === 'read') {
+                if (userLevel <= fileLevel) { allowed = true; reason = "Access Granted: You are reading trustworthy data."; }
+                else { allowed = false; reason = "Access Denied (No Read Down): Do not trust data with lower integrity than yourself."; }
+            } else if (action === 'write') {
+                if (userLevel >= fileLevel) { allowed = true; reason = "Access Granted: You can modify data of lower/equal integrity."; }
+                else { allowed = false; reason = "Access Denied (No Write Up): You cannot modify data more trustworthy than you."; }
+            }
+            if (allowed) { feedback.innerHTML = `<strong>✅ ${reason}</strong>`; feedback.className = "p-4 rounded-lg bg-emerald-100 text-emerald-800 text-sm min-h-[80px] border border-emerald-200"; }
+            else { feedback.innerHTML = `<strong>🚫 ${reason}</strong>`; feedback.className = "p-4 rounded-lg bg-red-100 text-red-800 text-sm min-h-[80px] border border-red-200"; }
+        }
+
+        let accessedSets = { soda: null, tech: null };
+        function resetCW() {
+            accessedSets = { soda: null, tech: null };
+            document.querySelectorAll('.cw-btn').forEach(btn => {
+                btn.classList.remove('bg-gray-200', 'opacity-50', 'cursor-not-allowed', 'ring-2', 'ring-emerald-500');
+                btn.classList.add('bg-white', 'hover:bg-gray-50');
+                btn.querySelector('.status-icon').innerHTML = "⚪";
+            });
+        }
+        function accessCW(company, conflictSet) {
+            if (accessedSets[conflictSet] && accessedSets[conflictSet] !== company) { alert(`Conflict of Interest! You have already consulted for ${accessedSets[conflictSet]}. The Wall prevents access to ${company}.`); return; }
+            accessedSets[conflictSet] = company;
+            const btn = document.getElementById(`cw-${company}`);
+            btn.classList.add('ring-2', 'ring-emerald-500', 'bg-emerald-50');
+            btn.classList.remove('bg-white', 'hover:bg-gray-50');
+            btn.querySelector('.status-icon').innerHTML = "✅";
+            const competitor = conflictSet === 'soda' ? (company === 'coke' ? 'pepsi' : 'coke') : (company === 'apple' ? 'msft' : 'apple');
+            const compBtn = document.getElementById(`cw-${competitor}`);
+            compBtn.classList.add('bg-gray-200', 'opacity-50', 'cursor-not-allowed');
+            compBtn.classList.remove('bg-white', 'hover:bg-gray-50');
+            compBtn.querySelector('.status-icon').innerHTML = "🔒";
+        }
+    </script>
+</body>
+</html>
