@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Security: Week 1 & Course Overview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Chosen Palette: Warm Neutrals & Muted Accents */
+        /* Background: Stone-50, Text: Stone-800 */
+        /* Accents: Blue-600 (Info), Emerald-600 (Success), Orange-500 (Warning/Threat) */
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #fafaf9; /* stone-50 */
+            color: #292524; /* stone-800 */
+        }
+
+        /* Chart Container Styling - MANDATORY */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        /* Custom Scrollbar for code blocks */
+        .code-block::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .code-block::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        .code-block::-webkit-scrollbar-thumb {
+            background: #888; 
+            border-radius: 4px;
+        }
+        .code-block::-webkit-scrollbar-thumb:hover {
+            background: #555; 
+        }
+
+        .nav-item.active {
+            border-bottom: 2px solid #2563eb; /* blue-600 */
+            color: #2563eb;
+            font-weight: 600;
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+    <!-- Application Structure Plan: 
+         Designed as a "Mission Control" dashboard.
+         1. Header: Critical disclaimers and context.
+         2. Navigation: Tabs to switch between "Course Map", "Week 1 Briefing", "Lab Simulator" (Interactive Core), and "Report Assistant".
+         3. Course Map: Visual timeline and grading breakdown (Chart.js) to orient the student.
+         4. Week 1 Briefing: Interactive cards for Objectives and Readings (Concepts like TCP/Attacks).
+         5. Lab Simulator: A step-by-step wizard mimicking the lab flow (Setup -> Scan -> Attack -> Vuln Assess). Includes a "Mock Terminal" interaction.
+         6. Report Assistant: Structured guidance for the final output.
+         This structure moves from abstract (course) to specific (week) to practical (lab) to synthesis (report). 
+    -->
+    
+    <!-- Visualization & Content Choices:
+         1. Grading Weighting: Donut Chart (Chart.js). Goal: Inform. Justification: Clearly shows the 1-2-1 value of tasks.
+         2. Course Timeline: Horizontal Flex Steps. Goal: Organize. Justification: Linear progression of topics.
+         3. Scanning Concepts: Interactive Comparison Table. Goal: Compare. Justification: SYN vs Connect differences are best understood side-by-side.
+         4. Lab Network Topology: CSS-based Diagram (Divs/Flex). Goal: Organize/Inform. Justification: Visualizes the isolation requirement without images/SVG.
+         5. Mock Terminal: JS Text Block. Goal: Engagement/Simulate. Justification: Gives a "feel" of the command line output mentioned in the report.
+         6. Vulnerability Severity: Dynamic Bar Chart (Chart.js). Goal: Relationships. Justification: Visualizes CVSS score distribution in a typical report.
+    -->
+    
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- Header / Disclaimer -->
+    <header class="bg-stone-100 border-b border-stone-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold text-stone-800 tracking-tight">🛡️ SecCourse: Continuous Project</h1>
+                    <p class="text-sm text-stone-500">Week 1: Threats, Attacks & Defenses</p>
+                </div>
+                <div class="hidden md:block text-right">
+                    <div class="text-xs font-bold text-red-600 uppercase tracking-wide bg-red-50 px-2 py-1 rounded border border-red-200">
+                        ⚠ Lab Environment ONLY
+                    </div>
+                </div>
+            </div>
+            <!-- Navigation -->
+            <nav class="mt-6 -mb-4 flex space-x-8 overflow-x-auto" aria-label="Tabs">
+                <button onclick="switchTab('course-overview')" id="nav-course-overview" class="nav-item active whitespace-nowrap py-4 px-1 border-b-2 border-transparent font-medium text-sm hover:text-stone-700 hover:border-stone-300">
+                    Course Overview
+                </button>
+                <button onclick="switchTab('week1-briefing')" id="nav-week1-briefing" class="nav-item whitespace-nowrap py-4 px-1 border-b-2 border-transparent font-medium text-sm hover:text-stone-700 hover:border-stone-300">
+                    Week 1 Concepts
+                </button>
+                <button onclick="switchTab('lab-simulator')" id="nav-lab-simulator" class="nav-item whitespace-nowrap py-4 px-1 border-b-2 border-transparent font-medium text-sm hover:text-stone-700 hover:border-stone-300">
+                    🧪 Lab Walkthrough
+                </button>
+                <button onclick="switchTab('report-guide')" id="nav-report-guide" class="nav-item whitespace-nowrap py-4 px-1 border-b-2 border-transparent font-medium text-sm hover:text-stone-700 hover:border-stone-300">
+                    Report Builder
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- SECTION: COURSE OVERVIEW -->
+        <section id="course-overview" class="tab-content fade-in">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-stone-800 mb-4">Course Roadmap</h2>
+                <p class="text-stone-600 text-lg mb-6 leading-relaxed">
+                    Welcome to the Continuous Computer Security Project. This dashboard tracks your journey through four key security modules. 
+                    Below is the high-level timeline and the grading breakdown for your weekly submissions.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+                <!-- Timeline Visualization -->
+                <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <h3 class="text-lg font-semibold mb-4 text-stone-700">Project Timeline</h3>
+                    <div class="space-y-6 relative border-l-2 border-stone-200 ml-3 pl-8">
+                        <!-- Topic 1 -->
+                        <div class="relative">
+                            <span class="absolute -left-[41px] bg-stone-200 h-6 w-6 rounded-full border-4 border-white"></span>
+                            <h4 class="text-md font-bold text-stone-500">Topic 1</h4>
+                            <p class="text-stone-600">Foundations & Policy Issues</p>
+                        </div>
+                        <!-- Topic 2 (Current) -->
+                        <div class="relative">
+                            <span class="absolute -left-[41px] bg-blue-600 h-6 w-6 rounded-full border-4 border-blue-100"></span>
+                            <h4 class="text-md font-bold text-blue-600">Topic 2 (Current)</h4>
+                            <p class="font-medium text-stone-800">Threats, Attacks & Defenses</p>
+                            <p class="text-sm text-stone-500 mt-1">Scanning, Classification, Vuln Analysis</p>
+                        </div>
+                        <!-- Midterm -->
+                        <div class="relative">
+                            <span class="absolute -left-[41px] bg-stone-200 h-6 w-6 rounded-full border-4 border-white"></span>
+                            <h4 class="text-md font-bold text-stone-500">Midterm Assessment</h4>
+                        </div>
+                        <!-- Topic 3 -->
+                        <div class="relative">
+                            <span class="absolute -left-[41px] bg-stone-200 h-6 w-6 rounded-full border-4 border-white"></span>
+                            <h4 class="text-md font-bold text-stone-500">Topic 3: Security Domains</h4>
+                            <p class="text-sm text-stone-500">OS, Network, Crypto</p>
+                        </div>
+                        <!-- Topic 4 -->
+                        <div class="relative">
+                            <span class="absolute -left-[41px] bg-stone-200 h-6 w-6 rounded-full border-4 border-white"></span>
+                            <h4 class="text-md font-bold text-stone-500">Topic 4: Emerging Topics</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grading Chart -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200 flex flex-col items-center">
+                    <h3 class="text-lg font-semibold mb-2 text-stone-700 w-full text-center">Module Grading Scheme</h3>
+                    <p class="text-xs text-stone-500 mb-4 text-center">Based on the 1-2-1 Weighting System</p>
+                    
+                    <div class="chart-container">
+                        <canvas id="gradingChart"></canvas>
+                    </div>
+                    
+                    <div class="mt-4 text-sm text-stone-600 text-center">
+                        <p><strong>Note:</strong> Practical work carries the highest weight (50%).</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Disclaimer Block -->
+            <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-r-lg">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <span class="text-2xl">⚖️</span>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-bold text-red-800">Legal & Ethical Responsibility</h3>
+                        <p class="mt-2 text-red-700 text-sm">
+                            All exercises must be performed exclusively within your <strong>controlled lab environment</strong>. 
+                            Unauthorized scanning or exploitation of systems you do not own is a criminal offence. 
+                            You bear full personal responsibility for your actions.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: WEEK 1 BRIEFING -->
+        <section id="week1-briefing" class="tab-content hidden fade-in">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-stone-800 mb-4">Week 1: Conceptual Foundations</h2>
+                <p class="text-stone-600 text-lg leading-relaxed">
+                    Before starting the lab, you must understand the "Kill-Chain", scanning methodologies, and how to classify attacks. 
+                    Use the interactive cards below to explore these topics.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <!-- Card 1: Scanning -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">
+                    <div class="bg-blue-600 px-6 py-4">
+                        <h3 class="text-white font-bold text-lg">📡 Network Scanning Types</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex space-x-2 mb-4">
+                            <button onclick="updateScanInfo('syn')" class="flex-1 bg-blue-50 text-blue-700 py-2 rounded text-sm font-semibold hover:bg-blue-100 transition">SYN Scan</button>
+                            <button onclick="updateScanInfo('connect')" class="flex-1 bg-stone-100 text-stone-600 py-2 rounded text-sm font-semibold hover:bg-stone-200 transition">Connect Scan</button>
+                        </div>
+                        <div id="scan-description" class="bg-stone-50 p-4 rounded border border-stone-200 h-32 overflow-y-auto text-sm text-stone-700">
+                            <!-- JS will populate this -->
+                            Select a scan type above to learn more.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Attack Classification -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">
+                    <div class="bg-orange-500 px-6 py-4">
+                        <h3 class="text-white font-bold text-lg">🏷️ Classification Frameworks</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="border border-stone-200 rounded p-3 hover:bg-stone-50 cursor-pointer transition" onclick="showFramework('mitre')">
+                                <h4 class="font-bold text-stone-800">MITRE ATT&CK</h4>
+                                <p class="text-xs text-stone-500 mt-1">Focus on Tactics ("Why") & Techniques ("How")</p>
+                            </div>
+                            <div class="border border-stone-200 rounded p-3 hover:bg-stone-50 cursor-pointer transition" onclick="showFramework('stride')">
+                                <h4 class="font-bold text-stone-800">STRIDE</h4>
+                                <p class="text-xs text-stone-500 mt-1">Focus on Threat Category (Spoofing, Tampering...)</p>
+                            </div>
+                        </div>
+                        <div id="framework-info" class="mt-4 text-sm text-stone-600 italic">
+                            Click a framework to see its focus.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Objectives Checklist -->
+            <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
+                <h3 class="text-lg font-bold text-stone-800 mb-4">Week 1 Learning Objectives</h3>
+                <ul class="space-y-3">
+                    <li class="flex items-start">
+                        <input type="checkbox" class="mt-1 h-4 w-4 text-blue-600 rounded border-stone-300 focus:ring-blue-500" checked disabled>
+                        <span class="ml-3 text-stone-700">Explain network scanning & the kill-chain model.</span>
+                    </li>
+                    <li class="flex items-start">
+                        <input type="checkbox" class="mt-1 h-4 w-4 text-blue-600 rounded border-stone-300 focus:ring-blue-500" checked disabled>
+                        <span class="ml-3 text-stone-700">Distinguish host discovery, port scanning, and OS fingerprinting.</span>
+                    </li>
+                    <li class="flex items-start">
+                        <input type="checkbox" class="mt-1 h-4 w-4 text-blue-600 rounded border-stone-300 focus:ring-blue-500">
+                        <span class="ml-3 text-stone-700">Apply scanning tools (e.g., Nmap) in a controlled lab.</span>
+                    </li>
+                    <li class="flex items-start">
+                        <input type="checkbox" class="mt-1 h-4 w-4 text-blue-600 rounded border-stone-300 focus:ring-blue-500">
+                        <span class="ml-3 text-stone-700">Classify attacks using MITRE or STRIDE.</span>
+                    </li>
+                    <li class="flex items-start">
+                        <input type="checkbox" class="mt-1 h-4 w-4 text-blue-600 rounded border-stone-300 focus:ring-blue-500">
+                        <span class="ml-3 text-stone-700">Conduct vulnerability assessment & propose remediation.</span>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- SECTION: LAB SIMULATOR -->
+        <section id="lab-simulator" class="tab-content hidden fade-in">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-stone-800 mb-4">Lab Walkthrough</h2>
+                <p class="text-stone-600 text-lg leading-relaxed">
+                    This interactive guide simulates the workflow you will perform in your actual lab environment. 
+                    Follow these steps to structure your practical work (Approx. 3 hours).
+                </p>
+            </div>
+
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Sidebar Steps -->
+                <div class="w-full lg:w-1/4 space-y-2">
+                    <button onclick="setLabStep(1)" id="step-btn-1" class="w-full text-left px-4 py-3 rounded-lg font-medium bg-blue-600 text-white shadow-md">1. Environment Setup</button>
+                    <button onclick="setLabStep(2)" id="step-btn-2" class="w-full text-left px-4 py-3 rounded-lg font-medium bg-white text-stone-600 hover:bg-stone-50 border border-stone-200">2. Host & Port Scan</button>
+                    <button onclick="setLabStep(3)" id="step-btn-3" class="w-full text-left px-4 py-3 rounded-lg font-medium bg-white text-stone-600 hover:bg-stone-50 border border-stone-200">3. Vulnerability Analysis</button>
+                    <button onclick="setLabStep(4)" id="step-btn-4" class="w-full text-left px-4 py-3 rounded-lg font-medium bg-white text-stone-600 hover:bg-stone-50 border border-stone-200">4. Reflection</button>
+                </div>
+
+                <!-- Main Lab Content -->
+                <div class="w-full lg:w-3/4 bg-white rounded-xl shadow-sm border border-stone-200 p-6 min-h-[500px]">
+                    
+                    <!-- STEP 1: SETUP -->
+                    <div id="lab-step-1" class="lab-step">
+                        <h3 class="text-xl font-bold text-stone-800 mb-4">Step A: Lab Environment Setup</h3>
+                        <p class="text-stone-600 mb-6">Create an isolated virtual network. Your host machine must NOT be connected to the public internet.</p>
+                        
+                        <div class="bg-stone-50 p-6 rounded-lg border border-stone-200 mb-6">
+                            <h4 class="font-bold text-sm text-stone-500 uppercase tracking-wide mb-4 text-center">Required Topology</h4>
+                            <!-- CSS Topology Diagram -->
+                            <div class="flex flex-col md:flex-row justify-center items-center gap-8 py-4 relative">
+                                <!-- Attacker -->
+                                <div class="w-40 h-32 bg-stone-800 rounded-lg flex flex-col items-center justify-center text-white relative z-10 shadow-lg">
+                                    <span class="text-2xl mb-2">💻</span>
+                                    <span class="font-bold">Attacker</span>
+                                    <span class="text-xs text-stone-400">Kali / Parrot</span>
+                                    <span class="text-xs font-mono bg-stone-700 px-1 mt-1 rounded">192.168.56.10</span>
+                                </div>
+                                
+                                <!-- Connection Line -->
+                                <div class="hidden md:block w-32 h-1 bg-stone-300 relative">
+                                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-bold text-stone-500 bg-stone-50 px-2">Isolated vNet</div>
+                                </div>
+                                <div class="md:hidden h-16 w-1 bg-stone-300"></div>
+
+                                <!-- Target -->
+                                <div class="w-40 h-32 bg-red-100 border-2 border-red-300 rounded-lg flex flex-col items-center justify-center text-red-800 relative z-10 shadow-lg">
+                                    <span class="text-2xl mb-2">🎯</span>
+                                    <span class="font-bold">Target</span>
+                                    <span class="text-xs text-red-600">Metasploitable</span>
+                                    <span class="text-xs font-mono bg-red-200 px-1 mt-1 rounded">192.168.56.11</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-blue-50 p-4 rounded text-sm text-blue-800">
+                            <strong>Task:</strong> Document IP addresses, software versions, and network settings for your report Introduction.
+                        </div>
+                    </div>
+
+                    <!-- STEP 2: SCANNING -->
+                    <div id="lab-step-2" class="lab-step hidden">
+                        <h3 class="text-xl font-bold text-stone-800 mb-4">Step B: Host Discovery & Port Scanning</h3>
+                        <p class="text-stone-600 mb-4">Use a tool like Nmap to identify open ports. Compare scan types (SYN vs Full Connect).</p>
+
+                        <!-- Mock Terminal -->
+                        <div class="bg-stone-900 rounded-lg p-4 font-mono text-sm text-green-400 mb-6 shadow-inner border border-stone-700">
+                            <div class="flex justify-between border-b border-stone-700 pb-2 mb-2">
+                                <span class="text-stone-400">root@kali:~#</span>
+                                <span class="text-stone-500 text-xs">Terminal Simulation</span>
+                            </div>
+                            <div id="terminal-output" class="h-48 overflow-y-auto code-block whitespace-pre-wrap">Waiting for command...</div>
+                        </div>
+
+                        <div class="flex gap-4 mb-4">
+                            <button onclick="runMockScan('discovery')" class="bg-stone-200 hover:bg-stone-300 text-stone-800 px-4 py-2 rounded font-medium transition">1. Ping Sweep</button>
+                            <button onclick="runMockScan('syn')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium transition">2. SYN Scan (-sS)</button>
+                            <button onclick="runMockScan('version')" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded font-medium transition">3. Version Scan (-sV)</button>
+                        </div>
+                        
+                        <p class="text-xs text-stone-500 italic">* This is a simulation. Perform actual scans in your lab VM.</p>
+                    </div>
+
+                    <!-- STEP 3: VULNERABILITY -->
+                    <div id="lab-step-3" class="lab-step hidden">
+                        <h3 class="text-xl font-bold text-stone-800 mb-4">Step C & D: Vulnerability Assessment</h3>
+                        <p class="text-stone-600 mb-4">Run a scanner (OpenVAS/Nikto). Identify findings, map to CVEs, and score with CVSS.</p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Input Simulation -->
+                            <div class="space-y-4">
+                                <div class="p-4 bg-stone-50 rounded border border-stone-200">
+                                    <label class="block text-sm font-bold text-stone-700 mb-2">Simulate a Finding:</label>
+                                    <select id="vuln-selector" class="w-full p-2 border border-stone-300 rounded text-sm mb-2" onchange="updateVulnDetails()">
+                                        <option value="vsftpd">VSFTPD 2.3.4 Backdoor</option>
+                                        <option value="apache">Apache Outdated Version</option>
+                                        <option value="telnet">Telnet Service Enabled</option>
+                                    </select>
+                                    <div id="vuln-details" class="text-sm text-stone-600 mt-2 bg-white p-2 rounded border border-stone-100">
+                                        Select a vulnerability to see details.
+                                    </div>
+                                </div>
+                                <div class="bg-orange-50 p-4 rounded border border-orange-100">
+                                    <h5 class="text-orange-800 font-bold text-sm mb-1">Your Report Task:</h5>
+                                    <p class="text-orange-700 text-xs">For the top 3 findings, identify the CVE ID, CVSS Score, and propose a fix (e.g., Update software, Disable service).</p>
+                                </div>
+                            </div>
+
+                            <!-- Severity Chart -->
+                            <div class="flex flex-col h-full">
+                                <h4 class="text-sm font-bold text-stone-600 mb-2 text-center">Typical Severity Distribution</h4>
+                                <div class="chart-container flex-grow" style="max-height: 250px;">
+                                    <canvas id="vulnChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 4: REFLECTION -->
+                    <div id="lab-step-4" class="lab-step hidden">
+                        <h3 class="text-xl font-bold text-stone-800 mb-4">Step E: Reflection & Cleanup</h3>
+                        <div class="bg-green-50 p-6 rounded-lg border border-green-200 mb-6">
+                            <h4 class="font-bold text-green-800 mb-2">Checklist before shutdown:</h4>
+                            <ul class="list-disc list-inside text-green-700 text-sm space-y-2">
+                                <li>Have you documented all open ports?</li>
+                                <li>Did you save screenshots of key findings?</li>
+                                <li>Did you test your remediation idea (conceptually)?</li>
+                                <li><strong>Action:</strong> Shut down VMs safely.</li>
+                            </ul>
+                        </div>
+                        <h4 class="font-bold text-stone-700 mb-2">Reflection Prompts:</h4>
+                        <textarea class="w-full p-3 border border-stone-300 rounded text-sm text-stone-600 bg-stone-50" rows="4" placeholder="Draft your thoughts here: Which tool was most effective? How would a defender detect your SYN scan?"></textarea>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: REPORT GUIDE -->
+        <section id="report-guide" class="tab-content hidden fade-in">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-stone-800 mb-4">Report Builder</h2>
+                <p class="text-stone-600 text-lg leading-relaxed">
+                    Your deliverable is a 4-page PDF. Use this structure to ensure you meet all grading criteria.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Report Structure Visual -->
+                <div class="space-y-4">
+                    <!-- Page 1 -->
+                    <div class="group relative bg-white p-4 rounded border border-stone-200 shadow-sm hover:shadow-md transition cursor-pointer" onclick="toggleReportTip('page1')">
+                        <div class="absolute -left-3 top-4 bg-stone-800 text-white text-xs font-bold px-2 py-1 rounded">PG 1</div>
+                        <h3 class="ml-6 font-bold text-stone-800">Introduction & Environment</h3>
+                        <p class="ml-6 text-sm text-stone-500">Objectives, Topology, Tools selected.</p>
+                        <div id="tip-page1" class="hidden mt-3 pt-3 border-t border-stone-100 text-sm text-blue-600 bg-blue-50 p-2 rounded">
+                            <strong>Tip:</strong> Don't just list tools; explain <em>why</em> you chose them. Include your topology diagram.
+                        </div>
+                    </div>
+
+                    <!-- Page 2 -->
+                    <div class="group relative bg-white p-4 rounded border border-stone-200 shadow-sm hover:shadow-md transition cursor-pointer" onclick="toggleReportTip('page2')">
+                        <div class="absolute -left-3 top-4 bg-stone-800 text-white text-xs font-bold px-2 py-1 rounded">PG 2</div>
+                        <h3 class="ml-6 font-bold text-stone-800">Scanning Results & Analysis</h3>
+                        <p class="ml-6 text-sm text-stone-500">Port lists, Service versions, Attack surface.</p>
+                        <div id="tip-page2" class="hidden mt-3 pt-3 border-t border-stone-100 text-sm text-blue-600 bg-blue-50 p-2 rounded">
+                            <strong>Tip:</strong> Use tables for open ports. Analyze <em>filtered</em> ports – why are they filtered? Firewall?
+                        </div>
+                    </div>
+
+                    <!-- Page 3 -->
+                    <div class="group relative bg-white p-4 rounded border border-stone-200 shadow-sm hover:shadow-md transition cursor-pointer" onclick="toggleReportTip('page3')">
+                        <div class="absolute -left-3 top-4 bg-stone-800 text-white text-xs font-bold px-2 py-1 rounded">PG 3</div>
+                        <h3 class="ml-6 font-bold text-stone-800">Classification & Findings</h3>
+                        <p class="ml-6 text-sm text-stone-500">MITRE mapping, Top 3 Vulnerabilities (CVE/CVSS).</p>
+                        <div id="tip-page3" class="hidden mt-3 pt-3 border-t border-stone-100 text-sm text-blue-600 bg-blue-50 p-2 rounded">
+                            <strong>Tip:</strong> Demonstrate understanding of CVSS vectors, don't just copy the number. Map specific attacks to discovered services.
+                        </div>
+                    </div>
+
+                    <!-- Page 4 -->
+                    <div class="group relative bg-white p-4 rounded border border-stone-200 shadow-sm hover:shadow-md transition cursor-pointer" onclick="toggleReportTip('page4')">
+                        <div class="absolute -left-3 top-4 bg-stone-800 text-white text-xs font-bold px-2 py-1 rounded">PG 4</div>
+                        <h3 class="ml-6 font-bold text-stone-800">Remediation & Reflection</h3>
+                        <p class="ml-6 text-sm text-stone-500">Specific fixes, Critical reflection.</p>
+                        <div id="tip-page4" class="hidden mt-3 pt-3 border-t border-stone-100 text-sm text-blue-600 bg-blue-50 p-2 rounded">
+                            <strong>Tip:</strong> Be concrete. Instead of "update system", say "Update vsftpd to version 2.3.5 or disable if unused."
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resources List -->
+                <div class="bg-stone-50 p-6 rounded-xl border border-stone-200">
+                    <h3 class="text-lg font-bold text-stone-800 mb-4">📚 Essential Resources</h3>
+                    <ul class="space-y-2">
+                        <li><a href="https://nmap.org" target="_blank" class="text-blue-600 hover:underline">Nmap Reference Guide</a></li>
+                        <li><a href="https://attack.mitre.org" target="_blank" class="text-blue-600 hover:underline">MITRE ATT&CK Framework</a></li>
+                        <li><a href="https://www.cve.org" target="_blank" class="text-blue-600 hover:underline">CVE Programme</a></li>
+                        <li><a href="https://www.first.org/cvss" target="_blank" class="text-blue-600 hover:underline">FIRST (CVSS Calculator)</a></li>
+                        <li><a href="https://owasp.org" target="_blank" class="text-blue-600 hover:underline">OWASP Foundation</a></li>
+                    </ul>
+                    <div class="mt-6 pt-4 border-t border-stone-200 text-xs text-stone-500">
+                        <p><strong>Reminders:</strong></p>
+                        <p>• Max 4 Pages</p>
+                        <p>• Cite all sources</p>
+                        <p>• 1-2-1 Grading Weight</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-stone-800 text-stone-400 py-6 mt-8">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-sm">Continuous Computer Security Project | Introduction to Computer Security</p>
+            <p class="text-xs mt-2">Use responsibly within controlled environments only.</p>
+        </div>
+    </footer>
+
+    <script>
+        // State Management
+        const state = {
+            currentTab: 'course-overview',
+            labStep: 1,
+            scanResult: null
+        };
+
+        // Data Store
+        const scanData = {
+            discovery: `root@kali:~# nmap -sn 192.168.56.0/24
+Starting Nmap 7.92...
+Nmap scan report for 192.168.56.10 (Host is up)
+Nmap scan report for 192.168.56.11 (Host is up) -- TARGET FOUND
+Nmap done: 256 IP addresses (2 hosts up) scanned in 2.05 seconds`,
+            syn: `root@kali:~# nmap -sS -p- 192.168.56.11
+Starting Nmap 7.92...
+Host is up (0.00045s latency).
+Not shown: 65530 closed tcp ports (reset)
+PORT     STATE SERVICE
+21/tcp   open  ftp
+22/tcp   open  ssh
+80/tcp   open  http
+445/tcp  open  microsoft-ds
+3306/tcp open  mysql
+
+Nmap done: 1 IP address (1 host up) scanned in 14.12 seconds`,
+            version: `root@kali:~# nmap -sV -p 21,80 192.168.56.11
+Starting Nmap 7.92...
+PORT   STATE SERVICE VERSION
+21/tcp open  ftp     vsftpd 2.3.4
+80/tcp open  http    Apache httpd 2.2.8 ((Ubuntu) DAV/2)
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 6.34 seconds`
+        };
+
+        const vulnData = {
+            vsftpd: {
+                title: "VSFTPD 2.3.4 Backdoor",
+                cve: "CVE-2011-2523",
+                desc: "Malicious backdoor introduced into the VSFTPD source code. Allows remote command execution."
+            },
+            apache: {
+                title: "Apache Outdated Version",
+                cve: "CVE-Various",
+                desc: "Older versions may be vulnerable to DoS or Buffer Overflow attacks depending on configuration."
+            },
+            telnet: {
+                title: "Unencrypted Telnet Service",
+                cve: "Configuration Issue",
+                desc: "Telnet transmits credentials in cleartext. High risk of credential interception (MITM)."
+            }
+        };
+
+        // --- Navigation Logic ---
+        function switchTab(tabId) {
+            // Update State
+            state.currentTab = tabId;
+
+            // UI Updates
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active', 'border-blue-600', 'text-blue-600'));
+            document.getElementById(`nav-${tabId}`).classList.add('active');
+
+            // Resize charts if they became visible
+            if (tabId === 'course-overview' && gradingChart) gradingChart.resize();
+            if (tabId === 'lab-simulator' && vulnChart) vulnChart.resize();
+        }
+
+        // --- Week 1 Interactions ---
+        function updateScanInfo(type) {
+            const el = document.getElementById('scan-description');
+            if (type === 'syn') {
+                el.innerHTML = `<strong>SYN Scan (Half-open):</strong><br>Sends a SYN packet. If target responds SYN/ACK, port is Open. The scanner immediately sends RST (Reset) to tear down connection. <br><em class="text-blue-600">Pro:</em> Often not logged by applications. Faster. <em class="text-blue-600">Con:</em> Requires root privileges to build raw packets.`;
+            } else {
+                el.innerHTML = `<strong>Connect Scan (Full):</strong><br>Completes the full 3-way handshake (SYN -> SYN/ACK -> ACK). The OS establishes a full connection.<br><em class="text-stone-600">Pro:</em> No root privileges needed. More reliable on unstable networks. <em class="text-stone-600">Con:</em> Slower. Very likely to be logged by the target service.`;
+            }
+        }
+
+        function showFramework(type) {
+            const el = document.getElementById('framework-info');
+            if (type === 'mitre') {
+                el.innerHTML = `<strong>MITRE ATT&CK:</strong> Focuses on the lifecycle of an attack. <br>Example: <em>Tactic:</em> Credential Access -> <em>Technique:</em> Brute Force (T1110).<br>Use this to describe specific adversary behaviors found in the lab.`;
+            } else {
+                el.innerHTML = `<strong>STRIDE:</strong> Focuses on what security property is violated.<br><strong>S</strong>poofing, <strong>T</strong>ampering, <strong>R</strong>epudiation, <strong>I</strong>nformation Disclosure, <strong>D</strong>oS, <strong>E</strong>levation of Privilege.<br>Use this for threat modeling the system.`;
+            }
+        }
+
+        // --- Lab Simulator Logic ---
+        function setLabStep(stepNum) {
+            state.labStep = stepNum;
+            document.querySelectorAll('.lab-step').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`lab-step-${stepNum}`).classList.remove('hidden');
+
+            // Button styling
+            for(let i=1; i<=4; i++) {
+                const btn = document.getElementById(`step-btn-${i}`);
+                if (i === stepNum) {
+                    btn.className = "w-full text-left px-4 py-3 rounded-lg font-medium bg-blue-600 text-white shadow-md transition";
+                } else {
+                    btn.className = "w-full text-left px-4 py-3 rounded-lg font-medium bg-white text-stone-600 hover:bg-stone-50 border border-stone-200 transition";
+                }
+            }
+            if (stepNum === 3 && vulnChart) vulnChart.resize();
+        }
+
+        function runMockScan(type) {
+            const terminal = document.getElementById('terminal-output');
+            terminal.innerHTML = "Scanning...";
+            
+            setTimeout(() => {
+                terminal.innerHTML = scanData[type];
+            }, 600);
+        }
+
+        function updateVulnDetails() {
+            const val = document.getElementById('vuln-selector').value;
+            const data = vulnData[val];
+            const display = document.getElementById('vuln-details');
+            display.innerHTML = `<strong>${data.title}</strong><br><span class="text-xs bg-stone-200 px-1 rounded text-stone-700">${data.cve}</span><br>${data.desc}`;
+        }
+
+        function toggleReportTip(pageId) {
+            const tip = document.getElementById(`tip-${pageId}`);
+            tip.classList.toggle('hidden');
+        }
+
+        // --- Chart Initialization ---
+        let gradingChart;
+        let vulnChart;
+
+        window.onload = function() {
+            // 1. Grading Chart
+            const ctxGrading = document.getElementById('gradingChart').getContext('2d');
+            gradingChart = new Chart(ctxGrading, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Practical Work (50%)', 'Conceptual (25%)', 'Reporting (25%)'],
+                    datasets: [{
+                        data: [50, 25, 25],
+                        backgroundColor: ['#2563eb', '#f97316', '#10b981'], // Blue, Orange, Emerald
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+
+            // 2. Vulnerability Chart (Lab Step 3)
+            const ctxVuln = document.getElementById('vulnChart').getContext('2d');
+            vulnChart = new Chart(ctxVuln, {
+                type: 'bar',
+                data: {
+                    labels: ['Critical', 'High', 'Medium', 'Low'],
+                    datasets: [{
+                        label: 'Finding Count',
+                        data: [2, 5, 12, 8],
+                        backgroundColor: ['#ef4444', '#f97316', '#eab308', '#22c55e']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: 'Sample Metasploitable Scan Results' }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+            
+            // Initialize default views
+            updateScanInfo('syn');
+            updateVulnDetails();
+        };
+
+    </script>
+</body>
+</html>
+
+
+
+

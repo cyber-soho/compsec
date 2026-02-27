@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber.SoHo | Security Week 4 Interactive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease-in-out; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Chart Container Logic */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px; /* Max width to prevent stretching */
+            height: 300px;    /* Base height */
+            max-height: 400px;
+            margin: 0 auto;   /* Center horizontally */
+        }
+        @media (min-width: 768px) {
+            .chart-container { height: 350px; }
+        }
+
+        .interactive-card { transition: all 0.2s; cursor: pointer; }
+        .interactive-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .selected-card { border-color: #4f46e5; background-color: #eef2ff; }
+
+        .kill-chain-step { position: relative; padding-left: 2rem; border-left: 2px solid #e2e8f0; padding-bottom: 2rem; }
+        .kill-chain-step:last-child { border-left: none; }
+        .kill-chain-step::before { content: ''; position: absolute; left: -9px; top: 0; width: 16px; height: 16px; border-radius: 50%; background: #94a3b8; border: 4px solid #f8fafc; }
+        .kill-chain-step.active::before { background: #ef4444; border-color: #fee2e2; }
+    </style>
+    <!-- Chosen Palette: Slate (Neutral Background) + Indigo (Primary Action) + Red (Threat) + Emerald (Safety) -->
+    <!-- Application Structure Plan: 
+         A Dashboard-style SPA with a Sidebar Navigation (Desktop) / Top Nav (Mobile).
+         Sections:
+         1. Dashboard/Overview: High-level summary of the 3 key pillars (Scan, Classify, Vuln).
+         2. Network Scanning Lab: Interactive simulator. Users 'run' a scan to see how ports/services are discovered. 
+         3. Threat Intel Center (Attack Classification): Interactive CIA Triad filter and Kill Chain explorer.
+         4. Vulnerability Forge: Interactive CVSS Calculator. Users input vector metrics to see the score change in real-time.
+         Rationale: This structure breaks the linear slide deck into task-oriented modules, allowing the user to 'do' the security work (scan, classify, score) rather than just read about it.
+    -->
+    <!-- Visualization & Content Choices:
+         1. Scanning Module: 
+            - Goal: Show distribution of services.
+            - Viz: Bar Chart (Chart.js) of "Common Ports Found".
+            - Interaction: "Run Scan" button simulates delay and populates a data table.
+         2. Attack Module:
+            - Goal: Connect Attacks to CIA Triad.
+            - Interaction: Clicking "Confidentiality" filters a list of attack types.
+         3. Vulnerability Module:
+            - Goal: Visualize Severity.
+            - Viz: Doughnut Gauge (Chart.js) for CVSS Score.
+            - Interaction: Changing dropdowns updates the gauge color and value instantly.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="text-slate-800">
+
+    <!-- Top Navigation (Mobile) -->
+    <div class="md:hidden bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-50">
+        <h1 class="font-bold text-xl text-indigo-900">Cyber.SoHo <span class="text-slate-400 text-sm font-normal">| Wk 4</span></h1>
+        <button id="mobile-menu-btn" class="text-slate-600 focus:outline-none">
+            &#9776; <!-- Hamburger Icon -->
+        </button>
+    </div>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-menu" class="hidden md:hidden fixed inset-0 z-40 bg-white p-6 pt-20">
+        <nav class="flex flex-col space-y-4 text-lg font-medium">
+            <a href="#" onclick="switchTab('dashboard')" class="text-slate-600 hover:text-indigo-600">Overview</a>
+            <a href="#" onclick="switchTab('scanning')" class="text-slate-600 hover:text-indigo-600">Network Scanning</a>
+            <a href="#" onclick="switchTab('attacks')" class="text-slate-600 hover:text-indigo-600">Attack Classification</a>
+            <a href="#" onclick="switchTab('vulns')" class="text-slate-600 hover:text-indigo-600">Vulnerability Analysis</a>
+        </nav>
+    </div>
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar Navigation (Desktop) -->
+        <aside class="hidden md:flex flex-col w-64 bg-white border-r border-slate-200 fixed h-full z-10">
+            <div class="p-6 border-b border-slate-100">
+                <h1 class="font-bold text-2xl text-indigo-900 tracking-tight">Cyber.SoHo</h1>
+                <p class="text-xs text-slate-500 mt-1 uppercase tracking-wider">Security Fundamentals</p>
+            </div>
+            <nav class="flex-1 overflow-y-auto py-4">
+                <button onclick="switchTab('dashboard')" class="nav-btn w-full text-left px-6 py-3 text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition-colors border-l-4 border-transparent active-nav" data-target="dashboard">
+                    <span class="mr-3">📊</span> Overview
+                </button>
+                <button onclick="switchTab('scanning')" class="nav-btn w-full text-left px-6 py-3 text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition-colors border-l-4 border-transparent" data-target="scanning">
+                    <span class="mr-3">📡</span> Network Scanning
+                </button>
+                <button onclick="switchTab('attacks')" class="nav-btn w-full text-left px-6 py-3 text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition-colors border-l-4 border-transparent" data-target="attacks">
+                    <span class="mr-3">🛡️</span> Attack Classification
+                </button>
+                <button onclick="switchTab('vulns')" class="nav-btn w-full text-left px-6 py-3 text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition-colors border-l-4 border-transparent" data-target="vulns">
+                    <span class="mr-3">⚠️</span> Vulnerability Analysis
+                </button>
+            </nav>
+            <div class="p-6 border-t border-slate-100">
+                <div class="bg-indigo-50 rounded-lg p-4">
+                    <h4 class="text-indigo-800 text-sm font-semibold mb-1">Week 4 Status</h4>
+                    <div class="w-full bg-indigo-200 rounded-full h-2 mb-2">
+                        <div class="bg-indigo-600 h-2 rounded-full" style="width: 75%"></div>
+                    </div>
+                    <p class="text-xs text-indigo-600">Modules Reviewed</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 md:ml-64 p-4 md:p-8 lg:p-10 max-w-7xl mx-auto">
+            
+            <!-- SECTION 1: DASHBOARD -->
+            <section id="dashboard" class="tab-content active">
+                <header class="mb-8">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-2">Introduction to Computer Security</h2>
+                    <p class="text-slate-600 max-w-2xl">Week 4 focuses on the foundations of how attackers think—and how defenders respond. Explore the three key pillars below.</p>
+                </header>
+
+                <!-- Learning Outcomes Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition cursor-pointer" onclick="switchTab('scanning')">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 text-2xl mb-4">📡</div>
+                        <h3 class="font-semibold text-lg mb-2">Network Scanning</h3>
+                        <p class="text-sm text-slate-500">Discover active hosts, open ports, and services using tools like Nmap to map the attack surface.</p>
+                        <div class="mt-4 text-blue-600 text-sm font-medium hover:underline">Launch Scanner &rarr;</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition cursor-pointer" onclick="switchTab('attacks')">
+                        <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center text-red-600 text-2xl mb-4">⚔️</div>
+                        <h3 class="font-semibold text-lg mb-2">Attack Classification</h3>
+                        <p class="text-sm text-slate-500">Classify threats using the CIA Triad, Cyber Kill Chain, and MITRE ATT&CK framework.</p>
+                        <div class="mt-4 text-red-600 text-sm font-medium hover:underline">Analyze Threats &rarr;</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition cursor-pointer" onclick="switchTab('vulns')">
+                        <div class="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center text-amber-600 text-2xl mb-4">🚧</div>
+                        <h3 class="font-semibold text-lg mb-2">Vulnerability Analysis</h3>
+                        <p class="text-sm text-slate-500">Assess severity using CVSS scoring and understand the vulnerability lifecycle from discovery to patch.</p>
+                        <div class="mt-4 text-amber-600 text-sm font-medium hover:underline">Calculate CVSS &rarr;</div>
+                    </div>
+                </div>
+
+                <!-- Summary Chart -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-8">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                        <div>
+                            <h3 class="font-bold text-slate-800">Concept Relationship Map</h3>
+                            <p class="text-sm text-slate-500">How these concepts fit together in the security ecosystem.</p>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="overviewChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: NETWORK SCANNING -->
+            <section id="scanning" class="tab-content">
+                <header class="mb-8">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-2">Network Scanning & Discovery</h2>
+                    <p class="text-slate-600">The first phase of an attack (or audit) is discovery. Scanning identifies active hosts ("alive"), open ports ("doors"), and services ("what's inside").</p>
+                </header>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Interactive Scanner -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                        <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-4">
+                            <h3 class="font-bold text-slate-800">📡 Port Scanner Simulator</h3>
+                            <span class="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded">Tool: Nmap Equivalent</span>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Target IP Range</label>
+                            <div class="flex gap-2">
+                                <input type="text" value="192.168.1.0/24" disabled class="flex-1 bg-slate-50 border border-slate-300 text-slate-500 text-sm rounded-lg p-2.5 font-mono cursor-not-allowed">
+                                <button onclick="runScan()" id="scanBtn" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition flex items-center">
+                                    <span id="scanBtnText">Run Scan</span>
+                                </button>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-2">Note: Always obtain written authorisation before scanning networks you do not own.</p>
+                        </div>
+
+                        <!-- Scan Results -->
+                        <div class="border border-slate-200 rounded-lg overflow-hidden bg-slate-900 text-green-400 font-mono text-xs md:text-sm h-64 p-4 overflow-y-auto" id="terminalOutput">
+                            <div class="opacity-50">// Ready to scan...</div>
+                            <div class="opacity-50">// Click "Run Scan" to begin discovery.</div>
+                        </div>
+                    </div>
+
+                    <!-- Scanning Theory & Stats -->
+                    <div class="flex flex-col gap-6">
+                         <!-- Common Ports Reference -->
+                         <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                            <h3 class="font-bold text-slate-800 mb-4">Common Ports Reference</h3>
+                            <div class="chart-container h-64">
+                                <canvas id="portsChart"></canvas>
+                            </div>
+                            <div class="mt-4 grid grid-cols-2 gap-2 text-sm">
+                                <div class="bg-slate-50 p-2 rounded border border-slate-100 flex justify-between">
+                                    <span class="font-mono font-bold">22</span> <span class="text-slate-600">SSH (Secure Shell)</span>
+                                </div>
+                                <div class="bg-slate-50 p-2 rounded border border-slate-100 flex justify-between">
+                                    <span class="font-mono font-bold">80</span> <span class="text-slate-600">HTTP (Web)</span>
+                                </div>
+                                <div class="bg-slate-50 p-2 rounded border border-slate-100 flex justify-between">
+                                    <span class="font-mono font-bold">443</span> <span class="text-slate-600">HTTPS (Secure Web)</span>
+                                </div>
+                                <div class="bg-slate-50 p-2 rounded border border-slate-100 flex justify-between">
+                                    <span class="font-mono font-bold">3389</span> <span class="text-slate-600">RDP (Remote Desktop)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scan Types -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                            <h3 class="font-bold text-slate-800 mb-2">Scan Types</h3>
+                            <div class="space-y-3">
+                                <div class="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                                    <div class="font-semibold text-blue-800 text-sm">Ping Sweep (ICMP)</div>
+                                    <div class="text-xs text-blue-600 mt-1">"Who is alive?" - Sends Echo Request. Timeout = Down/Filtered.</div>
+                                </div>
+                                <div class="p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+                                    <div class="font-semibold text-indigo-800 text-sm">SYN Scan (Half-Open)</div>
+                                    <div class="text-xs text-indigo-600 mt-1">"Stealthy" - Sends SYN, gets SYN-ACK, never sends final ACK. Logs fewer entries.</div>
+                                </div>
+                                <div class="p-3 bg-purple-50 rounded-lg border border-purple-100">
+                                    <div class="font-semibold text-purple-800 text-sm">Version Detection</div>
+                                    <div class="text-xs text-purple-600 mt-1">"What version?" - e.g., identifying "Apache 2.4.49" to find specific CVEs.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 3: ATTACK CLASSIFICATION -->
+            <section id="attacks" class="tab-content">
+                <header class="mb-8">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-2">Attack Classification</h2>
+                    <p class="text-slate-600">Understanding the goal (CIA), the method (MITRE), and the stage (Kill Chain) of an attack is crucial for defense.</p>
+                </header>
+
+                <!-- CIA Triad Explorer -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-8">
+                    <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <span class="text-xl">⚔️</span> The CIA Triad Attack Explorer
+                        <span class="text-xs font-normal text-slate-500 bg-slate-100 px-2 py-1 rounded ml-auto">Click a pillar to see related attacks</span>
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div onclick="selectCIA('C')" id="cia-C" class="interactive-card p-6 rounded-lg border border-slate-200 bg-white text-center cursor-pointer">
+                            <div class="text-4xl mb-2">🔒</div>
+                            <h4 class="font-bold text-lg text-slate-800">Confidentiality</h4>
+                            <p class="text-xs text-slate-500 mt-1">Keeping data secret.</p>
+                        </div>
+                        <div onclick="selectCIA('I')" id="cia-I" class="interactive-card p-6 rounded-lg border border-slate-200 bg-white text-center cursor-pointer">
+                            <div class="text-4xl mb-2">📜</div>
+                            <h4 class="font-bold text-lg text-slate-800">Integrity</h4>
+                            <p class="text-xs text-slate-500 mt-1">Ensuring data isn't tampered with.</p>
+                        </div>
+                        <div onclick="selectCIA('A')" id="cia-A" class="interactive-card p-6 rounded-lg border border-slate-200 bg-white text-center cursor-pointer">
+                            <div class="text-4xl mb-2">⚡</div>
+                            <h4 class="font-bold text-lg text-slate-800">Availability</h4>
+                            <p class="text-xs text-slate-500 mt-1">Ensuring systems are running.</p>
+                        </div>
+                    </div>
+
+                    <div id="cia-details" class="bg-slate-50 rounded-lg p-6 border border-slate-200">
+                        <h4 class="font-bold text-indigo-900 mb-2" id="cia-title">Select a Pillar above</h4>
+                        <p class="text-sm text-slate-700 mb-4" id="cia-desc">Attacks are classified by which property of the CIA triad they violate.</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="cia-examples">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Cyber Kill Chain -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                        <h3 class="font-bold text-slate-800 mb-6">Cyber Kill Chain (7 Stages)</h3>
+                        <div class="pl-4 border-l-2 border-slate-100 relative">
+                            <!-- Steps generated via JS/HTML Structure -->
+                            <div class="kill-chain-step group hover:bg-slate-50 rounded-r-lg transition">
+                                <h4 class="font-bold text-sm text-slate-700">1. Reconnaissance</h4>
+                                <p class="text-xs text-slate-500">Target research, scanning, email harvesting.</p>
+                            </div>
+                            <div class="kill-chain-step group hover:bg-slate-50 rounded-r-lg transition">
+                                <h4 class="font-bold text-sm text-slate-700">2. Weaponisation</h4>
+                                <p class="text-xs text-slate-500">Creating the exploit/payload (e.g., PDF with malware).</p>
+                            </div>
+                            <div class="kill-chain-step group hover:bg-slate-50 rounded-r-lg transition">
+                                <h4 class="font-bold text-sm text-slate-700">3. Delivery</h4>
+                                <p class="text-xs text-slate-500">Transmission via Email (Phishing), USB, Web.</p>
+                            </div>
+                            <div class="kill-chain-step group hover:bg-slate-50 rounded-r-lg transition">
+                                <h4 class="font-bold text-sm text-slate-700">4. Exploitation</h4>
+                                <p class="text-xs text-slate-500">Triggering the vulnerability in the system.</p>
+                            </div>
+                            <div class="kill-chain-step group hover:bg-slate-50 rounded-r-lg transition">
+                                <h4 class="font-bold text-sm text-slate-700">5. Installation</h4>
+                                <p class="text-xs text-slate-500">Establishing a backdoor or persistence.</p>
+                            </div>
+                            <div class="kill-chain-step group hover:bg-slate-50 rounded-r-lg transition">
+                                <h4 class="font-bold text-sm text-slate-700">6. C2 (Command & Control)</h4>
+                                <p class="text-xs text-slate-500">Remote control established by attacker.</p>
+                            </div>
+                            <div class="kill-chain-step group hover:bg-slate-50 rounded-r-lg transition">
+                                <h4 class="font-bold text-sm text-red-600">7. Actions on Objectives</h4>
+                                <p class="text-xs text-slate-500">Data exfiltration, encryption (Ransomware), destruction.</p>
+                            </div>
+                        </div>
+                        <div class="mt-2 bg-indigo-50 text-indigo-800 p-3 rounded text-xs font-medium">
+                            Goal: Break the chain at any stage to stop the attack.
+                        </div>
+                    </div>
+
+                    <!-- Malware Classification -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                        <h3 class="font-bold text-slate-800 mb-4">Malware & Social Engineering</h3>
+                        
+                        <div class="mb-6">
+                            <h4 class="text-sm font-semibold text-slate-700 mb-2 border-b pb-1">Malware Types</h4>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex items-start gap-2">
+                                    <span class="bg-red-100 text-red-800 px-2 rounded text-xs mt-0.5">Worm</span>
+                                    <span class="text-slate-600">Self-replicating. Spreads automatically (e.g., WannaCry).</span>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <span class="bg-orange-100 text-orange-800 px-2 rounded text-xs mt-0.5">Trojan</span>
+                                    <span class="text-slate-600">Disguised as legit software. Opens backdoors.</span>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <span class="bg-slate-100 text-slate-800 px-2 rounded text-xs mt-0.5">Ransomware</span>
+                                    <span class="text-slate-600">Encrypts files for payment. High availability impact.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="text-sm font-semibold text-slate-700 mb-2 border-b pb-1">Social Engineering (Human Hacking)</h4>
+                            <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-100">
+                                <p class="font-bold text-yellow-800 text-sm mb-1">The Phishing Formula</p>
+                                <p class="text-yellow-700 italic text-sm">Urgency + Authority + Spoofed Branding = Click</p>
+                            </div>
+                            <ul class="mt-3 space-y-1 text-sm text-slate-600 list-disc list-inside">
+                                <li><strong>Phishing:</strong> Generic fake emails.</li>
+                                <li><strong>Spear Phishing:</strong> Targeted using personal info.</li>
+                                <li><strong>Vishing:</strong> Voice/Phone based.</li>
+                                <li><strong>Smishing:</strong> SMS based.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 4: VULNERABILITY ANALYSIS -->
+            <section id="vulns" class="tab-content">
+                <header class="mb-8">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-2">Vulnerability Analysis</h2>
+                    <p class="text-slate-600">A vulnerability is a flaw. An exploit is the key. Risk is the combination of probability and impact. Use the CVSS calculator below to see how severity is determined.</p>
+                </header>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    
+                    <!-- CVSS Calculator (Takes up 7 cols) -->
+                    <div class="lg:col-span-7 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-bold text-slate-800">🧮 CVSS v3.1 Calculator</h3>
+                            <a href="https://first.org/cvss" target="_blank" class="text-xs text-indigo-600 hover:underline">Reference: FIRST.org</a>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Exploitability Metrics -->
+                            <div class="space-y-4">
+                                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Exploitability Metrics</h4>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-700 mb-1">Attack Vector (AV)</label>
+                                    <select id="cvss-av" class="w-full text-sm border-slate-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 bg-slate-50" onchange="calculateCVSS()">
+                                        <option value="0.85">Network (Remote) [Worst]</option>
+                                        <option value="0.62">Adjacent (Local Network)</option>
+                                        <option value="0.55">Local (Physical Access)</option>
+                                        <option value="0.2">Physical (Hardware Access)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-700 mb-1">Attack Complexity (AC)</label>
+                                    <select id="cvss-ac" class="w-full text-sm border-slate-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 bg-slate-50" onchange="calculateCVSS()">
+                                        <option value="0.77">Low (Easy) [Worst]</option>
+                                        <option value="0.44">High (Hard)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-700 mb-1">Privileges Required (PR)</label>
+                                    <select id="cvss-pr" class="w-full text-sm border-slate-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 bg-slate-50" onchange="calculateCVSS()">
+                                        <option value="0.85">None (No Login) [Worst]</option>
+                                        <option value="0.62">Low (Standard User)</option>
+                                        <option value="0.27">High (Admin)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-700 mb-1">User Interaction (UI)</label>
+                                    <select id="cvss-ui" class="w-full text-sm border-slate-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 bg-slate-50" onchange="calculateCVSS()">
+                                        <option value="0.85">None [Worst]</option>
+                                        <option value="0.62">Required (e.g. click link)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Impact Metrics -->
+                            <div class="space-y-4">
+                                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Impact Metrics (CIA)</h4>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-700 mb-1">Confidentiality (C)</label>
+                                    <select id="cvss-c" class="w-full text-sm border-slate-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 bg-slate-50" onchange="calculateCVSS()">
+                                        <option value="0.56">High (Total Data Loss)</option>
+                                        <option value="0.22">Low (Partial)</option>
+                                        <option value="0">None</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-700 mb-1">Integrity (I)</label>
+                                    <select id="cvss-i" class="w-full text-sm border-slate-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 bg-slate-50" onchange="calculateCVSS()">
+                                        <option value="0.56">High (Total Modification)</option>
+                                        <option value="0.22">Low (Partial)</option>
+                                        <option value="0">None</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-700 mb-1">Availability (A)</label>
+                                    <select id="cvss-a" class="w-full text-sm border-slate-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 bg-slate-50" onchange="calculateCVSS()">
+                                        <option value="0.56">High (Total Downtime)</option>
+                                        <option value="0.22">Low (Partial)</option>
+                                        <option value="0">None</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Score Result (Takes up 5 cols) -->
+                    <div class="lg:col-span-5 flex flex-col gap-6">
+                        <!-- Score Display -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex flex-col items-center justify-center text-center">
+                            <h4 class="text-sm font-bold text-slate-500 mb-2">Calculated Base Score</h4>
+                            <div class="relative w-48 h-48 mb-4">
+                                <div class="chart-container" style="height: 100%; width: 100%;">
+                                    <canvas id="cvssGauge"></canvas>
+                                </div>
+                                <div class="absolute inset-0 flex items-center justify-center flex-col">
+                                    <span id="score-val" class="text-5xl font-bold text-slate-800">0.0</span>
+                                    <span id="score-rating" class="text-sm font-semibold text-slate-500 uppercase px-2 py-1 rounded mt-1">None</span>
+                                </div>
+                            </div>
+                            <p class="text-xs text-slate-400">Score ranges: 0-3.9 Low | 4.0-6.9 Medium | 7.0-8.9 High | 9.0-10 Critical</p>
+                        </div>
+
+                        <!-- Triangle Concept -->
+                        <div class="bg-indigo-900 text-white p-6 rounded-xl shadow-sm">
+                            <h4 class="font-bold mb-2">The Vulnerability Triangle</h4>
+                            <p class="text-xs text-indigo-200 mb-4">For an attack to happen, ALL three must exist.</p>
+                            <div class="flex justify-between items-center text-center text-xs font-medium">
+                                <div>
+                                    <div class="bg-white/10 p-2 rounded mb-1">Vulnerability</div>
+                                    <span class="text-indigo-300">The Flaw</span>
+                                </div>
+                                <div class="text-xl">+</div>
+                                <div>
+                                    <div class="bg-white/10 p-2 rounded mb-1">Threat</div>
+                                    <span class="text-indigo-300">The Actor</span>
+                                </div>
+                                <div class="text-xl">+</div>
+                                <div>
+                                    <div class="bg-white/10 p-2 rounded mb-1">Exposure</div>
+                                    <span class="text-indigo-300">Access</span>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-indigo-800 text-center text-sm font-bold text-indigo-200">
+                                = SUCCESSFUL ATTACK
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Lifecycle -->
+                <div class="mt-8 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <h3 class="font-bold text-slate-800 mb-4">Zero-Day Lifecycle</h3>
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-center">
+                        <div class="flex-1">
+                            <div class="bg-red-100 text-red-800 font-bold p-3 rounded-lg mb-2">1. Discovery</div>
+                            <p class="text-xs text-slate-500">Flaw found by attacker. No patch exists.</p>
+                        </div>
+                        <div class="text-slate-300 text-xl hidden md:block">→</div>
+                        <div class="flex-1">
+                            <div class="bg-orange-100 text-orange-800 font-bold p-3 rounded-lg mb-2">2. Secret Exploitation</div>
+                            <p class="text-xs text-slate-500">Attackers use it. "Window of Exposure".</p>
+                        </div>
+                        <div class="text-slate-300 text-xl hidden md:block">→</div>
+                        <div class="flex-1">
+                            <div class="bg-blue-100 text-blue-800 font-bold p-3 rounded-lg mb-2">3. Disclosure</div>
+                            <p class="text-xs text-slate-500">Vendor notified or attack spotted.</p>
+                        </div>
+                        <div class="text-slate-300 text-xl hidden md:block">→</div>
+                        <div class="flex-1">
+                            <div class="bg-green-100 text-green-800 font-bold p-3 rounded-lg mb-2">4. Patch</div>
+                            <p class="text-xs text-slate-500">CVE published. Fix deployed.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // State Management
+        const appState = {
+            currentTab: 'dashboard',
+            scanRunning: false,
+            ciaSelection: null
+        };
+
+        // Tab Switching Logic
+        function switchTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            // Show selected
+            document.getElementById(tabId).classList.add('active');
+            
+            // Update Sidebar UI
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if(btn.dataset.target === tabId) {
+                    btn.classList.add('bg-slate-50', 'text-indigo-600', 'border-indigo-600');
+                    btn.classList.remove('border-transparent');
+                } else {
+                    btn.classList.remove('bg-slate-50', 'text-indigo-600', 'border-indigo-600');
+                    btn.classList.add('border-transparent');
+                }
+            });
+
+            // Close mobile menu if open
+            document.getElementById('mobile-menu').classList.add('hidden');
+        }
+
+        // Mobile Menu Toggle
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        });
+
+        // -------------------------
+        // MODULE 1: NETWORK SCANNER
+        // -------------------------
+        function runScan() {
+            if(appState.scanRunning) return;
+            appState.scanRunning = true;
+            
+            const btn = document.getElementById('scanBtn');
+            const btnText = document.getElementById('scanBtnText');
+            const output = document.getElementById('terminalOutput');
+            
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+            btnText.innerText = "Scanning...";
+            output.innerHTML = '<div class="text-slate-400">// Starting Nmap 7.92...</div>';
+
+            const steps = [
+                { time: 500, text: 'Initiating Ping Scan at 10:00' },
+                { time: 1000, text: 'Scanning 192.168.1.0/24 [256 hosts]' },
+                { time: 1800, text: 'Discovered open port 80/tcp on 192.168.1.10' },
+                { time: 2200, text: 'Discovered open port 22/tcp on 192.168.1.10' },
+                { time: 2600, text: 'Discovered open port 443/tcp on 192.168.1.10' },
+                { time: 3000, text: 'Discovered open port 3306/tcp on 192.168.1.15' },
+                { time: 3500, text: 'Service Scan: Apache 2.4.49 detected on port 80.' },
+                { time: 4000, text: '<span class="text-white bg-green-800 px-1">Scan Complete.</span> 2 hosts up.' }
+            ];
+
+            let currentTime = 0;
+            steps.forEach(step => {
+                setTimeout(() => {
+                    const div = document.createElement('div');
+                    div.innerHTML = `> ${step.text}`;
+                    output.appendChild(div);
+                    output.scrollTop = output.scrollHeight;
+                }, step.time);
+            });
+
+            setTimeout(() => {
+                appState.scanRunning = false;
+                btn.classList.remove('opacity-75', 'cursor-not-allowed');
+                btnText.innerText = "Run Scan";
+            }, 4200);
+        }
+
+        // -------------------------
+        // MODULE 2: CIA TRIAD
+        // -------------------------
+        const ciaData = {
+            'C': {
+                title: 'Confidentiality Attacks',
+                desc: 'Attacks that steal, snoop, or leak data. The goal is unauthorized access.',
+                examples: [
+                    { name: 'Phishing', desc: 'Stealing creds via fake emails', type: 'Human' },
+                    { name: 'MITM', desc: 'Intercepting traffic mid-stream', type: 'Network' },
+                    { name: 'Spyware', desc: 'Silent data collection', type: 'Malware' },
+                    { name: 'ARP Spoofing', desc: 'LAN traffic redirection', type: 'Network' }
+                ]
+            },
+            'I': {
+                title: 'Integrity Attacks',
+                desc: 'Attacks that alter, corrupt, or modify data. The goal is deception or sabotage.',
+                examples: [
+                    { name: 'SQL Injection', desc: 'Modifying DB queries/data', type: 'Web' },
+                    { name: 'File Tampering', desc: 'Altering logs or binaries', type: 'Host' },
+                    { name: 'DNS Poisoning', desc: 'Redirecting to fake sites', type: 'Network' },
+                    { name: 'Website Defacement', desc: 'Changing visual content', type: 'Web' }
+                ]
+            },
+            'A': {
+                title: 'Availability Attacks',
+                desc: 'Attacks that stop systems from working. The goal is disruption.',
+                examples: [
+                    { name: 'DDoS', desc: 'Flooding with traffic', type: 'Network' },
+                    { name: 'Ransomware', desc: 'Encrypting data (no access)', type: 'Malware' },
+                    { name: 'Wiper Malware', desc: 'Deleting data permanently', type: 'Malware' },
+                    { name: 'Power Cut', desc: 'Physical disruption', type: 'Physical' }
+                ]
+            }
+        };
+
+        function selectCIA(type) {
+            // UI Selection State
+            ['C', 'I', 'A'].forEach(t => document.getElementById(`cia-${t}`).classList.remove('selected-card'));
+            document.getElementById(`cia-${type}`).classList.add('selected-card');
+
+            // Update Content
+            const data = ciaData[type];
+            document.getElementById('cia-title').innerText = data.title;
+            document.getElementById('cia-title').className = `font-bold text-xl mb-2 ${type === 'A' ? 'text-red-600' : type === 'I' ? 'text-purple-600' : 'text-indigo-600'}`;
+            document.getElementById('cia-desc').innerText = data.desc;
+
+            const container = document.getElementById('cia-examples');
+            container.innerHTML = '';
+            data.examples.forEach(ex => {
+                container.innerHTML += `
+                    <div class="bg-white p-3 rounded border border-slate-200 shadow-sm">
+                        <div class="flex justify-between">
+                            <span class="font-bold text-slate-800">${ex.name}</span>
+                            <span class="text-xs bg-slate-100 px-2 rounded text-slate-500">${ex.type}</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">${ex.desc}</p>
+                    </div>
+                `;
+            });
+        }
+
+        // Initialize CIA
+        selectCIA('C');
+
+        // -------------------------
+        // MODULE 3: CVSS CALCULATOR
+        // -------------------------
+        let cvssChartInstance = null;
+
+        function calculateCVSS() {
+            // Get values
+            const AV = parseFloat(document.getElementById('cvss-av').value);
+            const AC = parseFloat(document.getElementById('cvss-ac').value);
+            const PR = parseFloat(document.getElementById('cvss-pr').value);
+            const UI = parseFloat(document.getElementById('cvss-ui').value);
+            const C = parseFloat(document.getElementById('cvss-c').value);
+            const I = parseFloat(document.getElementById('cvss-i').value);
+            const A = parseFloat(document.getElementById('cvss-a').value);
+
+            // Simplified CVSS 3.1 Logic approximation for educational purpose
+            // Base Score = Impact + Exploitability
+            
+            // 1. ISS (Impact Sub Score) = 1 - [ (1-C) * (1-I) * (1-A) ]
+            const ISS = 1 - ((1-C) * (1-I) * (1-A));
+            
+            // 2. Impact = If ISS > 0, 6.42 * ISS
+            let Impact = ISS > 0 ? (6.42 * ISS) : 0;
+            if (Impact <= 0) Impact = 0;
+
+            // 3. Exploitability = 8.22 * AV * AC * PR * UI
+            const Exploitability = 8.22 * AV * AC * PR * UI;
+
+            // 4. Base Score (If Impact <= 0, score is 0)
+            let BaseScore = 0;
+            if (Impact > 0) {
+                // Simplified clamp logic
+                BaseScore = Impact + Exploitability;
+                if (BaseScore > 10) BaseScore = 10;
+            }
+            
+            // Round to 1 decimal
+            BaseScore = Math.round(BaseScore * 10) / 10;
+
+            // Update UI
+            const scoreVal = document.getElementById('score-val');
+            const scoreRating = document.getElementById('score-rating');
+            
+            scoreVal.innerText = BaseScore.toFixed(1);
+            
+            let color = '#94a3b8';
+            let rating = 'None';
+            let textCol = 'text-slate-500';
+            let bgCol = 'bg-slate-100';
+
+            if (BaseScore > 0) {
+                if (BaseScore < 4.0) { rating = 'Low'; color = '#facc15'; textCol = 'text-yellow-700'; bgCol = 'bg-yellow-100'; }
+                else if (BaseScore < 7.0) { rating = 'Medium'; color = '#f97316'; textCol = 'text-orange-700'; bgCol = 'bg-orange-100'; }
+                else if (BaseScore < 9.0) { rating = 'High'; color = '#ef4444'; textCol = 'text-red-700'; bgCol = 'bg-red-100'; }
+                else { rating = 'Critical'; color = '#7f1d1d'; textCol = 'text-red-900'; bgCol = 'bg-red-200'; }
+            }
+
+            scoreRating.innerText = rating;
+            scoreRating.className = `text-sm font-semibold uppercase px-2 py-1 rounded mt-1 ${textCol} ${bgCol}`;
+            scoreVal.className = `text-5xl font-bold ${textCol}`;
+
+            // Update Gauge
+            if(cvssChartInstance) {
+                cvssChartInstance.data.datasets[0].data = [BaseScore, 10 - BaseScore];
+                cvssChartInstance.data.datasets[0].backgroundColor = [color, '#e2e8f0'];
+                cvssChartInstance.update();
+            }
+        }
+
+        // -------------------------
+        // INITIALIZATION & CHARTS
+        // -------------------------
+        window.onload = function() {
+            // 1. Overview Chart
+            const ctxOverview = document.getElementById('overviewChart').getContext('2d');
+            new Chart(ctxOverview, {
+                type: 'bar',
+                data: {
+                    labels: ['Network Scanning', 'Attacks (CIA)', 'Vulnerabilities', 'Defence'],
+                    datasets: [{
+                        label: 'Course Focus Area',
+                        data: [25, 35, 25, 15],
+                        backgroundColor: ['#3b82f6', '#ef4444', '#f59e0b', '#10b981'],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { display: false }, x: { grid: { display: false } } }
+                }
+            });
+
+            // 2. Ports Chart
+            const ctxPorts = document.getElementById('portsChart').getContext('2d');
+            new Chart(ctxPorts, {
+                type: 'bar',
+                data: {
+                    labels: ['80 (HTTP)', '443 (HTTPS)', '22 (SSH)', '3389 (RDP)', '3306 (MySQL)'],
+                    datasets: [{
+                        label: 'Scan Frequency',
+                        data: [95, 88, 60, 45, 30],
+                        backgroundColor: '#6366f1',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // 3. CVSS Gauge
+            const ctxCvss = document.getElementById('cvssGauge').getContext('2d');
+            cvssChartInstance = new Chart(ctxCvss, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Score', 'Remaining'],
+                    datasets: [{
+                        data: [0, 10],
+                        backgroundColor: ['#94a3b8', '#e2e8f0'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '80%',
+                    plugins: { tooltip: { enabled: false }, legend: { display: false } }
+                }
+            });
+
+            // Run initial calc
+            calculateCVSS();
+        };
+
+    </script>
+</body>
+</html>
+
+
+

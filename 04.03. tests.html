@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Week 4: Study Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for 3D flip effect */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .preserve-3d {
+            transform-style: preserve-3d;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+        .flashcard-inner {
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+        }
+        
+        /* Hide scrollbar for a cleaner look if content overflows */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen font-sans selection:bg-blue-200 selection:text-blue-900">
+
+    <div class="max-w-4xl mx-auto pt-8 pb-12 px-4 sm:px-6">
+        <!-- Header -->
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-slate-900 mb-2">Introduction to Computer Security</h1>
+            <p class="text-slate-500">Week 4 Study Tool: Network Scanning & Attack Classification</p>
+        </header>
+
+        <!-- Tabs Navigation -->
+        <div class="flex justify-center mb-8 border-b border-slate-200">
+            <button id="tab-btn-flashcards" onclick="switchTab('flashcards')" class="px-6 py-3 font-semibold text-blue-600 border-b-2 border-blue-600 focus:outline-none transition-colors">
+                <svg class="w-5 h-5 inline-block mr-2 -mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                Flashcards
+            </button>
+            <button id="tab-btn-quiz" onclick="switchTab('quiz')" class="px-6 py-3 font-medium text-slate-500 border-b-2 border-transparent hover:text-slate-700 hover:border-slate-300 focus:outline-none transition-colors">
+                <svg class="w-5 h-5 inline-block mr-2 -mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Practice Quiz
+            </button>
+        </div>
+
+        <!-- Flashcards Tab Content -->
+        <div id="tab-flashcards" class="block">
+            <div class="max-w-2xl mx-auto">
+                <div class="flex justify-between items-center mb-4 px-2">
+                    <span class="text-sm font-medium text-slate-500 uppercase tracking-wider">Flashcard Study</span>
+                    <span id="fc-progress" class="text-sm font-bold text-blue-600 bg-blue-50 py-1 px-3 rounded-full">1 / 25</span>
+                </div>
+
+                <!-- Flashcard Container -->
+                <div class="perspective-1000 w-full h-80 cursor-pointer mb-8" onclick="flipCard()">
+                    <div id="fc-inner" class="flashcard-inner w-full h-full relative preserve-3d shadow-xl rounded-2xl">
+                        
+                        <!-- Front of card -->
+                        <div class="absolute w-full h-full backface-hidden bg-white rounded-2xl border border-slate-100 flex flex-col items-center justify-center p-8 text-center">
+                            <span class="absolute top-4 left-4 text-xs font-semibold text-slate-400 uppercase tracking-widest">Term</span>
+                            <h2 id="fc-front-text" class="text-2xl sm:text-3xl font-bold text-slate-800 leading-tight"></h2>
+                            <p class="absolute bottom-4 text-sm text-slate-400 flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
+                                Click to flip
+                            </p>
+                        </div>
+
+                        <!-- Back of card -->
+                        <div class="absolute w-full h-full backface-hidden bg-blue-600 text-white rounded-2xl border border-blue-500 flex flex-col items-center justify-center p-8 text-center rotate-y-180">
+                            <span class="absolute top-4 left-4 text-xs font-semibold text-blue-200 uppercase tracking-widest">Definition</span>
+                            <p id="fc-back-text" class="text-lg sm:text-xl font-medium leading-relaxed"></p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="flex justify-between items-center gap-4">
+                    <button onclick="prevCard()" class="flex-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold py-3 px-6 rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                        Previous
+                    </button>
+                    <button onclick="nextCard()" class="flex-1 bg-slate-800 hover:bg-slate-900 text-white font-semibold py-3 px-6 rounded-xl shadow-md shadow-slate-200 transition-all active:scale-95 flex items-center justify-center gap-2">
+                        Next
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Tab Content -->
+        <div id="tab-quiz" class="hidden">
+            <div class="max-w-3xl mx-auto">
+                
+                <!-- Quiz Startup View -->
+                <div id="quiz-start" class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 text-center">
+                    <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">Knowledge Check</h2>
+                    <p class="text-slate-500 mb-6">Test your understanding of Network Scanning, Threat Classification, and Vulnerability Analysis with these 10 questions.</p>
+                    <button onclick="startQuiz()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-md transition-colors">
+                        Start Quiz
+                    </button>
+                </div>
+
+                <!-- Active Quiz View -->
+                <div id="quiz-active" class="hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <span id="quiz-progress" class="text-sm font-semibold text-slate-500">Question 1 of 10</span>
+                        <span class="text-sm font-semibold text-slate-500">Score: <span id="quiz-score" class="text-blue-600">0</span></span>
+                    </div>
+
+                    <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-100 mb-6">
+                        <h3 id="quiz-question" class="text-xl font-bold text-slate-800 mb-6 leading-relaxed"></h3>
+                        
+                        <!-- Options Container -->
+                        <div id="quiz-options" class="flex flex-col gap-3">
+                            <!-- Options injected here -->
+                        </div>
+
+                        <!-- Hint Area -->
+                        <div class="mt-6 pt-6 border-t border-slate-100">
+                            <button id="btn-hint" onclick="toggleHint()" class="text-sm text-blue-500 hover:text-blue-700 font-medium flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                                Show Hint
+                            </button>
+                            <p id="quiz-hint" class="hidden mt-3 text-sm text-slate-600 bg-amber-50 p-4 rounded-lg border border-amber-100 italic"></p>
+                        </div>
+                    </div>
+
+                    <!-- Feedback Area (Hidden initially) -->
+                    <div id="quiz-feedback" class="hidden bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-6 transition-all">
+                        <div class="flex items-start gap-4">
+                            <div id="feedback-icon" class="mt-1 flex-shrink-0">
+                                <!-- Icon injected here -->
+                            </div>
+                            <div>
+                                <h4 id="feedback-title" class="text-lg font-bold mb-1"></h4>
+                                <p id="feedback-rationale" class="text-slate-600 leading-relaxed"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button id="btn-next-question" onclick="nextQuestion()" class="hidden bg-slate-800 hover:bg-slate-900 text-white font-semibold py-3 px-8 rounded-xl shadow-md transition-all">
+                            Next Question
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quiz Results View -->
+                <div id="quiz-results" class="hidden bg-white p-10 rounded-2xl shadow-sm border border-slate-100 text-center">
+                    <div id="result-icon-container" class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <!-- Result icon injected here -->
+                    </div>
+                    <h2 class="text-3xl font-bold text-slate-800 mb-2">Quiz Complete!</h2>
+                    <p class="text-lg text-slate-500 mb-6">You scored <span id="final-score" class="font-bold text-slate-800"></span> out of <span id="total-questions" class="font-bold text-slate-800"></span>.</p>
+                    
+                    <div class="w-full bg-slate-100 rounded-full h-3 mb-8 overflow-hidden">
+                        <div id="score-bar" class="bg-blue-500 h-3 rounded-full transition-all duration-1000 w-0"></div>
+                    </div>
+
+                    <button onclick="resetQuiz()" class="bg-white border-2 border-slate-200 hover:bg-slate-50 text-slate-700 font-bold py-3 px-8 rounded-xl shadow-sm transition-colors mr-3">
+                        Retake Quiz
+                    </button>
+                    <button onclick="switchTab('flashcards')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-md transition-colors border-2 border-blue-600 hover:border-blue-700">
+                        Review Flashcards
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Data Definitions ---
+
+        const flashcardsData = [
+            { front: "Network Scanning Purpose", back: "To systematically probe a network to discover active hosts, open ports, operating systems, and network topology." },
+            { front: "Ping Sweep (ICMP Scan)", back: "A scan that sends ICMP Echo Requests to a range of IPs to build an inventory of live hosts." },
+            { front: "Port 22 Service", back: "SSH (Secure Shell)" },
+            { front: "Port 80 vs Port 443", back: "Port 80 is for HTTP (unsecured web traffic); Port 443 is for HTTPS (secured/encrypted web traffic)." },
+            { front: "SYN Scan (\"Half-Open\")", back: "A stealthy scan that sends a SYN packet and receives a SYN-ACK, but never sends the final ACK to complete the connection." },
+            { front: "OS Fingerprinting", back: "The process of analyzing how a target system responds to unusual packets to identify its operating system (e.g., Windows, Linux)." },
+            { front: "Nmap", back: "The industry-standard tool used for network scanning, OS fingerprinting, and version detection." },
+            { front: "CIA Triad", back: "The three pillars of security: Confidentiality, Integrity, and Availability." },
+            { front: "MITRE ATT&CK", back: "A framework that catalogues real-world Adversarial Tactics, Techniques, and Common Knowledge (TTPs)." },
+            { front: "Cyber Kill Chain: Stage 1", back: "Reconnaissance: Target research, scanning, and email harvesting." },
+            { front: "Cyber Kill Chain: Stage 7", back: "Actions on Objectives: The final stage where the attacker achieves their goal (e.g., data exfiltration, encryption)." },
+            { front: "Phishing vs. Spear Phishing", back: "Phishing is a generic fake email sent to many; Spear Phishing is targeted and uses personal information to trick a specific victim." },
+            { front: "Ransomware", back: "Malware that encrypts files and demands payment for the decryption key." },
+            { front: "DDoS (Distributed Denial of Service)", back: "An attack that floods a system with traffic to disrupt its Availability." },
+            { front: "SQL Injection (SQLi)", back: "A web application attack where malicious SQL code is inserted into input fields to manipulate the database." },
+            { front: "The Vulnerability Triangle", back: "For an attack to succeed, three elements must exist: Vulnerability (flaw), Threat (actor), and Exposure (access)." },
+            { front: "CVSS (Common Vulnerability Scoring System)", back: "An industry standard that produces a score from 0.0 to 10.0 to reflect the severity of a vulnerability." },
+            { front: "CVSS Critical Score Range", back: "9.0 – 10.0" },
+            { front: "Zero-Day Vulnerability", back: "A vulnerability that is unknown to the vendor (no patch exists) and is actively exploitable by attackers." },
+            { front: "Zero-Day Lifecycle", back: "Discovery -> Secret Exploitation (Window of Exposure) -> Disclosure -> Patch Development." },
+            { front: "CVE", back: "Common Vulnerabilities and Exposures; a unique ID (e.g., CVE-2021-44228) assigned to a specific vulnerability." },
+            { front: "Vulnerability Scan vs. Penetration Test", back: "Scans are automated, wide, and shallow (inventory); Penetration Tests are manual, narrow, and deep (simulate attack to prove exploitability)." },
+            { front: "OWASP Top 10", back: "A standard awareness document representing the most critical security risks to web applications." },
+            { front: "Rootkit", back: "Malicious software that hides deep in the OS to maintain persistent access and is very hard to detect." },
+            { front: "Port 3389 Service", back: "RDP (Remote Desktop Protocol)" }
+        ];
+
+        const quizData = [
+            {
+                question: "A security auditor is performing a 'half-open' scan on a target server to avoid logging complete connections. Which type of scan are they most likely using?",
+                hint: "This scan type abandons the connection establishment process after receiving the first response from the target.",
+                options: [
+                    { text: "SYN Scan", rationale: "A SYN scan initiates the TCP handshake but never sends the final ACK, preventing a full connection from being established and often bypassing simple logging mechanisms.", isCorrect: true },
+                    { text: "Ping Sweep", rationale: "A ping sweep uses ICMP Echo Requests to determine if hosts are alive, but it does not involve the TCP handshake process used in port scanning.", isCorrect: false },
+                    { text: "Connect Scan", rationale: "A Connect scan completes the full TCP three-way handshake (SYN, SYN-ACK, ACK), making it highly visible in system logs.", isCorrect: false },
+                    { text: "UDP Scan", rationale: "UDP scans target connectionless services and do not involve the TCP SYN/ACK handshake process.", isCorrect: false }
+                ]
+            },
+            {
+                question: "During a network inventory, you discover a host with Port 443 open. Which service is most likely running on this port?",
+                hint: "This service ensures your credit card numbers are safe when shopping online.",
+                options: [
+                    { text: "HTTPS (Secure Web)", rationale: "Port 443 is the standard reserved port for HTTPS, which handles encrypted web traffic.", isCorrect: true },
+                    { text: "SSH (Secure Shell)", rationale: "SSH typically runs on port 22 to provide secure command-line access.", isCorrect: false },
+                    { text: "RDP (Remote Desktop)", rationale: "Remote Desktop Protocol usually listens on port 3389.", isCorrect: false },
+                    { text: "HTTP (Unsecured Web)", rationale: "Standard, unencrypted HTTP traffic typically uses port 80.", isCorrect: false }
+                ]
+            },
+            {
+                question: "An organization is hit by a ransomware attack that encrypts all critical files, rendering them inaccessible to employees. Which pillar of the CIA Triad has been primarily violated?",
+                hint: "The employees are unable to use the systems or read the data they need to do their jobs.",
+                options: [
+                    { text: "Availability", rationale: "The primary impact of ransomware is denying authorized users access to their data or systems, which is a direct violation of Availability.", isCorrect: true },
+                    { text: "Confidentiality", rationale: "While modern ransomware often steals data (double extortion), the act of encryption primarily stops access (Availability), whereas Confidentiality deals with unauthorized disclosure.", isCorrect: false },
+                    { text: "Integrity", rationale: "Integrity involves unauthorized modification or tampering; while encryption technically modifies data, the functional loss is the inability to access it.", isCorrect: false },
+                    { text: "Authentication", rationale: "Authentication is a process for verifying identity, not one of the three core goals of the CIA Triad itself.", isCorrect: false }
+                ]
+            },
+            {
+                question: "According to the Cyber Kill Chain, in which stage does the attacker create the specific malware payload intended for the target?",
+                hint: "This stage involves preparing the 'weapon' before it is launched at the target.",
+                options: [
+                    { text: "Weaponisation", rationale: "Weaponisation is the stage where the attacker couples a remote access trojan or exploit with a deliverable file (like a PDF or Office doc).", isCorrect: true },
+                    { text: "Delivery", rationale: "Delivery focuses on transmitting the weaponized payload to the victim, for example via email or USB.", isCorrect: false },
+                    { text: "Exploitation", rationale: "Exploitation occurs after delivery, when the code actually triggers the vulnerability on the target system.", isCorrect: false },
+                    { text: "Reconnaissance", rationale: "Reconnaissance is the initial research phase where targets are identified, before any payload is created.", isCorrect: false }
+                ]
+            },
+            {
+                question: "You receive an email claiming to be from your CEO, demanding you urgently transfer funds or risk being fired. This is an example of which component of the 'Phishing Formula'?",
+                hint: "Think about the psychological triggers used: 'Do this NOW' and 'I am your BOSS'.",
+                options: [
+                    { text: "Urgency + Authority", rationale: "The attacker combines the pressure of time (Urgency) with the fear of a superior (Authority) to bypass critical thinking.", isCorrect: true },
+                    { text: "Technical Exploitation", rationale: "This scenario relies on psychological manipulation (social engineering), not a technical software flaw.", isCorrect: false },
+                    { text: "Spoofed Branding Only", rationale: "While the email may look legitimate, the driving force causing the user to act is the pressure applied by the sender's persona and deadline.", isCorrect: false },
+                    { text: "Insecure Deserialization", rationale: "Insecure deserialization is a technical software vulnerability, not a social engineering tactic.", isCorrect: false }
+                ]
+            },
+            {
+                question: "What key characteristic distinguishes a Worm from a Virus?",
+                hint: "One needs a human to click 'run' on a file, the other can travel across a network on its own.",
+                options: [
+                    { text: "A worm self-replicates without user action.", rationale: "Worms are standalone programs that spread automatically across networks, whereas viruses require a user to execute a host file.", isCorrect: true },
+                    { text: "A worm always encrypts files.", rationale: "Encryption is a characteristic of Ransomware; a worm's defining feature is its method of propagation, not its payload.", isCorrect: false },
+                    { text: "A worm is disguised as legitimate software.", rationale: "Disguise is the defining characteristic of a Trojan, not a worm.", isCorrect: false },
+                    { text: "A worm only targets mobile devices.", rationale: "Worms can target any computing environment, including servers, desktops, and IoT devices.", isCorrect: false }
+                ]
+            },
+            {
+                question: "According to the 'Vulnerability Triangle', an attack cannot succeed if you remove which of the following elements?",
+                hint: "Even if a flaw exists and a hacker is ready, nothing happens if the hacker cannot reach the system.",
+                options: [
+                    { text: "Exposure", rationale: "If the system is not reachable (no Exposure), the Threat cannot reach the Vulnerability to exploit it.", isCorrect: true },
+                    { text: "Complexity", rationale: "Complexity is a metric of CVSS, but not one of the three corners of the Vulnerability Triangle (Threat, Vulnerability, Exposure).", isCorrect: false },
+                    { text: "Encryption", rationale: "Encryption is a defense mechanism; lacking it might be a vulnerability, but it is not a foundational corner of the triangle concept itself.", isCorrect: false },
+                    { text: "Logging", rationale: "Logging helps detection, but lack of logging does not prevent the attack components (Threat/Vuln/Exposure) from existing.", isCorrect: false }
+                ]
+            },
+            {
+                question: "A vulnerability has a CVSS score of 9.8. How should the security team prioritize this?",
+                hint: "This score is very close to the maximum possible value on the scale.",
+                options: [
+                    { text: "Critical - Patch immediately", rationale: "Scores between 9.0 and 10.0 are classified as Critical, requiring immediate action to prevent likely catastrophe.", isCorrect: true },
+                    { text: "High - Patch within the month", rationale: "Scores of 7.0–8.9 are High; a 9.8 is Critical and typically cannot wait a month.", isCorrect: false },
+                    { text: "Medium - Schedule for next update cycle", rationale: "Medium vulnerabilities (4.0–6.9) can often wait for a cycle, but a Critical flaw poses an imminent threat.", isCorrect: false },
+                    { text: "Low - Accept the risk", rationale: "Low risks (0.1–3.9) might be accepted, but ignoring a Critical vulnerability is negligent.", isCorrect: false }
+                ]
+            },
+            {
+                question: "What is the defining characteristic of a 'Zero-Day' vulnerability?",
+                hint: "Think about how much time the software developer has had to fix the problem.",
+                options: [
+                    { text: "The vendor is unaware of the flaw and no patch exists.", rationale: "The term 'Zero-Day' implies the defenders have had zero days to prepare a fix because the vulnerability was unknown to them until it was exploited or disclosed.", isCorrect: true },
+                    { text: "It takes zero days to exploit.", rationale: "The time to exploit relates to complexity, not the definition of the term itself.", isCorrect: false },
+                    { text: "It has a CVSS score of 0.", rationale: "A score of 0 implies no risk; Zero-Days are often high or critical risk.", isCorrect: false },
+                    { text: "It only affects software that is zero days old.", rationale: "Zero-days can be found in legacy software that has been in use for years.", isCorrect: false }
+                ]
+            },
+            {
+                question: "Before launching Nmap against a friend's server to check for security flaws, what must you absolutely obtain to avoid legal repercussions?",
+                hint: "Good intentions do not prevent you from being sued or prosecuted under the Computer Fraud and Abuse Act.",
+                options: [
+                    { text: "Written authorisation", rationale: "Scanning networks you do not own without explicit permission (ideally written) is illegal under laws like the CFAA and NIS2.", isCorrect: true },
+                    { text: "A verbal 'okay'", rationale: "Verbal agreements are hard to prove in court; professional standards require written scope and consent.", isCorrect: false },
+                    { text: "A VPN connection", rationale: "Using a VPN hides your IP but does not make the act of unauthorized scanning legal.", isCorrect: false },
+                    { text: "The latest version of Nmap", rationale: "Using updated tools is good practice but has no bearing on the legality of the action.", isCorrect: false }
+                ]
+            }
+        ];
+
+        // --- App State ---
+        
+        // Flashcard state
+        let currentFCIndex = 0;
+        let isCardFlipped = false;
+
+        // Quiz state
+        let currentQuizIndex = 0;
+        let quizScore = 0;
+        let isQuestionAnswered = false;
+
+
+        // --- UI Initialization ---
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderFlashcard();
+        });
+
+
+        // --- Tab Logic ---
+
+        function switchTab(tabName) {
+            const tabFC = document.getElementById('tab-flashcards');
+            const tabQuiz = document.getElementById('tab-quiz');
+            const btnFC = document.getElementById('tab-btn-flashcards');
+            const btnQuiz = document.getElementById('tab-btn-quiz');
+
+            if (tabName === 'flashcards') {
+                tabFC.classList.remove('hidden');
+                tabFC.classList.add('block');
+                tabQuiz.classList.remove('block');
+                tabQuiz.classList.add('hidden');
+
+                btnFC.className = "px-6 py-3 font-semibold text-blue-600 border-b-2 border-blue-600 focus:outline-none transition-colors";
+                btnQuiz.className = "px-6 py-3 font-medium text-slate-500 border-b-2 border-transparent hover:text-slate-700 hover:border-slate-300 focus:outline-none transition-colors";
+            } else {
+                tabQuiz.classList.remove('hidden');
+                tabQuiz.classList.add('block');
+                tabFC.classList.remove('block');
+                tabFC.classList.add('hidden');
+
+                btnQuiz.className = "px-6 py-3 font-semibold text-blue-600 border-b-2 border-blue-600 focus:outline-none transition-colors";
+                btnFC.className = "px-6 py-3 font-medium text-slate-500 border-b-2 border-transparent hover:text-slate-700 hover:border-slate-300 focus:outline-none transition-colors";
+            }
+        }
+
+
+        // --- Flashcard Logic ---
+
+        function renderFlashcard() {
+            const fc = flashcardsData[currentFCIndex];
+            document.getElementById('fc-front-text').textContent = fc.front;
+            document.getElementById('fc-back-text').textContent = fc.back;
+            document.getElementById('fc-progress').textContent = `${currentFCIndex + 1} / ${flashcardsData.length}`;
+            
+            // Reset flip state
+            isCardFlipped = false;
+            document.getElementById('fc-inner').style.transform = 'rotateY(0deg)';
+        }
+
+        function flipCard() {
+            isCardFlipped = !isCardFlipped;
+            const inner = document.getElementById('fc-inner');
+            inner.style.transform = isCardFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)';
+        }
+
+        function nextCard() {
+            currentFCIndex = (currentFCIndex + 1) % flashcardsData.length;
+            
+            // If currently flipped, flip back quickly before changing content
+            if (isCardFlipped) {
+                isCardFlipped = false;
+                document.getElementById('fc-inner').style.transform = 'rotateY(0deg)';
+                setTimeout(renderFlashcard, 300); // Wait for half flip animation
+            } else {
+                renderFlashcard();
+            }
+        }
+
+        function prevCard() {
+            currentFCIndex = (currentFCIndex - 1 + flashcardsData.length) % flashcardsData.length;
+            
+            if (isCardFlipped) {
+                isCardFlipped = false;
+                document.getElementById('fc-inner').style.transform = 'rotateY(0deg)';
+                setTimeout(renderFlashcard, 300);
+            } else {
+                renderFlashcard();
+            }
+        }
+
+
+        // --- Quiz Logic ---
+
+        function startQuiz() {
+            document.getElementById('quiz-start').classList.add('hidden');
+            document.getElementById('quiz-active').classList.remove('hidden');
+            currentQuizIndex = 0;
+            quizScore = 0;
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            isQuestionAnswered = false;
+            const q = quizData[currentQuizIndex];
+            
+            document.getElementById('quiz-progress').textContent = `Question ${currentQuizIndex + 1} of ${quizData.length}`;
+            document.getElementById('quiz-score').textContent = quizScore;
+            document.getElementById('quiz-question').textContent = q.question;
+            
+            // Reset hint
+            document.getElementById('btn-hint').classList.remove('hidden');
+            document.getElementById('quiz-hint').classList.add('hidden');
+            document.getElementById('quiz-hint').textContent = q.hint;
+
+            // Render Options
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = ''; // Clear previous
+
+            // Shuffle options for better testing
+            const shuffledOptions = [...q.options].map((a) => ({sort: Math.random(), value: a}))
+                .sort((a, b) => a.sort - b.sort)
+                .map((a) => a.value);
+
+            shuffledOptions.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left p-4 rounded-xl border-2 border-slate-200 bg-white hover:bg-slate-50 hover:border-blue-300 font-medium text-slate-700 transition-all group';
+                btn.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-6 h-6 rounded-full border-2 border-slate-300 flex items-center justify-center flex-shrink-0 group-hover:border-blue-400">
+                            <div class="w-3 h-3 rounded-full bg-blue-500 opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                        </div>
+                        <span>${opt.text}</span>
+                    </div>
+                `;
+                btn.onclick = () => selectOption(opt, btn, shuffledOptions);
+                optionsContainer.appendChild(btn);
+            });
+
+            // Hide feedback and next button
+            document.getElementById('quiz-feedback').classList.add('hidden');
+            document.getElementById('btn-next-question').classList.add('hidden');
+        }
+
+        function selectOption(selectedOpt, btnElement, allOptions) {
+            if (isQuestionAnswered) return; // Prevent multiple clicks
+            isQuestionAnswered = true;
+
+            const optionsContainer = document.getElementById('quiz-options');
+            const allButtons = optionsContainer.children;
+
+            // Hide hint button when answered
+            document.getElementById('btn-hint').classList.add('hidden');
+            document.getElementById('quiz-hint').classList.add('hidden');
+
+            if (selectedOpt.isCorrect) {
+                quizScore++;
+                document.getElementById('quiz-score').textContent = quizScore;
+                
+                // Style selected correct button
+                btnElement.className = 'w-full text-left p-4 rounded-xl border-2 border-emerald-500 bg-emerald-50 font-medium text-emerald-900 transition-all';
+                btnElement.querySelector('.rounded-full').className = 'w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center flex-shrink-0';
+                btnElement.querySelector('.rounded-full').innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+                
+                showFeedback(true, selectedOpt.rationale);
+            } else {
+                // Style selected wrong button
+                btnElement.className = 'w-full text-left p-4 rounded-xl border-2 border-rose-500 bg-rose-50 font-medium text-rose-900 transition-all';
+                btnElement.querySelector('.rounded-full').className = 'w-6 h-6 rounded-full bg-rose-500 text-white flex items-center justify-center flex-shrink-0';
+                btnElement.querySelector('.rounded-full').innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+                
+                // Find and highlight the correct one
+                const correctIndex = allOptions.findIndex(o => o.isCorrect);
+                const correctBtn = allButtons[correctIndex];
+                correctBtn.className = 'w-full text-left p-4 rounded-xl border-2 border-emerald-500 bg-emerald-50 font-medium text-emerald-900 transition-all';
+                correctBtn.querySelector('.rounded-full').className = 'w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center flex-shrink-0';
+                correctBtn.querySelector('.rounded-full').innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+
+                showFeedback(false, selectedOpt.rationale);
+            }
+
+            // Disable all buttons
+            for (let btn of allButtons) {
+                btn.onclick = null;
+                btn.classList.remove('hover:bg-slate-50', 'hover:border-blue-300', 'cursor-pointer');
+                if(!btn.classList.contains('bg-emerald-50') && !btn.classList.contains('bg-rose-50')) {
+                    btn.classList.add('opacity-50');
+                }
+            }
+
+            // Show next button
+            document.getElementById('btn-next-question').classList.remove('hidden');
+        }
+
+        function showFeedback(isCorrect, rationale) {
+            const feedbackBox = document.getElementById('quiz-feedback');
+            const iconBox = document.getElementById('feedback-icon');
+            const titleBox = document.getElementById('feedback-title');
+            
+            feedbackBox.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200', 'bg-rose-50', 'border-rose-200');
+            
+            if (isCorrect) {
+                feedbackBox.classList.add('bg-emerald-50', 'border-emerald-200');
+                titleBox.textContent = "Correct!";
+                titleBox.className = "text-lg font-bold mb-1 text-emerald-800";
+                iconBox.innerHTML = '<div class="w-8 h-8 rounded-full bg-emerald-200 text-emerald-700 flex items-center justify-center"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div>';
+            } else {
+                feedbackBox.classList.add('bg-rose-50', 'border-rose-200');
+                titleBox.textContent = "Incorrect";
+                titleBox.className = "text-lg font-bold mb-1 text-rose-800";
+                iconBox.innerHTML = '<div class="w-8 h-8 rounded-full bg-rose-200 text-rose-700 flex items-center justify-center"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></div>';
+            }
+
+            document.getElementById('feedback-rationale').textContent = rationale;
+        }
+
+        function toggleHint() {
+            const hintBox = document.getElementById('quiz-hint');
+            if (hintBox.classList.contains('hidden')) {
+                hintBox.classList.remove('hidden');
+            } else {
+                hintBox.classList.add('hidden');
+            }
+        }
+
+        function nextQuestion() {
+            currentQuizIndex++;
+            if (currentQuizIndex < quizData.length) {
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quiz-active').classList.add('hidden');
+            document.getElementById('quiz-results').classList.remove('hidden');
+            
+            document.getElementById('final-score').textContent = quizScore;
+            document.getElementById('total-questions').textContent = quizData.length;
+            
+            const percentage = (quizScore / quizData.length) * 100;
+            
+            // Animate bar
+            setTimeout(() => {
+                const bar = document.getElementById('score-bar');
+                bar.style.width = `${percentage}%`;
+                
+                // Color based on score
+                if(percentage >= 80) bar.className = "h-3 rounded-full transition-all duration-1000 bg-emerald-500";
+                else if(percentage >= 50) bar.className = "h-3 rounded-full transition-all duration-1000 bg-amber-500";
+                else bar.className = "h-3 rounded-full transition-all duration-1000 bg-rose-500";
+            }, 100);
+
+            // Icon logic
+            const iconContainer = document.getElementById('result-icon-container');
+            if (percentage >= 80) {
+                iconContainer.className = "w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 bg-emerald-100 text-emerald-600";
+                iconContainer.innerHTML = '<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+            } else if (percentage >= 50) {
+                iconContainer.className = "w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 bg-amber-100 text-amber-600";
+                iconContainer.innerHTML = '<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+            } else {
+                iconContainer.className = "w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 bg-rose-100 text-rose-600";
+                iconContainer.innerHTML = '<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+            }
+        }
+
+        function resetQuiz() {
+            document.getElementById('quiz-results').classList.add('hidden');
+            document.getElementById('score-bar').style.width = '0%';
+            startQuiz();
+        }
+
+    </script>
+</body>
+</html>
+
+
