@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 5 · Cyber Terrorism &amp; Information Warfare — Cyber.SoHo</title>
+<style>
+/* ═══════════════════════════════════════════════════════════
+   CYBER.SOHO — INTERACTIVE COURSE MODULE
+   Week 5, Lesson 1: Cyber Terrorism & Information Warfare
+   ═══════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg-deep: #060a12;
+  --bg-primary: #0a0f1a;
+  --bg-card: #101827;
+  --bg-card-hover: #151d30;
+  --bg-code: #0c1220;
+  --border: #1a2744;
+  --border-glow: #1e3a5f;
+  --cyan: #4fc3f7;
+  --cyan-dim: #2a7ab0;
+  --teal: #00e5bf;
+  --teal-dim: rgba(0,229,191,0.15);
+  --red: #ef4444;
+  --red-dim: rgba(239,68,68,0.12);
+  --orange: #f97316;
+  --orange-dim: rgba(249,115,22,0.12);
+  --yellow: #eab308;
+  --green: #22c55e;
+  --green-dim: rgba(34,197,94,0.12);
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --font-display: 'Space Mono', monospace;
+  --font-body: 'DM Sans', -apple-system, sans-serif;
+  --font-code: 'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+html { scroll-behavior: smooth; font-size: 16px; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ── Scrollbar ──────────────────────────────────────────── */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-deep); }
+::-webkit-scrollbar-thumb { background: var(--border-glow); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--cyan-dim); }
+
+/* ── Scanline overlay effect ─────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.03) 2px,
+    rgba(0,0,0,0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ── Top navigation ──────────────────────────────────────── */
+.top-nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 56px;
+  background: rgba(6,10,18,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  z-index: 1000;
+}
+.top-nav .brand {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  color: var(--cyan);
+  letter-spacing: 2px;
+}
+.top-nav .nav-links {
+  display: flex; gap: 1.5rem; list-style: none;
+}
+.top-nav .nav-links a {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+.top-nav .nav-links a:hover { color: var(--cyan); }
+
+/* ── Progress bar ────────────────────────────────────────── */
+.progress-bar {
+  position: fixed; top: 56px; left: 0; right: 0;
+  height: 3px;
+  background: var(--border);
+  z-index: 999;
+}
+.progress-bar .fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--cyan), var(--teal));
+  width: 0%;
+  transition: width 0.15s;
+}
+
+/* ── Hero section ────────────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 8rem 3rem 4rem;
+  max-width: 900px;
+  margin: 0 auto;
+  position: relative;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  top: 0; right: -200px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(79,195,247,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero .meta {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  color: var(--cyan);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+}
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+}
+.hero h1 span { color: var(--cyan); }
+.hero .subtitle {
+  font-size: 1.15rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin-bottom: 2rem;
+}
+.hero .stats-row {
+  display: flex; gap: 2rem; flex-wrap: wrap;
+}
+.hero .stat {
+  text-align: left;
+}
+.hero .stat .num {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  color: var(--teal);
+  font-weight: 700;
+}
+.hero .stat .label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ── Table of Contents ───────────────────────────────────── */
+.toc-section {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 4rem 3rem;
+}
+.toc-section h2 {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  color: var(--cyan);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+}
+.toc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+.toc-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.25s;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+.toc-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-glow);
+  transform: translateY(-2px);
+}
+.toc-card .num {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  color: var(--cyan);
+  font-weight: 700;
+  line-height: 1;
+  min-width: 32px;
+}
+.toc-card .info h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+.toc-card .info p {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ── Section styles ──────────────────────────────────────── */
+.lecture-section {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 5rem 3rem 3rem;
+  border-top: 1px solid var(--border);
+}
+.section-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+.section-header .section-num {
+  font-family: var(--font-display);
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--cyan);
+  line-height: 1;
+  opacity: 0.4;
+}
+.section-header .section-title {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.3;
+}
+.section-header .section-time {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.3rem;
+  display: block;
+}
+
+/* ── Content blocks ──────────────────────────────────────── */
+.content-block {
+  margin-bottom: 2rem;
+}
+.content-block h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--cyan);
+  margin-bottom: 0.75rem;
+  padding-left: 1rem;
+  border-left: 3px solid var(--cyan);
+}
+.content-block p {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+.content-block ul, .content-block ol {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+  font-size: 0.95rem;
+}
+.content-block li { margin-bottom: 0.5rem; }
+.content-block li strong, .content-block p strong { color: var(--text-primary); }
+
+/* ── Callout boxes ───────────────────────────────────────── */
+.callout {
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+  margin: 1.5rem 0;
+  border-left: 4px solid;
+  font-size: 0.9rem;
+}
+.callout.definition {
+  background: rgba(79,195,247,0.06);
+  border-color: var(--cyan);
+}
+.callout.warning {
+  background: var(--red-dim);
+  border-color: var(--red);
+}
+.callout.insight {
+  background: var(--teal-dim);
+  border-color: var(--teal);
+}
+.callout.example {
+  background: var(--orange-dim);
+  border-color: var(--orange);
+}
+.callout .callout-title {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+.callout.definition .callout-title { color: var(--cyan); }
+.callout.warning .callout-title { color: var(--red); }
+.callout.insight .callout-title { color: var(--teal); }
+.callout.example .callout-title { color: var(--orange); }
+
+/* ── Key takeaway ────────────────────────────────────────── */
+.key-takeaway {
+  background: linear-gradient(135deg, rgba(79,195,247,0.08), rgba(0,229,191,0.05));
+  border: 1px solid var(--border-glow);
+  border-radius: 12px;
+  padding: 1.75rem 2rem;
+  margin: 2.5rem 0;
+  position: relative;
+  overflow: hidden;
+}
+.key-takeaway::before {
+  content: '🔑';
+  position: absolute;
+  top: -15px; right: -10px;
+  font-size: 5rem;
+  opacity: 0.06;
+}
+.key-takeaway .kt-label {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 0.75rem;
+}
+.key-takeaway p {
+  font-size: 1.05rem;
+  color: var(--text-primary);
+  line-height: 1.8;
+}
+
+/* ── Tables ──────────────────────────────────────────────── */
+.data-table-wrapper {
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+thead th {
+  background: var(--bg-card);
+  color: var(--cyan);
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 0.9rem 1rem;
+  text-align: left;
+  border-bottom: 2px solid var(--border-glow);
+  font-weight: 700;
+}
+tbody td {
+  padding: 0.75rem 1rem;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+}
+tbody tr:nth-child(even) { background: rgba(16,24,39,0.5); }
+tbody tr:hover { background: var(--bg-card-hover); }
+
+/* ── Code blocks ─────────────────────────────────────────── */
+.code-block {
+  margin: 1.5rem 0;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 1rem;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+}
+.code-header .lang {
+  font-family: var(--font-code);
+  font-size: 0.7rem;
+  color: var(--teal);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.code-header .copy-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-family: var(--font-code);
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.code-header .copy-btn:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+.code-content {
+  background: var(--bg-code);
+  padding: 1.25rem;
+  overflow-x: auto;
+  font-family: var(--font-code);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+.code-content .comment { color: var(--text-muted); font-style: italic; }
+.code-content .keyword { color: var(--cyan); }
+.code-content .string { color: var(--teal); }
+.code-content .number { color: var(--orange); }
+.code-content .function { color: #a78bfa; }
+
+/* ── Diagram ─────────────────────────────────────────────── */
+.diagram-wrapper {
+  margin: 1.5rem 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  overflow-x: auto;
+}
+.diagram-wrapper pre {
+  font-family: var(--font-code);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  white-space: pre;
+}
+.diagram-wrapper .label {
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+/* ── Collapsible sections ────────────────────────────────── */
+.collapsible {
+  margin: 1.5rem 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.collapsible-trigger {
+  width: 100%;
+  background: var(--bg-card);
+  border: none;
+  color: var(--text-primary);
+  padding: 1rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-align: left;
+  transition: background 0.2s;
+}
+.collapsible-trigger:hover { background: var(--bg-card-hover); }
+.collapsible-trigger .arrow {
+  color: var(--cyan);
+  transition: transform 0.3s;
+  font-size: 1.1rem;
+}
+.collapsible-trigger.open .arrow { transform: rotate(90deg); }
+.collapsible-content {
+  display: none;
+  padding: 1.25rem;
+  background: var(--bg-primary);
+  border-top: 1px solid var(--border);
+}
+.collapsible-content.show { display: block; }
+
+/* ── Numbered steps ──────────────────────────────────────── */
+.steps {
+  counter-reset: step;
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0;
+}
+.steps li {
+  counter-increment: step;
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  align-items: flex-start;
+}
+.steps li::before {
+  content: counter(step);
+  min-width: 32px; height: 32px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-glow);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  color: var(--cyan);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ── Interactive SOC dashboard mini ──────────────────────── */
+.soc-mini {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+.soc-mini .soc-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 1rem;
+}
+.soc-mini .soc-header h4 {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  color: var(--cyan);
+  letter-spacing: 2px;
+}
+.soc-mini .soc-btn {
+  background: transparent;
+  border: 1px solid var(--cyan);
+  color: var(--cyan);
+  padding: 0.35rem 1rem;
+  border-radius: 4px;
+  font-family: var(--font-code);
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.soc-mini .soc-btn:hover { background: var(--cyan); color: var(--bg-deep); }
+.soc-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.soc-stat {
+  background: var(--bg-primary);
+  border-radius: 6px;
+  padding: 0.75rem;
+  border-left: 3px solid;
+  text-align: center;
+}
+.soc-stat.crit { border-color: var(--red); }
+.soc-stat.high { border-color: var(--orange); }
+.soc-stat.med { border-color: var(--yellow); }
+.soc-stat.low { border-color: var(--green); }
+.soc-stat .val {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.soc-stat.crit .val { color: var(--red); }
+.soc-stat.high .val { color: var(--orange); }
+.soc-stat.med .val { color: var(--yellow); }
+.soc-stat.low .val { color: var(--green); }
+.soc-stat .lbl {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.soc-feed {
+  max-height: 200px;
+  overflow-y: auto;
+  background: var(--bg-primary);
+  border-radius: 6px;
+  padding: 0.75rem;
+}
+.soc-alert {
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid var(--border);
+  margin-bottom: 0.5rem;
+  font-size: 0.78rem;
+  background: rgba(0,0,0,0.2);
+  border-radius: 0 4px 4px 0;
+  animation: fadeSlide 0.3s ease-out;
+}
+.soc-alert.crit { border-color: var(--red); }
+.soc-alert.high { border-color: var(--orange); }
+.soc-alert.med { border-color: var(--yellow); }
+.soc-alert.low { border-color: var(--green); }
+.soc-alert .time { color: var(--text-muted); font-family: var(--font-code); font-size: 0.7rem; }
+.soc-alert .src { color: var(--cyan); margin-left: 0.5rem; }
+.soc-alert .msg { color: var(--text-secondary); display: block; margin-top: 2px; }
+
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* ── Threat level bar ────────────────────────────────────── */
+.threat-indicator {
+  margin-top: 1rem;
+}
+.threat-indicator .bar-track {
+  height: 8px;
+  background: var(--bg-primary);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.threat-indicator .bar-val {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s, background 0.5s;
+  width: 10%;
+  background: var(--green);
+}
+.threat-indicator .bar-label {
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+  margin-top: 0.35rem;
+  color: var(--green);
+}
+
+/* ── Links section ───────────────────────────────────────── */
+.link-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.link-item:hover {
+  border-color: var(--cyan);
+  background: var(--bg-card-hover);
+}
+.link-item .icon {
+  width: 36px; height: 36px;
+  background: rgba(79,195,247,0.1);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cyan);
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+.link-item .link-info .link-name {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+.link-item .link-info .link-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* ── Disclaimer ──────────────────────────────────────────── */
+.disclaimer-section {
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  padding: 3rem;
+  margin-top: 3rem;
+}
+.disclaimer-section .inner {
+  max-width: 900px;
+  margin: 0 auto;
+}
+.disclaimer-section h3 {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+}
+.disclaimer-section p {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  line-height: 1.7;
+}
+.disclaimer-section a { color: var(--cyan); }
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .hero { padding: 7rem 1.5rem 3rem; }
+  .lecture-section, .toc-section { padding-left: 1.5rem; padding-right: 1.5rem; }
+  .hero .stats-row { gap: 1.5rem; }
+  .soc-stats { grid-template-columns: repeat(2, 1fr); }
+  .top-nav .nav-links { display: none; }
+  .section-header .section-num { font-size: 2rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ TOP NAVIGATION ══════════════════════════════════════ -->
+<nav class="top-nav">
+  <div class="brand">CYBER.SOHO</div>
+  <ul class="nav-links">
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#sec1">Definitions</a></li>
+    <li><a href="#sec2">Info Warfare</a></li>
+    <li><a href="#sec3">Vectors</a></li>
+    <li><a href="#sec4">Infrastructure</a></li>
+    <li><a href="#sec5">APTs</a></li>
+    <li><a href="#sec6">Disinfo</a></li>
+    <li><a href="#sec7">Defense</a></li>
+    <li><a href="#resources">Resources</a></li>
+  </ul>
+</nav>
+
+<!-- ══ PROGRESS BAR ════════════════════════════════════════ -->
+<div class="progress-bar"><div class="fill" id="progressFill"></div></div>
+
+<!-- ══ HERO ════════════════════════════════════════════════ -->
+<section class="hero" id="overview">
+  <div class="meta">Part I: Threats, Attacks &amp; Defenses · Week 5</div>
+  <h1>Cyber Terrorism and<br><span>Information Warfare</span></h1>
+  <p class="subtitle">An interactive course module exploring how digital attacks threaten physical infrastructure, how nations wage invisible wars through information, and what you — as the next generation of computer scientists — can do about it.</p>
+  <div class="stats-row">
+    <div class="stat"><div class="num">8</div><div class="label">Sections</div></div>
+    <div class="stat"><div class="num">60</div><div class="label">Minutes</div></div>
+    <div class="stat"><div class="num">7</div><div class="label">Code Examples</div></div>
+    <div class="stat"><div class="num">$10T+</div><div class="label">Annual Cybercrime Cost</div></div>
+  </div>
+</section>
+
+<!-- ══ TABLE OF CONTENTS ═══════════════════════════════════ -->
+<section class="toc-section">
+  <h2>Module Contents</h2>
+  <div class="toc-grid">
+    <a class="toc-card" href="#sec1"><div class="num">01</div><div class="info"><h3>What Is Cyber Terrorism?</h3><p>Definitions, spectrum, and why it matters</p></div></a>
+    <a class="toc-card" href="#sec2"><div class="num">02</div><div class="info"><h3>Information Warfare</h3><p>The five pillars and three arenas</p></div></a>
+    <a class="toc-card" href="#sec3"><div class="num">03</div><div class="info"><h3>Attack Vectors</h3><p>DDoS, ransomware, supply chains, zero-days</p></div></a>
+    <a class="toc-card" href="#sec4"><div class="num">04</div><div class="info"><h3>Critical Infrastructure</h3><p>SCADA, Stuxnet, and the Oldsmar attack</p></div></a>
+    <a class="toc-card" href="#sec5"><div class="num">05</div><div class="info"><h3>State-Sponsored APTs</h3><p>Nation-state actors and the SolarWinds breach</p></div></a>
+    <a class="toc-card" href="#sec6"><div class="num">06</div><div class="info"><h3>Disinformation &amp; PSYOP</h3><p>Propaganda, deepfakes, and bot networks</p></div></a>
+    <a class="toc-card" href="#sec7"><div class="num">07</div><div class="info"><h3>Defense Frameworks</h3><p>Defense in Depth, NIST, MITRE ATT&amp;CK</p></div></a>
+    <a class="toc-card" href="#sec8"><div class="num">08</div><div class="info"><h3>Ethics &amp; Careers</h3><p>Responsible practice and career paths</p></div></a>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 1 — WHAT IS CYBER TERRORISM?
+     ══════════════════════════════════════════════════════════ -->
+<section class="lecture-section" id="sec1">
+  <div class="section-header">
+    <div class="section-num">01</div>
+    <div>
+      <div class="section-title">What Is Cyber Terrorism?</div>
+      <span class="section-time">≈ 8 minutes</span>
+    </div>
+  </div>
+
+  <div class="callout definition">
+    <div class="callout-title">Definition</div>
+    <p><strong>Cyber terrorism</strong> is the deliberate use of computer networks, systems, and digital tools to launch attacks that cause fear, disruption, physical damage, or loss of life — driven by political, ideological, or religious motivation.</p>
+  </div>
+
+  <div class="content-block">
+    <h3>The Key Distinction</h3>
+    <p>The <a href="https://www.fbi.gov/" target="_blank" rel="noopener">FBI (Federal Bureau of Investigation)</a> defines cyber terrorism as a "premeditated, politically motivated attack against information, computer systems, programs, and data which results in violence against non-combatant targets." The crucial difference from ordinary cybercrime is <strong>motive</strong>. A cybercriminal steals your credit card number to buy sneakers. A cyber terrorist shuts down a hospital's network to make a political statement — the collateral damage to patients is the point.</p>
+  </div>
+
+  <div class="content-block">
+    <h3>The Cyber Threat Spectrum</h3>
+    <ol class="steps">
+      <li><strong>Hacktivism</strong> — Politically motivated hacking to embarrass or protest (digital graffiti)</li>
+      <li><strong>Cybercrime</strong> — Financially motivated attacks (ransomware, identity theft)</li>
+      <li><strong>Cyber Espionage</strong> — Stealing secrets for strategic advantage (government spying)</li>
+      <li><strong>Cyber Terrorism</strong> — Attacks designed to terrorize, disrupt critical services, or cause physical harm</li>
+      <li><strong>Cyber Warfare</strong> — Nation-state military operations conducted through cyberspace</li>
+    </ol>
+  </div>
+
+  <div class="content-block">
+    <h3>Why It Matters Right Now</h3>
+    <p>The <a href="https://www.cisa.gov/" target="_blank" rel="noopener">CISA (Cybersecurity and Infrastructure Security Agency)</a> reports that attacks against critical infrastructure have increased dramatically year over year. Healthcare systems, electrical grids, water treatment plants, and transportation networks are now prime targets. The global cost of cybercrime is projected to exceed <strong>$10 trillion USD (United States Dollars)</strong> annually.</p>
+  </div>
+
+  <div class="collapsible">
+    <button class="collapsible-trigger" onclick="toggleCollapsible(this)">
+      📖 Real-Life Example: The 2021 Colonial Pipeline Ransomware Attack
+      <span class="arrow">›</span>
+    </button>
+    <div class="collapsible-content">
+      <p>In May 2021, the DarkSide ransomware group attacked <a href="https://www.colpipe.com/" target="_blank" rel="noopener">Colonial Pipeline</a>, the largest fuel pipeline system in the United States. The attackers encrypted critical business systems and demanded approximately $4.4 million in Bitcoin. Colonial Pipeline proactively shut down its 5,500-mile pipeline. The result? Panic buying, fuel shortages at thousands of gas stations, and a state of emergency in multiple states — all from a single compromised password.</p>
+      <p style="margin-top:0.75rem">The attack vector was a legacy VPN (Virtual Private Network) account that used a reused password and lacked MFA (Multi-Factor Authentication). <strong>One password. Billions of dollars in economic damage.</strong></p>
+      <div class="diagram-wrapper">
+        <span class="label">Attack Flow Diagram</span>
+<pre>
+ATTACKER ──▶ Compromised VPN ──▶ Internal Network ──▶ Ransomware Deployed
+(DarkSide)   (Reused Password     Access              (Data Encrypted)
+              + No MFA)                                       │
+                                                              ▼
+GAS STATIONS ◀── Pipeline Shutdown ◀── Ransom Demanded: $4.4M Bitcoin
+ RUN DRY          (5,500 miles)         (Partially recovered by FBI)
+ (5+ states)
+</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="key-takeaway">
+    <div class="kt-label">Key Takeaway</div>
+    <p>Cyber terrorism is not science fiction — it is a present reality. The same tools that steal credit cards can shut down hospitals. <strong>Motive</strong> is what separates crime from terrorism.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 2 — INFORMATION WARFARE
+     ══════════════════════════════════════════════════════════ -->
+<section class="lecture-section" id="sec2">
+  <div class="section-header">
+    <div class="section-num">02</div>
+    <div>
+      <div class="section-title">Information Warfare — The Invisible Battlefield</div>
+      <span class="section-time">≈ 8 minutes</span>
+    </div>
+  </div>
+
+  <div class="content-block">
+    <h3>The Five Pillars (U.S. DoD Model)</h3>
+    <p>The <a href="https://www.defense.gov/" target="_blank" rel="noopener">U.S. Department of Defense (DoD)</a> identifies five pillars of information warfare:</p>
+    <ul>
+      <li><strong>EW (Electronic Warfare)</strong> — Jamming radar, intercepting communications, spoofing GPS (Global Positioning System) signals</li>
+      <li><strong>CNO (Computer Network Operations)</strong> — Attacking, defending, and exploiting computer networks</li>
+      <li><strong>PSYOP (Psychological Operations)</strong> — Influencing the perceptions, attitudes, and behavior of target audiences</li>
+      <li><strong>OPSEC (Operations Security)</strong> — Protecting your own critical information from adversaries</li>
+      <li><strong>MILDEC (Military Deception)</strong> — Deliberately misleading adversaries about military capabilities or intentions</li>
+    </ul>
+  </div>
+
+  <div class="content-block">
+    <h3>Cyber Terrorism vs. Information Warfare</h3>
+    <div class="data-table-wrapper">
+      <table>
+        <thead><tr><th>Dimension</th><th>Cyber Terrorism</th><th>Information Warfare</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Actor</strong></td><td>Non-state groups, lone wolves</td><td>Nation-states, military units</td></tr>
+          <tr><td><strong>Goal</strong></td><td>Cause terror, political statement</td><td>Gain strategic superiority</td></tr>
+          <tr><td><strong>Scale</strong></td><td>Targeted disruption</td><td>Sustained campaigns</td></tr>
+          <tr><td><strong>Legal Status</strong></td><td>Criminal act</td><td>May be legal under armed conflict</td></tr>
+          <tr><td><strong>Duration</strong></td><td>Event-based (one attack)</td><td>Continuous (ongoing operations)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The takeaway: cyber terrorism is a <strong>tactic</strong> (plant a digital bomb); information warfare is a <strong>strategy</strong> (reshape how an entire population thinks).</p>
+  </div>
+
+  <div class="content-block">
+    <h3>Three Arenas of Information Warfare</h3>
+    <ul>
+      <li><strong>Offensive IW</strong> — Attacking adversary information systems (network attacks, data destruction, electronic jamming)</li>
+      <li><strong>Defensive IW</strong> — Protecting your own information assets (firewalls, IDS (Intrusion Detection Systems), incident response)</li>
+      <li><strong>Exploitative IW</strong> — Collecting intelligence from adversary systems without altering them (signals intelligence, cyber espionage)</li>
+    </ul>
+  </div>
+
+  <div class="collapsible">
+    <button class="collapsible-trigger" onclick="toggleCollapsible(this)">
+      📖 Real-Life Example: Russia's Internet Research Agency
+      <span class="arrow">›</span>
+    </button>
+    <div class="collapsible-content">
+      <p>Between 2014 and 2018, Russia's IRA (Internet Research Agency) employed hundreds of operatives who created thousands of fake social media accounts posing as American citizens. According to the <a href="https://www.intelligence.senate.gov/" target="_blank" rel="noopener">U.S. Senate Intelligence Committee</a>, the IRA's Facebook content alone reached an estimated <strong>126 million Americans</strong>. Over 3,800 fake Twitter accounts were identified. The entire operation cost <strong>under $10 million</strong> — a fraction of a traditional military campaign.</p>
+      <div class="diagram-wrapper">
+        <span class="label">Disinformation Pipeline</span>
+<pre>
+CREATE fake personas ──▶ POST divisive content ──▶ BOT networks amplify
+     (hundreds)           on social media            share, like, retweet
+                                                           │
+                                                           ▼
+Public trust in    ◀── Communities fight  ◀── Real users organically
+media collapses        each other online       reshare the content
+
+COST: &lt;$10M   |   REACH: 126M+ Users   |   ROI: Incalculable damage
+</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="key-takeaway">
+    <div class="kt-label">Key Takeaway</div>
+    <p>Information warfare does not break your computer — it breaks your ability to tell truth from fiction. It is <strong>invisible</strong>, <strong>cheap</strong>, and <strong>devastatingly effective</strong>.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 3 — ATTACK VECTORS
+     ══════════════════════════════════════════════════════════ -->
+<section class="lecture-section" id="sec3">
+  <div class="section-header">
+    <div class="section-num">03</div>
+    <div>
+      <div class="section-title">Attack Vectors Used by Cyber Terrorists</div>
+      <span class="section-time">≈ 8 minutes</span>
+    </div>
+  </div>
+
+  <div class="content-block">
+    <h3>The Cyber Terrorist Toolkit</h3>
+    <ul>
+      <li><strong>DDoS (Distributed Denial of Service)</strong> — Flooding a target with so much traffic that legitimate users cannot access the service. Like a thousand people trying to squeeze through a single doorway.</li>
+      <li><strong>Malware &amp; Ransomware</strong> — Malicious software designed to damage, disrupt, or take control. Ransomware encrypts files and demands payment for decryption keys.</li>
+      <li><strong>Phishing &amp; Spear-Phishing</strong> — Deceptive messages designed to trick targets into revealing credentials. Spear-phishing targets specific individuals.</li>
+      <li><strong>Supply Chain Attacks</strong> — Compromise a trusted vendor to reach thousands of downstream targets. Attack 1 update server instead of 10,000 companies.</li>
+      <li><strong>Zero-Day Exploits</strong> — Vulnerabilities the vendor does not yet know exist. "Zero days" = zero days to fix it. The most expensive weapons in the cyber arsenal.</li>
+    </ul>
+  </div>
+
+  <div class="callout warning">
+    <div class="callout-title">Physical-Cyber Convergence</div>
+    <p>Modern attacks combine cyber and physical elements. Hack an HVAC (Heating, Ventilation, and Air Conditioning) system to damage server rooms. Compromise traffic light systems to cause gridlock during evacuations. IT (Information Technology) and OT (Operational Technology) teams must now coordinate.</p>
+  </div>
+
+  <div class="collapsible">
+    <button class="collapsible-trigger" onclick="toggleCollapsible(this)">
+      📖 Real-Life Example: The 2016 Mirai Botnet
+      <span class="arrow">›</span>
+    </button>
+    <div class="collapsible-content">
+      <p>In October 2016, a massive DDoS attack struck <a href="https://www.oracle.com/cloud/networking/dns/" target="_blank" rel="noopener">Dyn</a>, a major DNS (Domain Name System) provider, taking down Twitter, Netflix, Reddit, CNN, and dozens of other sites. The weapon? A botnet called <strong>Mirai</strong>, composed of ~600,000 compromised IoT (Internet of Things) devices — security cameras, DVRs (Digital Video Recorders), routers, and baby monitors.</p>
+      <p style="margin-top:0.5rem">Mirai scanned the internet for IoT devices still using factory-default credentials (like "admin/admin"). The attack peaked at <strong>1.2 Tbps (Terabits per second)</strong> — enough to download ~150,000 movies per second.</p>
+    </div>
+  </div>
+
+  <div class="key-takeaway">
+    <div class="kt-label">Key Takeaway</div>
+    <p>Cyber terrorists use the same tools as cybercriminals — DDoS, malware, phishing, supply chains, zero-days. <strong>The difference is intent.</strong> The convergence of physical and digital makes everything more dangerous.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 4 — CRITICAL INFRASTRUCTURE
+     ══════════════════════════════════════════════════════════ -->
+<section class="lecture-section" id="sec4">
+  <div class="section-header">
+    <div class="section-num">04</div>
+    <div>
+      <div class="section-title">Critical Infrastructure Under Siege</div>
+      <span class="section-time">≈ 8 minutes</span>
+    </div>
+  </div>
+
+  <div class="content-block">
+    <h3>ICS &amp; SCADA — The Nervous System</h3>
+    <p>The <a href="https://www.nist.gov/" target="_blank" rel="noopener">NIST (National Institute of Standards and Technology)</a> and <a href="https://www.cisa.gov/" target="_blank" rel="noopener">CISA</a> identify 16 critical infrastructure sectors. Most are controlled by ICS (Industrial Control Systems) and SCADA (Supervisory Control and Data Acquisition) — systems designed in the 1980s–1990s for reliability, not security. Many run outdated operating systems, use unencrypted communications, and were never intended to be internet-connected.</p>
+  </div>
+
+  <div class="content-block">
+    <h3>The Stuxnet Paradigm Shift (2010)</h3>
+    <p>Stuxnet was a highly sophisticated worm — widely attributed to a joint U.S.–Israeli operation — that targeted Iran's Natanz nuclear facility. It attacked Siemens Step 7 software controlling PLCs (Programmable Logic Controllers) which managed uranium enrichment centrifuges.</p>
+    <div class="callout insight">
+      <div class="callout-title">How It Worked</div>
+      <p>Stuxnet made centrifuges spin at irregular speeds — too fast, then too slow — causing them to physically tear themselves apart. Simultaneously, it sent <strong>normal readings</strong> to operator screens. Operators saw everything functioning perfectly while equipment was being destroyed. Result: ~1,000 centrifuges destroyed, program set back 2–3 years.</p>
+    </div>
+  </div>
+
+  <div class="collapsible">
+    <button class="collapsible-trigger" onclick="toggleCollapsible(this)">
+      📖 Real-Life Example: The 2021 Oldsmar Water Treatment Plant Attack
+      <span class="arrow">›</span>
+    </button>
+    <div class="collapsible-content">
+      <p>In February 2021, an attacker remotely accessed the SCADA system at Oldsmar, Florida's water plant via TeamViewer. They increased sodium hydroxide (lye) from <strong>100 ppm (parts per million) to 11,100 ppm</strong> — a potentially lethal concentration.</p>
+      <p style="margin-top:0.5rem"><strong>Why it was possible:</strong> outdated Windows, shared TeamViewer password, no firewall separating SCADA from the internet, password never changed after an employee left.</p>
+      <p style="margin-top:0.5rem"><strong>What saved the day:</strong> An alert operator <em>saw the cursor moving</em> on his screen and immediately reversed the change. Human vigilance was the last line of defense.</p>
+    </div>
+  </div>
+
+  <div class="key-takeaway">
+    <div class="kt-label">Key Takeaway</div>
+    <p>Critical infrastructure runs on decades-old systems never built for cybersecurity. Stuxnet proved <strong>software can destroy physical equipment</strong>. The Oldsmar attack showed that a single shared password nearly poisoned 15,000 people's water.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 5 — STATE-SPONSORED APTs
+     ══════════════════════════════════════════════════════════ -->
+<section class="lecture-section" id="sec5">
+  <div class="section-header">
+    <div class="section-num">05</div>
+    <div>
+      <div class="section-title">State-Sponsored Attacks and APTs</div>
+      <span class="section-time">≈ 8 minutes</span>
+    </div>
+  </div>
+
+  <div class="content-block">
+    <h3>Major Threat Actors</h3>
+    <div class="data-table-wrapper">
+      <table>
+        <thead><tr><th>Attribution</th><th>Groups</th><th>Primary Targets</th><th>Notable Operations</th></tr></thead>
+        <tbody>
+          <tr><td><strong>China</strong></td><td>APT1, APT10, APT41</td><td>IP, military secrets</td><td>OPM breach (22M records)</td></tr>
+          <tr><td><strong>Russia</strong></td><td>APT28 (Fancy Bear), APT29 (Cozy Bear), Sandworm</td><td>Elections, energy, NATO</td><td>SolarWinds, NotPetya</td></tr>
+          <tr><td><strong>North Korea</strong></td><td>Lazarus Group, APT38</td><td>Financial, crypto</td><td>Sony Pictures, WannaCry</td></tr>
+          <tr><td><strong>Iran</strong></td><td>APT33, APT35 (Charming Kitten)</td><td>Energy, government</td><td>Shamoon, Ababil</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="content-block">
+    <h3>The APT (Advanced Persistent Threat) Lifecycle</h3>
+    <ol class="steps">
+      <li><strong>Reconnaissance</strong> — Research the target, identify key personnel</li>
+      <li><strong>Initial Compromise</strong> — Spear-phishing, watering hole, supply chain</li>
+      <li><strong>Establish Foothold</strong> — Install backdoors, create persistence</li>
+      <li><strong>Escalate Privileges</strong> — Regular user → administrator access</li>
+      <li><strong>Internal Reconnaissance</strong> — Map the internal network</li>
+      <li><strong>Lateral Movement</strong> — Move system to system</li>
+      <li><strong>Data Exfiltration</strong> — Steal data slowly to avoid detection</li>
+      <li><strong>Maintain Presence</strong> — Keep backdoors for future access</li>
+    </ol>
+    <div class="callout warning">
+      <div class="callout-title">Detection Gap</div>
+      <p>Average time from APT compromise to detection: <strong>21 days</strong> (Mandiant M-Trends). During those three weeks, attackers roam freely.</p>
+    </div>
+  </div>
+
+  <div class="collapsible">
+    <button class="collapsible-trigger" onclick="toggleCollapsible(this)">
+      📖 Real-Life Example: SolarWinds Supply Chain Attack (2020)
+      <span class="arrow">›</span>
+    </button>
+    <div class="collapsible-content">
+      <p>APT29 (Russia's SVR) compromised <a href="https://www.solarwinds.com/" target="_blank" rel="noopener">SolarWinds</a>' build system and injected the SUNBURST backdoor into the Orion software update DLL (Dynamic Link Library). Because SolarWinds digitally signed it, every security tool trusted it. <strong>18,000 organizations</strong> downloaded the infected update. Victims included the U.S. Treasury, DHS, Commerce Department, Microsoft, and FireEye. The attack went <strong>undetected for ~9 months</strong>.</p>
+      <div class="diagram-wrapper">
+        <span class="label">Supply Chain Attack Flow</span>
+<pre>
+SolarWinds Build System
+  Source Code ──▶ [SUNBURST INJECTED] ──▶ Compile ──▶ Digital Sign
+                                                          │
+                       Trusted, signed update             │
+                    ┌──────────────────────────────────────┘
+                    ▼
+            ORION UPDATE SERVER
+              │         │          │
+              ▼         ▼          ▼
+          Treasury    DHS     18,000 orgs
+              │         │          │
+              └─────────┼──────────┘
+                        ▼
+               SUNBURST BACKDOOR
+         Sleeps 14 days → Contacts C2 → Selective targeting
+         → 9 months undetected
+</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="key-takeaway">
+    <div class="kt-label">Key Takeaway</div>
+    <p>State-sponsored APTs are patient, well-funded, and persistent. They stay hidden for months while stealing everything. <strong>Supply chain attacks</strong> mean trusting your software vendor = trusting their entire security posture.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 6 — DISINFORMATION
+     ══════════════════════════════════════════════════════════ -->
+<section class="lecture-section" id="sec6">
+  <div class="section-header">
+    <div class="section-num">06</div>
+    <div>
+      <div class="section-title">Propaganda, Disinformation &amp; PSYOP</div>
+      <span class="section-time">≈ 8 minutes</span>
+    </div>
+  </div>
+
+  <div class="content-block">
+    <h3>Taxonomy of False Information</h3>
+    <div class="data-table-wrapper">
+      <table>
+        <thead><tr><th>Type</th><th>Definition</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Misinformation</strong></td><td>False info, no harmful intent</td><td>Uncle forwarding an inaccurate health tip</td></tr>
+          <tr><td><strong>Disinformation</strong></td><td>False info, deliberately deceptive</td><td>Foreign agency fabricating election news</td></tr>
+          <tr><td><strong>Malinformation</strong></td><td>True info, harmful intent</td><td>Leaking private medical records</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="content-block">
+    <h3>The 6-Step Disinformation Playbook</h3>
+    <ol class="steps">
+      <li><strong>Create the Narrative</strong> — Craft a story that exploits existing social divisions</li>
+      <li><strong>Seed the Content</strong> — Plant it on fringe forums, blogs, or social media</li>
+      <li><strong>Amplify Artificially</strong> — Use bot networks, paid trolls, and coordinated sharing</li>
+      <li><strong>Cross-Platform Migration</strong> — Move from fringe platforms to mainstream media</li>
+      <li><strong>Launder Through Legitimate Sources</strong> — Get real journalists or politicians to repeat it</li>
+      <li><strong>Entrench the Belief</strong> — Repeat until it becomes "common knowledge"</li>
+    </ol>
+  </div>
+
+  <div class="content-block">
+    <h3>Deepfakes — The Next Frontier</h3>
+    <p>Deepfakes are AI-generated synthetic media using GANs (Generative Adversarial Networks) and transformer models. <a href="https://www.darpa.mil/" target="_blank" rel="noopener">DARPA (Defense Advanced Research Projects Agency)</a> has invested heavily in detection.</p>
+    <div class="callout example">
+      <div class="callout-title">2019 CEO Voice Fraud</div>
+      <p>Criminals used deepfake audio to impersonate a German energy CEO's voice. The UK subsidiary CEO transferred <strong>€220,000</strong> to attackers. The fake voice replicated the German accent, speech patterns, and tone. Detected only when attackers called back for a second transfer.</p>
+    </div>
+  </div>
+
+  <div class="key-takeaway">
+    <div class="kt-label">Key Takeaway</div>
+    <p>Disinformation is cheap, scalable, and exploits our trust in media. <strong>Deepfakes</strong> make it possible to put words in anyone's mouth. The best defense starts with critical thinking and media literacy.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 7 — DEFENSE
+     ══════════════════════════════════════════════════════════ -->
+<section class="lecture-section" id="sec7">
+  <div class="section-header">
+    <div class="section-num">07</div>
+    <div>
+      <div class="section-title">Defense Strategies and Frameworks</div>
+      <span class="section-time">≈ 7 minutes</span>
+    </div>
+  </div>
+
+  <div class="content-block">
+    <h3>Defense in Depth — 7 Layers</h3>
+    <ol class="steps">
+      <li><strong>Perimeter</strong> — Firewalls, IDS/IPS (Intrusion Detection/Prevention Systems), DMZs (Demilitarized Zones)</li>
+      <li><strong>Network</strong> — Segmentation, VLANs (Virtual Local Area Networks), encrypted communications</li>
+      <li><strong>Endpoint</strong> — Antivirus, EDR (Endpoint Detection and Response), application whitelisting</li>
+      <li><strong>Application</strong> — Secure coding, WAFs (Web Application Firewalls), input validation</li>
+      <li><strong>Data</strong> — Encryption at rest and in transit, DLP (Data Loss Prevention), access controls</li>
+      <li><strong>Identity</strong> — MFA (Multi-Factor Authentication), PAM (Privileged Access Management), zero-trust</li>
+      <li><strong>Human</strong> — Security awareness training, phishing simulations, incident response drills</li>
+    </ol>
+    <div class="callout insight">
+      <div class="callout-title">Principle</div>
+      <p>An attacker must defeat <strong>ALL</strong> layers to reach the target. A defender only needs <strong>ONE</strong> layer to succeed.</p>
+    </div>
+  </div>
+
+  <div class="content-block">
+    <h3>Key Frameworks</h3>
+    <ul>
+      <li><strong><a href="https://www.nist.gov/cyberframework" target="_blank" rel="noopener">NIST CSF (Cybersecurity Framework)</a></strong> — Five functions: Identify, Protect, Detect, Respond, Recover. Most widely adopted in the U.S.</li>
+      <li><strong><a href="https://attack.mitre.org/" target="_blank" rel="noopener">MITRE ATT&amp;CK</a></strong> — Knowledge base of adversary tactics and techniques from real-world observations.</li>
+      <li><strong><a href="https://www.iso.org/standard/27001" target="_blank" rel="noopener">ISO/IEC 27001</a></strong> — International standard for information security management systems.</li>
+      <li><strong><a href="https://www.cisecurity.org/controls" target="_blank" rel="noopener">CIS Controls</a></strong> — Prioritized, actionable, measurable security actions.</li>
+    </ul>
+  </div>
+
+  <div class="content-block">
+    <h3>Incident Response Lifecycle (NIST SP 800-61)</h3>
+    <ol class="steps">
+      <li><strong>Preparation</strong> — Establish policies, build response teams, deploy monitoring</li>
+      <li><strong>Detection &amp; Analysis</strong> — Identify the incident, assess scope and severity</li>
+      <li><strong>Containment, Eradication &amp; Recovery</strong> — Stop the bleeding, remove the threat, restore systems</li>
+      <li><strong>Post-Incident Activity</strong> — Lessons learned, improve defenses</li>
+    </ol>
+  </div>
+
+  <!-- Interactive SOC Dashboard Mini -->
+  <div class="soc-mini">
+    <div class="soc-header">
+      <h4>⚡ INTERACTIVE: SOC ALERT DASHBOARD</h4>
+      <div>
+        <button class="soc-btn" id="socStartBtn" onclick="toggleSOC()">▶ START</button>
+        <button class="soc-btn" onclick="triggerSOCAttack()">⚠ ATTACK</button>
+      </div>
+    </div>
+    <div class="soc-stats">
+      <div class="soc-stat crit"><div class="val" id="sCrit">0</div><div class="lbl">Critical</div></div>
+      <div class="soc-stat high"><div class="val" id="sHigh">0</div><div class="lbl">High</div></div>
+      <div class="soc-stat med"><div class="val" id="sMed">0</div><div class="lbl">Medium</div></div>
+      <div class="soc-stat low"><div class="val" id="sLow">0</div><div class="lbl">Low</div></div>
+    </div>
+    <div class="soc-feed" id="socFeed">
+      <div class="soc-alert low"><span class="time">--:--:--</span><span class="src">[System]</span><span class="msg">Press START to begin simulation...</span></div>
+    </div>
+    <div class="threat-indicator">
+      <div class="bar-track"><div class="bar-val" id="threatFill"></div></div>
+      <div class="bar-label" id="threatLbl">LOW</div>
+    </div>
+  </div>
+
+  <div class="key-takeaway">
+    <div class="kt-label">Key Takeaway</div>
+    <p><strong>Defense in Depth</strong> = multiple layers, no single point of failure. Know the NIST CSF and MITRE ATT&amp;CK frameworks. When prevention fails, <strong>incident response speed</strong> determines the outcome.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 8 — ETHICS & CAREERS
+     ══════════════════════════════════════════════════════════ -->
+<section class="lecture-section" id="sec8">
+  <div class="section-header">
+    <div class="section-num">08</div>
+    <div>
+      <div class="section-title">Ethics, Careers &amp; Where We Go From Here</div>
+      <span class="section-time">≈ 5 minutes</span>
+    </div>
+  </div>
+
+  <div class="content-block">
+    <h3>Ethical Principles</h3>
+    <ul>
+      <li><strong>Do No Harm</strong> — Never use your skills without explicit authorization</li>
+      <li><strong>Responsible Disclosure</strong> — Report vulnerabilities to affected organizations, don't exploit them</li>
+      <li><strong>Proportionality</strong> — Defense measures proportional to the threat</li>
+      <li><strong>Privacy</strong> — Defend systems AND the people whose data they hold</li>
+      <li><strong>Legal Compliance</strong> — The CFAA (Computer Fraud and Abuse Act) and similar legislation make unauthorized access a serious criminal offense. See the <a href="https://www.eff.org/" target="_blank" rel="noopener">EFF (Electronic Frontier Foundation)</a></li>
+    </ul>
+  </div>
+
+  <div class="content-block">
+    <h3>Career Paths</h3>
+    <ul>
+      <li><strong>SOC Analyst</strong> — Monitor and respond to incidents in real time</li>
+      <li><strong>Threat Intelligence Analyst</strong> — Track APTs and predict future threats</li>
+      <li><strong>Incident Responder</strong> — First on the scene at a breach</li>
+      <li><strong>Penetration Tester</strong> — Authorized to break in and find vulnerabilities</li>
+      <li><strong>Security Architect</strong> — Design defense-in-depth strategies</li>
+      <li><strong>Policy Advisor</strong> — Shape cybersecurity legislation and national defense</li>
+    </ul>
+    <p>Certifications: CompTIA Security+, CEH (Certified Ethical Hacker), CISSP (Certified Information Systems Security Professional), OSCP (Offensive Security Certified Professional), SANS GIAC (Global Information Assurance Certification). The <a href="https://www.bls.gov/ooh/computer-and-information-technology/information-security-analysts.htm" target="_blank" rel="noopener">BLS (Bureau of Labor Statistics)</a> projects 33% job growth through 2033.</p>
+  </div>
+
+  <div class="content-block">
+    <h3>Five Things to Remember</h3>
+    <ol class="steps">
+      <li><strong>Cyber terrorism is real and growing</strong> — it targets the systems we all depend on every day</li>
+      <li><strong>Information warfare is invisible but devastating</strong> — it breaks your ability to tell truth from fiction</li>
+      <li><strong>Critical infrastructure is vulnerable</strong> — decades-old systems, modern threats</li>
+      <li><strong>State-sponsored APTs are patient and persistent</strong> — months of undetected access</li>
+      <li><strong>Defense is everyone's job</strong> — from changing default passwords to building SOC dashboards</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     RESOURCES & LINKS
+     ══════════════════════════════════════════════════════════ -->
+<section class="lecture-section" id="resources">
+  <div class="section-header">
+    <div class="section-num">⊕</div>
+    <div>
+      <div class="section-title">Resources &amp; References</div>
+      <span class="section-time">External links — verify before visiting</span>
+    </div>
+  </div>
+
+  <a class="link-item" href="https://www.cisa.gov/" target="_blank" rel="noopener"><div class="icon">🛡</div><div class="link-info"><div class="link-name">CISA — Cybersecurity and Infrastructure Security Agency</div><div class="link-desc">U.S. federal agency for critical infrastructure protection</div></div></a>
+  <a class="link-item" href="https://www.nist.gov/cyberframework" target="_blank" rel="noopener"><div class="icon">📋</div><div class="link-info"><div class="link-name">NIST Cybersecurity Framework</div><div class="link-desc">Most widely adopted security framework in the U.S.</div></div></a>
+  <a class="link-item" href="https://attack.mitre.org/" target="_blank" rel="noopener"><div class="icon">⚔</div><div class="link-info"><div class="link-name">MITRE ATT&amp;CK Framework</div><div class="link-desc">Knowledge base of adversary tactics and techniques</div></div></a>
+  <a class="link-item" href="https://haveibeenpwned.com/" target="_blank" rel="noopener"><div class="icon">🔍</div><div class="link-info"><div class="link-name">Have I Been Pwned</div><div class="link-desc">Check if your credentials have appeared in data breaches</div></div></a>
+  <a class="link-item" href="https://www.cisecurity.org/controls" target="_blank" rel="noopener"><div class="icon">✓</div><div class="link-info"><div class="link-name">CIS Controls</div><div class="link-desc">Prioritized cybersecurity best practices</div></div></a>
+  <a class="link-item" href="https://www.ic3.gov/" target="_blank" rel="noopener"><div class="icon">🏛</div><div class="link-info"><div class="link-name">FBI Internet Crime Complaint Center</div><div class="link-desc">Report cybercrime and view annual reports</div></div></a>
+  <a class="link-item" href="https://radar.cloudflare.com/" target="_blank" rel="noopener"><div class="icon">📡</div><div class="link-info"><div class="link-name">Cloudflare Radar</div><div class="link-desc">Real-time internet traffic and DDoS threat intelligence</div></div></a>
+  <a class="link-item" href="https://www.mandiant.com/" target="_blank" rel="noopener"><div class="icon">🎯</div><div class="link-info"><div class="link-name">Mandiant Threat Intelligence</div><div class="link-desc">APT research and incident response</div></div></a>
+  <a class="link-item" href="https://www.crowdstrike.com/" target="_blank" rel="noopener"><div class="icon">🦅</div><div class="link-info"><div class="link-name">CrowdStrike</div><div class="link-desc">Endpoint protection and state-sponsored threat tracking</div></div></a>
+  <a class="link-item" href="https://www.eff.org/" target="_blank" rel="noopener"><div class="icon">⚖</div><div class="link-info"><div class="link-name">EFF — Electronic Frontier Foundation</div><div class="link-desc">Digital privacy, free speech, and innovation advocacy</div></div></a>
+  <a class="link-item" href="https://www.virustotal.com/gui/home/url" target="_blank" rel="noopener"><div class="icon">🔒</div><div class="link-info"><div class="link-name">VirusTotal</div><div class="link-desc">Scan URLs and files against multiple security engines</div></div></a>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     DISCLAIMER
+     ══════════════════════════════════════════════════════════ -->
+<footer class="disclaimer-section">
+  <div class="inner">
+    <h3>Disclaimer</h3>
+    <p><strong>Intellectual Property:</strong> This material is the intellectual property of Cyber.SoHo. All rights reserved. © 2026 Cyber.SoHo. No part of this document may be reproduced without prior written permission of the copyright holder, except for brief quotations in academic reviews.</p>
+    <p><strong>Copyright &amp; Non-Affiliation:</strong> Cyber.SoHo is not affiliated with, endorsed by, or sponsored by any organizations, companies, products, or services mentioned. All trademarks are property of their respective owners. References are made solely for educational purposes. Any resemblance to proprietary training materials is coincidental.</p>
+    <p><strong>External Links:</strong> Users are strongly encouraged to verify all external URLs before visiting them using tools such as <a href="https://www.virustotal.com/gui/home/url" target="_blank" rel="noopener">VirusTotal</a>.</p>
+    <p><strong>Liability &amp; Ethics:</strong> Information is provided "as is" for educational purposes only. Code examples are strictly for educational demonstration and should never be used against systems without explicit written authorization. Any unauthorized use is illegal and unethical. Cyber.SoHo shall not be held liable for any damages arising from the use or misuse of this material. Knowledge of attack techniques carries a responsibility to use that knowledge for defense, protection, and the public good.</p>
+    <p style="color:var(--text-muted);margin-top:2rem;font-size:0.75rem;">Part I: Threats, Attacks & Defenses · Week 5, Lesson 1 · Introduction to Computer Security · © 2026 Cyber.SoHo</p>
+  </div>
+</footer>
+
+<!-- ══════════════════════════════════════════════════════════
+     JAVASCRIPT
+     ══════════════════════════════════════════════════════════ -->
+<script>
+// ── Progress Bar ─────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  const p = (window.scrollY / h) * 100;
+  document.getElementById('progressFill').style.width = p + '%';
+});
+
+// ── Collapsible Sections ─────────────────────────────────
+function toggleCollapsible(btn) {
+  btn.classList.toggle('open');
+  const content = btn.nextElementSibling;
+  content.classList.toggle('show');
+}
+
+// ── Copy Code Button ─────────────────────────────────────
+document.querySelectorAll('.copy-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const code = btn.closest('.code-block').querySelector('.code-content').textContent;
+    navigator.clipboard.writeText(code).then(() => {
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 1500);
+    });
+  });
+});
+
+// ── SOC Dashboard Simulator ──────────────────────────────
+let socRunning = false, socInterval = null;
+let sC=0, sH=0, sM=0, sL=0;
+
+const socTemplates = [
+  {src:"Firewall",sev:["low","med"],msgs:["Blocked outbound to known C2 (TOR exit node)","Port scan from 203.0.113.42","Traffic spike on port 443"]},
+  {src:"IDS/IPS",sev:["med","high"],msgs:["SQL injection attempt detected","Brute force: 15 failures in 60s","Malware communication pattern"]},
+  {src:"EDR",sev:["high","crit"],msgs:["Unauthorized powershell.exe -enc","mimikatz.exe signature detected","Lateral movement via PsExec"]},
+  {src:"SIEM",sev:["med","high","crit"],msgs:["Impossible travel: NYC and Beijing","2.3GB exfiltration to cloud","Privilege escalation outside change window"]},
+  {src:"Intel",sev:["low","med"],msgs:["IOC match: APT29 indicators","Spear-phishing with malicious .docx","Credentials found in dark web dump"]}
+];
+
+function ts(){return new Date().toLocaleTimeString('en-US',{hour12:false})}
+function genSOCAlert(){
+  const t=socTemplates[Math.floor(Math.random()*socTemplates.length)];
+  const s=t.sev[Math.floor(Math.random()*t.sev.length)];
+  const m=t.msgs[Math.floor(Math.random()*t.msgs.length)];
+  if(s==='crit')sC++;else if(s==='high')sH++;else if(s==='med')sM++;else sL++;
+  document.getElementById('sCrit').textContent=sC;
+  document.getElementById('sHigh').textContent=sH;
+  document.getElementById('sMed').textContent=sM;
+  document.getElementById('sLow').textContent=sL;
+  const feed=document.getElementById('socFeed');
+  const el=document.createElement('div');
+  el.className='soc-alert '+s;
+  el.innerHTML=`<span class="time">${ts()}</span><span class="src">[${t.src}]</span><span class="msg">${m}</span>`;
+  feed.insertBefore(el,feed.firstChild);
+  while(feed.children.length>30)feed.removeChild(feed.lastChild);
+  updateThreat();
+}
+function updateThreat(){
+  const total=sC+sH+sM+sL;if(!total)return;
+  const score=((sC*4)+(sH*3)+(sM*2)+sL)/(total*4)*100;
+  const fill=document.getElementById('threatFill');
+  const lbl=document.getElementById('threatLbl');
+  fill.style.width=Math.min(score,100)+'%';
+  if(score>=75){fill.style.background='var(--red)';lbl.textContent='CRITICAL';lbl.style.color='var(--red)';}
+  else if(score>=50){fill.style.background='var(--orange)';lbl.textContent='HIGH';lbl.style.color='var(--orange)';}
+  else if(score>=25){fill.style.background='var(--yellow)';lbl.textContent='ELEVATED';lbl.style.color='var(--yellow)';}
+  else{fill.style.background='var(--green)';lbl.textContent='LOW';lbl.style.color='var(--green)';}
+}
+function toggleSOC(){
+  const btn=document.getElementById('socStartBtn');
+  if(socRunning){clearInterval(socInterval);btn.textContent='▶ START';socRunning=false;}
+  else{socInterval=setInterval(genSOCAlert,1800);btn.textContent='⏸ PAUSE';socRunning=true;}
+}
+function triggerSOCAttack(){
+  const seq=[
+    {src:"Intel",s:"med",m:"APT28 phishing infrastructure in email headers"},
+    {src:"IDS",s:"high",m:"CVE exploit targeting unpatched Exchange server"},
+    {src:"EDR",s:"crit",m:"Cobalt Strike beacon on DC01 — active C2"},
+    {src:"SIEM",s:"crit",m:"Mass credential harvesting — 847 accounts"},
+    {src:"EDR",s:"crit",m:"Ransomware deployment across 23 endpoints — URGENT"}
+  ];
+  seq.forEach((a,i)=>{setTimeout(()=>{
+    if(a.s==='crit')sC++;else if(a.s==='high')sH++;else sM++;
+    document.getElementById('sCrit').textContent=sC;
+    document.getElementById('sHigh').textContent=sH;
+    document.getElementById('sMed').textContent=sM;
+    const feed=document.getElementById('socFeed');
+    const el=document.createElement('div');
+    el.className='soc-alert '+a.s;
+    el.innerHTML=`<span class="time">${ts()}</span><span class="src">[${a.src}]</span><span class="msg">${a.m}</span>`;
+    feed.insertBefore(el,feed.firstChild);
+    updateThreat();
+  },i*1200);});
+}
+
+// ── Smooth section reveal on scroll ──────────────────────
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting){
+      entry.target.style.opacity='1';
+      entry.target.style.transform='translateY(0)';
+    }
+  });
+}, {threshold: 0.1});
+
+document.querySelectorAll('.lecture-section, .toc-section').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(30px)';
+  el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+  observer.observe(el);
+});
+</script>
+</body>
+</html>

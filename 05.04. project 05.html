@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 5 — Cyber Terrorism & Information Warfare</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&family=IBM+Plex+Serif:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c10;
+    --surface: #0d1117;
+    --surface2: #131920;
+    --border: #1e2d3d;
+    --accent: #00e5ff;
+    --accent2: #ff3864;
+    --accent3: #f5a623;
+    --accent4: #7fff00;
+    --text: #c9d8e8;
+    --text-dim: #5a7a94;
+    --text-bright: #eaf4ff;
+    --warning: #ff6b35;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Syne', sans-serif;
+    --serif: 'IBM Plex Serif', serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--serif);
+    font-size: 16px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* === SCAN-LINE OVERLAY === */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,229,255,0.015) 2px,
+      rgba(0,229,255,0.015) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* === HERO === */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    padding: 4rem 2rem 4rem;
+    overflow: hidden;
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: gridPulse 8s ease-in-out infinite;
+  }
+
+  @keyframes gridPulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,56,100,0.12) 0%, transparent 70%);
+    top: -100px;
+    right: -100px;
+    pointer-events: none;
+  }
+  .hero-glow2 {
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,229,255,0.08) 0%, transparent 70%);
+    bottom: -50px;
+    left: 10%;
+    pointer-events: none;
+  }
+
+  .hero-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 960px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .course-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 4px 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .course-badge::before {
+    content: '';
+    position: absolute;
+    left: -100%;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0,229,255,0.1), transparent);
+    animation: shimmer 3s infinite;
+  }
+  @keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 200%; }
+  }
+
+  .hero h1 {
+    font-family: var(--sans);
+    font-weight: 800;
+    font-size: clamp(2.2rem, 5vw, 4rem);
+    line-height: 1.1;
+    color: var(--text-bright);
+    margin-bottom: 0.5rem;
+  }
+
+  .hero h1 span.red { color: var(--accent2); }
+  .hero h1 span.cyan { color: var(--accent); }
+
+  .hero-subtitle {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.1rem;
+    color: var(--text-dim);
+    margin-bottom: 2.5rem;
+    font-weight: 300;
+  }
+
+  .hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 3rem;
+  }
+
+  .meta-chip {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .meta-chip .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent3);
+    animation: blink 2s infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  .ponderation-display {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    width: fit-content;
+  }
+  .pond-block {
+    padding: 12px 24px;
+    text-align: center;
+    font-family: var(--mono);
+    border-right: 1px solid var(--border);
+  }
+  .pond-block:last-child { border-right: none; }
+  .pond-block .num {
+    font-size: 2rem;
+    font-weight: 700;
+    display: block;
+  }
+  .pond-block .label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+  }
+  .pond-block.theory .num { color: var(--accent); }
+  .pond-block.lab .num { color: var(--accent2); }
+  .pond-block.reflect .num { color: var(--accent4); }
+
+  /* === NAV === */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(8,12,16,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+  }
+  .nav-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-inner::-webkit-scrollbar { display: none; }
+  .nav-link {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    text-decoration: none;
+    padding: 14px 16px;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .nav-link:hover, .nav-link.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  /* === MAIN CONTENT === */
+  .content {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+  }
+
+  /* === DISCLAIMER BOX === */
+  .disclaimer {
+    border: 1px solid var(--warning);
+    background: rgba(255,107,53,0.05);
+    padding: 1.5rem 1.75rem;
+    margin: 3rem 0;
+    position: relative;
+  }
+  .disclaimer::before {
+    content: '⚠ EDUCATOR DISCLAIMER';
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    color: var(--warning);
+    position: absolute;
+    top: -10px;
+    left: 16px;
+    background: var(--bg);
+    padding: 0 8px;
+  }
+  .disclaimer p { font-size: 0.9rem; color: var(--text); margin-bottom: 0.5rem; }
+  .disclaimer p:last-child { margin-bottom: 0; }
+
+  /* === SECTION HEADERS === */
+  .section-header {
+    margin: 5rem 0 2rem;
+    position: relative;
+  }
+  .section-num {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--accent2);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .section-header h2 {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: clamp(1.5rem, 3vw, 2.2rem);
+    color: var(--text-bright);
+    line-height: 1.2;
+  }
+  .section-header .weight-badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    padding: 3px 10px;
+    border: 1px solid;
+    margin-top: 0.5rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .weight-badge.theory { color: var(--accent); border-color: var(--accent); }
+  .weight-badge.lab { color: var(--accent2); border-color: var(--accent2); }
+  .weight-badge.reflect { color: var(--accent4); border-color: var(--accent4); }
+
+  .section-divider {
+    width: 60px;
+    height: 2px;
+    background: var(--accent2);
+    margin: 1rem 0;
+  }
+
+  /* === CONTENT BLOCKS === */
+  .content h3 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 1.15rem;
+    color: var(--accent);
+    margin: 2.5rem 0 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .content h3::before {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  .content h4 {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    color: var(--accent3);
+    margin: 1.75rem 0 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .content p {
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+  }
+
+  /* === TABLES === */
+  .table-wrap {
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    border: 1px solid var(--border);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.83rem;
+    font-family: var(--mono);
+  }
+  th {
+    background: var(--surface2);
+    color: var(--accent);
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--accent);
+    white-space: nowrap;
+  }
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: top;
+  }
+  tr:hover td { background: rgba(0,229,255,0.03); }
+  td a, td .link { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+
+  /* === CASE STUDY CARDS === */
+  .case-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin: 2rem 0;
+  }
+  .case-card {
+    background: var(--surface);
+    padding: 1.5rem;
+    position: relative;
+    transition: background 0.2s;
+    cursor: pointer;
+  }
+  .case-card:hover { background: var(--surface2); }
+  .case-card .case-year {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--accent3);
+    letter-spacing: 0.15em;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+  }
+  .case-card h4 {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text-bright);
+    margin: 0 0 0.75rem;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .case-card p {
+    font-size: 0.83rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .case-card .severity {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    padding: 2px 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .sev-critical { color: var(--accent2); border: 1px solid var(--accent2); }
+  .sev-high { color: var(--accent3); border: 1px solid var(--accent3); }
+
+  /* === EXPANDABLE CASE DETAIL === */
+  .case-detail {
+    display: none;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--accent2);
+    padding: 1.5rem;
+    margin: -1px 0 2rem;
+    font-size: 0.88rem;
+  }
+  .case-detail.open { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+  .case-detail strong { color: var(--accent); font-family: var(--mono); font-weight: 400; }
+
+  /* === IW DOMAINS GRID === */
+  .iw-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    margin: 2rem 0;
+  }
+  .iw-cell {
+    background: var(--surface);
+    padding: 1.25rem;
+  }
+  .iw-cell .iw-tag {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--accent4);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.4rem;
+  }
+  .iw-cell h5 {
+    font-family: var(--sans);
+    font-weight: 700;
+    color: var(--text-bright);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+  .iw-cell p { font-size: 0.8rem; color: var(--text-dim); }
+
+  /* === ACTOR TYPES === */
+  .actor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  .actor-card {
+    border: 1px solid var(--border);
+    padding: 1rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .actor-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .actor-card.nation::after { background: var(--accent2); }
+  .actor-card.nonstate::after { background: var(--accent3); }
+  .actor-card.hacktivist::after { background: var(--accent4); }
+  .actor-card.insider::after { background: var(--accent); }
+  .actor-card h5 {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--text-bright);
+    margin-bottom: 0.3rem;
+  }
+  .actor-card p { font-size: 0.78rem; color: var(--text-dim); }
+
+  /* === CODE BLOCKS === */
+  .code-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 1.25rem 1.5rem;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--text);
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    white-space: pre;
+  }
+  .code-block .comment { color: var(--text-dim); }
+  .code-block .key { color: var(--accent2); }
+  .code-block .val { color: var(--accent4); }
+  .code-block .str { color: var(--accent3); }
+
+  /* === EXERCISE BLOCKS === */
+  .exercise {
+    border: 1px solid var(--border);
+    margin: 2.5rem 0;
+    position: relative;
+  }
+  .exercise-header {
+    background: var(--surface2);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+  }
+  .exercise-header:hover { background: rgba(0,229,255,0.04); }
+  .exercise-title {
+    font-family: var(--sans);
+    font-weight: 700;
+    color: var(--text-bright);
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .exercise-num {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--accent2);
+    background: rgba(255,56,100,0.1);
+    border: 1px solid var(--accent2);
+    padding: 2px 8px;
+    letter-spacing: 0.1em;
+  }
+  .exercise-time {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .toggle-icon {
+    font-size: 1.2rem;
+    color: var(--accent);
+    transition: transform 0.3s;
+    margin-left: 1rem;
+  }
+  .toggle-icon.open { transform: rotate(45deg); }
+  .exercise-body {
+    display: none;
+    padding: 1.5rem;
+  }
+  .exercise-body.open { display: block; animation: fadeIn 0.3s ease; }
+
+  /* === TOOLS TABLE === */
+  .tool-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .tool-item:last-child { border-bottom: none; }
+  .tool-name {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--accent);
+    min-width: 130px;
+    font-weight: 700;
+  }
+  .tool-desc {
+    font-size: 0.83rem;
+    color: var(--text-dim);
+    flex: 1;
+  }
+  .tool-link {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--accent3);
+    text-decoration: none;
+    border: 1px solid var(--accent3);
+    padding: 2px 8px;
+    white-space: nowrap;
+    transition: background 0.2s;
+  }
+  .tool-link:hover { background: rgba(245,166,35,0.1); }
+
+  /* === KILL CHAIN === */
+  .kill-chain {
+    display: flex;
+    overflow-x: auto;
+    gap: 0;
+    margin: 2rem 0;
+    padding-bottom: 0.5rem;
+  }
+  .kc-step {
+    min-width: 120px;
+    flex: 1;
+    text-align: center;
+    padding: 1rem 0.5rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-right: none;
+    position: relative;
+    transition: background 0.2s;
+    cursor: default;
+  }
+  .kc-step:last-child { border-right: 1px solid var(--border); }
+  .kc-step:hover { background: rgba(0,229,255,0.06); }
+  .kc-step::after {
+    content: '›';
+    position: absolute;
+    right: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--accent);
+    font-size: 1.4rem;
+    z-index: 1;
+    background: var(--bg);
+    line-height: 1;
+    padding: 0 2px;
+  }
+  .kc-step:last-child::after { display: none; }
+  .kc-step .kc-num {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    margin-bottom: 0.25rem;
+  }
+  .kc-step .kc-name {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 0.78rem;
+    color: var(--text-bright);
+  }
+
+  /* === CHECKLIST INTERACTIVE === */
+  .checklist {
+    list-style: none;
+    margin: 1rem 0;
+  }
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 0.5rem 0;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .checklist li.done { color: var(--text-dim); text-decoration: line-through; }
+  .check-box {
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    border: 1px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: var(--accent4);
+    margin-top: 3px;
+  }
+
+  /* === RUBRIC === */
+  .rubric-bar {
+    margin-bottom: 1rem;
+  }
+  .rubric-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  .rubric-label {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    min-width: 180px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .rubric-track {
+    flex: 1;
+    height: 4px;
+    background: var(--surface2);
+    position: relative;
+  }
+  .rubric-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+    width: 0;
+  }
+  .rubric-pct {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--accent);
+    min-width: 35px;
+    text-align: right;
+  }
+
+  /* === RESOURCE LINKS === */
+  .resource-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+  .resource-card {
+    border: 1px solid var(--border);
+    padding: 1rem;
+    text-decoration: none;
+    display: block;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .resource-card:hover {
+    border-color: var(--accent);
+    background: rgba(0,229,255,0.03);
+  }
+  .resource-type {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.25rem;
+  }
+  .resource-name {
+    font-family: var(--sans);
+    font-weight: 700;
+    color: var(--accent);
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+  }
+  .resource-url {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--text-dim);
+  }
+
+  /* === HIGHLIGHT BOX === */
+  .highlight-box {
+    border: 1px solid var(--accent);
+    background: rgba(0,229,255,0.03);
+    padding: 1.25rem 1.5rem;
+    margin: 1.5rem 0;
+    position: relative;
+  }
+  .highlight-box::before {
+    content: attr(data-label);
+    position: absolute;
+    top: -10px;
+    left: 14px;
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--accent);
+    background: var(--bg);
+    padding: 0 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .highlight-box p, .highlight-box li { font-size: 0.88rem; }
+
+  /* === FOOTER === */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+  footer .f-inner {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  footer .f-course {
+    font-family: var(--sans);
+    font-weight: 800;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+  }
+  footer p {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    font-family: var(--mono);
+  }
+
+  /* === PROGRESS BAR === */
+  .progress-strip {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    z-index: 200;
+    transition: width 0.1s;
+    width: 0%;
+  }
+
+  /* === UTILITY === */
+  a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+  .mono { font-family: var(--mono); font-size: 0.85em; }
+  .cyan { color: var(--accent); }
+  .red { color: var(--accent2); }
+  .gold { color: var(--accent3); }
+  .green { color: var(--accent4); }
+  .dim { color: var(--text-dim); }
+
+  strong { color: var(--text-bright); font-weight: 600; }
+  em { color: var(--accent3); font-style: italic; }
+
+  ul { padding-left: 0; list-style: none; }
+  ul li {
+    padding-left: 1.2em;
+    position: relative;
+    margin-bottom: 0.4rem;
+    font-size: 0.92rem;
+  }
+  ul li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+  }
+
+  @media (max-width: 600px) {
+    .hero-meta { flex-direction: column; }
+    .kill-chain { flex-direction: column; }
+    .kc-step { border-right: 1px solid var(--border); border-bottom: none; }
+    .kc-step::after { content: '↓'; right: 50%; top: auto; bottom: -14px; transform: translateX(50%); }
+    .kc-step:last-child::after { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-strip" id="progress"></div>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+  <div class="hero-inner">
+    <div class="course-badge">
+      <span class="dot"></span>
+      Intro to Computer Security · Undergraduate · Week 5
+    </div>
+    <h1>
+      <span class="red">Cyber Terrorism</span><br>
+      <span style="color:var(--text-bright)">&amp;</span>
+      <span class="cyan"> Information Warfare</span>
+    </h1>
+    <p class="hero-subtitle">Part I · Module 5 — When the Digital Becomes the Battlefield</p>
+
+    <div class="hero-meta">
+      <div class="meta-chip"><span class="dot"></span> ~6 Hours Workload</div>
+      <div class="meta-chip">Max 4 Pages A4 Report</div>
+      <div class="meta-chip">Continuous Project · Chapter 5</div>
+    </div>
+
+    <div class="ponderation-display">
+      <div class="pond-block theory">
+        <span class="num">1</span>
+        <span class="label">Theory<br>~1.5 h</span>
+      </div>
+      <div class="pond-block lab">
+        <span class="num">2</span>
+        <span class="label">Lab<br>~3 h</span>
+      </div>
+      <div class="pond-block reflect">
+        <span class="num">1</span>
+        <span class="label">Reflect<br>~1.5 h</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="#disclaimer" class="nav-link">Disclaimer</a>
+    <a href="#project-map" class="nav-link">Project Map</a>
+    <a href="#theory" class="nav-link">Theory</a>
+    <a href="#case-studies" class="nav-link">Case Studies</a>
+    <a href="#lab" class="nav-link">Lab</a>
+    <a href="#reflection" class="nav-link">Reflection</a>
+    <a href="#report" class="nav-link">Report</a>
+    <a href="#resources" class="nav-link">Resources</a>
+  </div>
+</nav>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- DISCLAIMER -->
+  <div class="disclaimer" id="disclaimer">
+    <p><strong>This module uses tools and techniques that are intentionally close to real-world cyber operations.</strong> The purpose is strictly educational and defensive. You learn how attacks are structured to understand how to detect, prevent, and respond to them.</p>
+    <p>All tools, platforms, and techniques mentioned here are <strong>open, freely available, and completely interchangeable</strong>. No tool is mandatory. You are strongly encouraged to research alternatives, compare approaches, and — where skills permit — <strong>build your own scripts and utilities</strong>. Originality is rewarded.</p>
+    <p>Any use of this knowledge outside a controlled, legal, and explicitly authorised environment is the <strong>sole legal and ethical responsibility</strong> of the individual. The instructor, institution, and course designers bear no liability for misuse.</p>
+  </div>
+
+  <!-- PROJECT MAP -->
+  <div class="section-header" id="project-map">
+    <div class="section-num">00 · Overview</div>
+    <h2>Your Semester-Long Dossier</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <p>Your project is assembled incrementally. Each week adds a new chapter. By the final assessment, you hold a complete security dossier. <span class="mono cyan">You are here → Week 5 / Module 5.</span></p>
+
+  <div class="table-wrap" style="margin-top:1.5rem">
+    <table>
+      <thead>
+        <tr><th>Week</th><th>Module</th><th>Theme</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>1–2</td><td>Foundations of Computer Security</td><td class="dim mono">done</td></tr>
+        <tr><td>2</td><td>3</td><td>Security Models and Policy Issues</td><td class="dim mono">done</td></tr>
+        <tr><td>3</td><td>4</td><td>Detection, Containment, and Response/Recovery</td><td class="dim mono">done</td></tr>
+        <tr><td>4</td><td>5</td><td>Techniques Used by Hackers + Network Scanning, Attack Classification, Vulnerability Analysis</td><td class="dim mono">done</td></tr>
+        <tr style="background:rgba(0,229,255,0.04)"><td><strong class="cyan">5</strong></td><td><strong class="cyan">6</strong></td><td><strong class="cyan">Cyber Terrorism &amp; Information Warfare</strong></td><td class="mono" style="color:var(--accent4)">▶ now</td></tr>
+        <tr><td>6</td><td>7</td><td>Industrial Espionage in Cyberspace</td><td class="dim mono">next →</td></tr>
+        <tr><td>—</td><td>—</td><td><strong>Midterm Assessment (Comprehensive Exam)</strong></td><td class="dim mono">—</td></tr>
+        <tr><td>7</td><td>8</td><td>Security Domains &amp; Technologies</td><td class="dim mono">—</td></tr>
+        <tr><td>8</td><td>9</td><td>Operating Systems Security and Malware</td><td class="dim mono">—</td></tr>
+        <tr><td>9</td><td>10</td><td>Network and Web Security</td><td class="dim mono">—</td></tr>
+        <tr><td>10</td><td>11</td><td>Authentication Protocols and Key Management</td><td class="dim mono">—</td></tr>
+        <tr><td>11</td><td>12</td><td>Applied Cryptography</td><td class="dim mono">—</td></tr>
+        <tr><td>12</td><td>13</td><td>Computer Security Software</td><td class="dim mono">—</td></tr>
+        <tr><td>13</td><td>14</td><td>Emerging Topics: Blockchain, Decentralised Applications, E-commerce</td><td class="dim mono">—</td></tr>
+        <tr><td>—</td><td>—</td><td><strong>Final Assessment and Overall Course Feedback</strong></td><td class="dim mono">—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- THEORY -->
+  <div class="section-header" id="theory">
+    <div class="section-num">Part 1 · Theory</div>
+    <h2>Defining the Digital Battlefield</h2>
+    <span class="weight-badge theory">Weight: 1 · ~1.5 hours</span>
+    <div class="section-divider"></div>
+  </div>
+
+  <h3>1.1 — What Is Cyber Terrorism?</h3>
+
+  <p>Cyber terrorism sits at the intersection of two already complex concepts: <em>terrorism</em> and <em>cyberattacks</em>. <a href="https://www.rand.org" target="_blank">RAND Corporation</a> offers a widely cited working definition framing it as premeditated, politically motivated attacks against information systems intended to cause violence or severe disruption against non-combatant targets.</p>
+
+  <p>The key ingredients that make something <em>cyber terrorism</em> rather than ordinary cybercrime:</p>
+
+  <div class="iw-grid">
+    <div class="iw-cell">
+      <div class="iw-tag">Element 1</div>
+      <h5>Premeditated</h5>
+      <p>Not accidental or opportunistic. Carefully planned with a specific destructive or coercive goal.</p>
+    </div>
+    <div class="iw-cell">
+      <div class="iw-tag">Element 2</div>
+      <h5>Politically Motivated</h5>
+      <p>Driven by ideology — not financial gain. This separates it from ransomware and cybercrime.</p>
+    </div>
+    <div class="iw-cell">
+      <div class="iw-tag">Element 3</div>
+      <h5>Targets Non-Combatants</h5>
+      <p>Civilian infrastructure: power grids, hospitals, water systems, financial networks.</p>
+    </div>
+    <div class="iw-cell">
+      <div class="iw-tag">Element 4</div>
+      <h5>Violence / Fear as Goal</h5>
+      <p>The attack is designed to cause physical harm, widespread panic, or political coercion.</p>
+    </div>
+  </div>
+
+  <div class="highlight-box" data-label="Know the Difference">
+    <p><strong>Cybercrime</strong> = financially motivated (ransomware gangs, credit card fraud)<br>
+    <strong>Hacktivism</strong> = ideologically motivated, typically non-violent (website defacement, DDoS (Distributed Denial-of-Service) protests)<br>
+    <strong>Cyber Espionage</strong> = intelligence gathering without direct disruption<br>
+    <strong>Cyber Terrorism</strong> = ideological + violent/coercive intent + civilian targets</p>
+  </div>
+
+  <h3>1.2 — Information Warfare: Older Than the Internet</h3>
+
+  <p><strong>Information Warfare (IW)</strong> is the deliberate use of information — and the denial, degradation, or manipulation of an adversary's information — to gain strategic advantage. Propaganda leaflets dropped from aircraft in WWI were information warfare. What digital networks changed is <em>scale</em>, <em>speed</em>, and <em>precision targeting</em>.</p>
+
+  <p>Modern IW doctrine, as studied by <a href="https://ccdcoe.org" target="_blank">NATO CCDCOE (Cooperative Cyber Defence Centre of Excellence)</a>, covers the following sub-domains. Click each card to expand details.</p>
+
+  <div class="iw-grid">
+    <div class="iw-cell">
+      <div class="iw-tag">Sub-domain 1</div>
+      <h5>PSYOP (Psychological Operations)</h5>
+      <p>Manipulating target audiences' beliefs, emotions, and decisions. Social media influence campaigns are its modern form.</p>
+    </div>
+    <div class="iw-cell">
+      <div class="iw-tag">Sub-domain 2</div>
+      <h5>EW (Electronic Warfare)</h5>
+      <p>Jamming, intercepting, or spoofing electronic signals. GPS (Global Positioning System) spoofing near conflict zones is a documented example.</p>
+    </div>
+    <div class="iw-cell">
+      <div class="iw-tag">Sub-domain 3</div>
+      <h5>Cyber Operations</h5>
+      <p>Offensive and defensive actions in cyberspace — destructive malware, data exfiltration, infrastructure disruption.</p>
+    </div>
+    <div class="iw-cell">
+      <div class="iw-tag">Sub-domain 4</div>
+      <h5>Deception</h5>
+      <p>Feeding false information to mislead adversary decision-makers. Includes fake military communications and fabricated intelligence.</p>
+    </div>
+    <div class="iw-cell">
+      <div class="iw-tag">Sub-domain 5</div>
+      <h5>OSINT Exploitation</h5>
+      <p>Using publicly available information to build intelligence profiles. Tracking troop movements via geotagged social media posts is a documented OSINT (Open Source INTelligence) vector.</p>
+    </div>
+    <div class="iw-cell">
+      <div class="iw-tag">Sub-domain 6</div>
+      <h5>Censorship / Narrative Control</h5>
+      <p>Suppressing information or flooding channels with noise so truth cannot easily be located or verified.</p>
+    </div>
+  </div>
+
+  <h3>1.3 — Threat Actor Taxonomy</h3>
+
+  <p>IW and cyber terrorism are not committed by a single actor type. Understanding <em>who does what</em> is essential for threat modelling. The <a href="https://attack.mitre.org" target="_blank">MITRE ATT&amp;CK (Adversarial Tactics, Techniques, and Common Knowledge) Framework</a> catalogues known TTPs (Tactics, Techniques, and Procedures) across dozens of documented APT (Advanced Persistent Threat) groups.</p>
+
+  <div class="actor-grid">
+    <div class="actor-card nation">
+      <h5>Nation-State / APT</h5>
+      <p>State-sponsored, highly sophisticated, virtually unlimited resources. Operate under strategic geopolitical goals.</p>
+    </div>
+    <div class="actor-card nonstate">
+      <h5>Non-State Terrorist Org.</h5>
+      <p>Use cyber for recruitment, propaganda, and cryptocurrency fundraising. Growing technical sophistication.</p>
+    </div>
+    <div class="actor-card hacktivist">
+      <h5>Hacktivist Collectives</h5>
+      <p>Ideologically driven, loosely organised. Operations often blur into IW territory.</p>
+    </div>
+    <div class="actor-card insider">
+      <h5>Insider Threats</h5>
+      <p>Individuals with legitimate access who misuse it. Among the hardest to detect and attribute.</p>
+    </div>
+  </div>
+
+  <h3>1.4 — Legal and Ethical Framework</h3>
+
+  <p>Cyber terrorism exists in a deeply contested legal space. The following three instruments are the most important reference points:</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Instrument</th><th>Body</th><th>Scope</th><th>Link</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Budapest Convention on Cybercrime</strong></td>
+          <td>Council of Europe</td>
+          <td>Most widely ratified international cybercrime treaty</td>
+          <td><a href="https://www.coe.int/en/web/cybercrime/the-budapest-convention" target="_blank">coe.int →</a></td>
+        </tr>
+        <tr>
+          <td><strong>Tallinn Manual 2.0</strong></td>
+          <td>NATO CCDCOE</td>
+          <td>Academic study on international law applied to cyber operations and warfare</td>
+          <td><a href="https://ccdcoe.org/research/tallinn-manual/" target="_blank">ccdcoe.org →</a></td>
+        </tr>
+        <tr>
+          <td><strong>UN GGE (Group of Governmental Experts) Reports</strong></td>
+          <td>United Nations</td>
+          <td>Norms of responsible state behaviour in cyberspace</td>
+          <td><a href="https://front.un-arm.org/wp-content/uploads/2021/08/Final-report-2019-2021-UNGGE-July-2021.pdf" target="_blank">un-arm.org →</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- CASE STUDIES -->
+  <div class="section-header" id="case-studies">
+    <div class="section-num">Part 1 · continued</div>
+    <h2>Landmark Case Studies</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <p>These four incidents are foundational knowledge. Click each card to expand the full case analysis.</p>
+
+  <div class="case-cards" id="cases">
+    <div class="case-card" onclick="toggleCase('c1')">
+      <div class="case-year">2007</div>
+      <span class="severity sev-high">HIGH</span>
+      <h4>Estonia: The First Nation-State DDoS</h4>
+      <p>First large-scale cyber attack against a nation's entire digital infrastructure.</p>
+    </div>
+    <div class="case-card" onclick="toggleCase('c2')">
+      <div class="case-year">2010</div>
+      <span class="severity sev-critical">CRITICAL</span>
+      <h4>Stuxnet: The First Cyber Weapon</h4>
+      <p>A worm designed to cause physical destruction to industrial machinery.</p>
+    </div>
+    <div class="case-card" onclick="toggleCase('c3')">
+      <div class="case-year">2017</div>
+      <span class="severity sev-critical">CRITICAL</span>
+      <h4>NotPetya: Wiper Disguised as Ransomware</h4>
+      <p>$10 billion in global damages. The deadliest cyberattack in history.</p>
+    </div>
+    <div class="case-card" onclick="toggleCase('c4')">
+      <div class="case-year">2016</div>
+      <span class="severity sev-high">HIGH</span>
+      <h4>IRA (Internet Research Agency) Influence Op.</h4>
+      <p>Coordinated inauthentic behaviour on a massive scale.</p>
+    </div>
+  </div>
+
+  <div class="case-detail" id="c1">
+    <p><strong>What happened:</strong> Following a political dispute with Russia over the relocation of a Soviet-era war memorial, Estonia experienced a wave of DDoS (Distributed Denial-of-Service) attacks that paralysed government, banking, and media websites for weeks.</p>
+    <p><strong>Technical signature:</strong> Coordinated botnets generating traffic floods, exploiting the limited redundancy of Estonian internet infrastructure.</p>
+    <p><strong>Key takeaway:</strong> Even without destroying hardware, an adversary can cripple a modern state by degrading its digital nervous system. This event directly led to the creation of <a href="https://ccdcoe.org" target="_blank">NATO CCDCOE</a> in Tallinn.</p>
+    <p><strong>Defensive lessons:</strong> DDoS (Distributed Denial-of-Service) mitigation, internet traffic scrubbing centres, international incident response cooperation.</p>
+  </div>
+  <div class="case-detail" id="c2">
+    <p><strong>What happened:</strong> Stuxnet was a highly sophisticated worm that targeted Iran's uranium enrichment programme. It caused centrifuges to spin at destructive speeds while reporting normal operation to operators.</p>
+    <p><strong>Technical novelty:</strong> It targeted <strong>SCADA (Supervisory Control and Data Acquisition)</strong> systems — specifically Siemens PLCs (Programmable Logic Controllers). It used four zero-day exploits simultaneously, unprecedented at the time.</p>
+    <p><strong>Key takeaway:</strong> Cyber weapons can cause physical destruction. The boundary between digital and physical security is gone. See <a href="https://www.cisa.gov/topics/industrial-control-systems" target="_blank">ICS-CERT (Industrial Control Systems Cyber Emergency Response Team) at CISA</a>.</p>
+    <p><strong>Defensive lessons:</strong> Air-gapping critical systems, integrity monitoring of industrial software, insider threat programmes.</p>
+  </div>
+  <div class="case-detail" id="c3">
+    <p><strong>What happened:</strong> NotPetya was initially disguised as ransomware but was in fact a <strong>wiper</strong> — malware with no recovery mechanism, designed purely to destroy. It spread globally via a compromised Ukrainian accounting software update.</p>
+    <p><strong>Attribution:</strong> Attributed to <strong>Sandworm</strong>, an APT (Advanced Persistent Threat) group linked to Russia's GRU (Glavnoye Razvedyvatel'noye Upravleniye — Russian Military Intelligence). Full technical advisory available at <a href="https://www.cisa.gov" target="_blank">CISA (Cybersecurity and Infrastructure Security Agency)</a>.</p>
+    <p><strong>Key takeaway:</strong> Supply chain attacks (compromising trusted software updates) are an extremely potent delivery vector. A state actor can cause global collateral damage far beyond the intended target.</p>
+    <p><strong>Defensive lessons:</strong> Software supply chain integrity, code signing verification, offline backups, network segmentation.</p>
+  </div>
+  <div class="case-detail" id="c4">
+    <p><strong>What happened:</strong> The Internet Research Agency (IRA), a Russian state-linked "troll farm," conducted a sustained influence operation across Facebook, Twitter/X, YouTube, and other platforms — targeting US social divisions ahead of the 2016 presidential election.</p>
+    <p><strong>Techniques used:</strong> Fake accounts posing as American activists, amplification via paid advertising, creation of divisive content around race, religion, and immigration, and <strong>coordinated inauthentic behaviour</strong> — the defining concept of modern information operations.</p>
+    <p><strong>Primary source:</strong> <a href="https://www.intelligence.senate.gov/publications/report-select-committee-intelligence-united-states-senate-russian-active-measures" target="_blank">US Senate Intelligence Committee Report on Russian Active Measures</a>.</p>
+    <p><strong>Key takeaway:</strong> Cognitive infrastructure is as attackable as technical infrastructure. Democracy itself can be a target surface.</p>
+  </div>
+
+  <!-- LAB -->
+  <div class="section-header" id="lab">
+    <div class="section-num">Part 2 · Hands-On Lab</div>
+    <h2>Three Exercises, Real Techniques</h2>
+    <span class="weight-badge lab">Weight: 2 · ~3 hours</span>
+    <div class="section-divider"></div>
+  </div>
+
+  <div class="disclaimer" style="border-color:var(--accent2);">
+    <p><strong>Lab Safety:</strong> All tasks use open, publicly available, legal tools on public data only. Every tool listed is a suggestion — research and use any equivalent. Never probe systems without written authorisation. Creative tool choices (including tools you build yourself) are explicitly encouraged and rewarded.</p>
+  </div>
+
+  <!-- EXERCISE 1 -->
+  <div class="exercise">
+    <div class="exercise-header" onclick="toggleExercise('ex1')">
+      <div class="exercise-title">
+        <span class="exercise-num">EX·01</span>
+        Threat Actor Mapping with MITRE ATT&amp;CK
+      </div>
+      <div style="display:flex;align-items:center;gap:1rem">
+        <span class="exercise-time">⏱ ~60 min</span>
+        <span class="toggle-icon" id="ex1-icon">+</span>
+      </div>
+    </div>
+    <div class="exercise-body" id="ex1">
+      <p><strong>Objective:</strong> Use the <a href="https://attack.mitre.org" target="_blank">MITRE ATT&amp;CK Framework</a> to map a documented threat actor's known techniques and understand how cyber terrorism and IW (Information Warfare) campaigns are constructed technically.</p>
+
+      <h4>Step 1 — Navigate to MITRE ATT&amp;CK Groups</h4>
+      <p>Go to <a href="https://attack.mitre.org" target="_blank">attack.mitre.org</a> → <strong>Groups</strong>. Select <strong>Sandworm Team</strong> (also known as APT44 (Advanced Persistent Threat 44), Voodoo Bear, or IRIDIUM — attributed to Russian GRU (Glavnoye Razvedyvatel'noye Upravleniye)). Read the group profile and note: what sectors they target, what their documented motivation is, how many techniques are attributed to them.</p>
+
+      <h4>Step 2 — ATT&amp;CK Navigator Heat Map</h4>
+      <p>Open <a href="https://mitre-attack.github.io/attack-navigator/" target="_blank">ATT&amp;CK Navigator</a>. Create a New Layer → Enterprise. Search for "Sandworm" and load their layer. Observe the heat map — highlighted cells are their known TTPs (Tactics, Techniques, and Procedures).</p>
+
+      <h4>Step 3 — Document 5 Techniques</h4>
+      <p>From Sandworm's highlighted cells, pick any 5 techniques. For each one record:</p>
+      <ul>
+        <li>Technique ID (e.g., T1486)</li>
+        <li>Technique name (e.g., "Data Encrypted for Impact")</li>
+        <li>What the technique involves in your own words</li>
+        <li>Classification: destruction / espionage / information warfare</li>
+      </ul>
+
+      <h4>Step 4 — Compare with Lazarus Group</h4>
+      <p>Repeat for <strong>Lazarus Group</strong> (APT38 — attributed to North Korea). Pick 3 techniques. Where do the two groups overlap? What does overlap tell you about attribution difficulty?</p>
+
+      <div class="highlight-box" data-label="Creative Option">
+        <p>Download the MITRE ATT&amp;CK dataset in JSON format from <a href="https://github.com/mitre-attack/attack-stix-data" target="_blank">github.com/mitre-attack/attack-stix-data</a> and write a Python script that parses and prints techniques for a given group. Document your script in the report.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXERCISE 2 -->
+  <div class="exercise">
+    <div class="exercise-header" onclick="toggleExercise('ex2')">
+      <div class="exercise-title">
+        <span class="exercise-num">EX·02</span>
+        Disinformation &amp; Information Operations Analysis
+      </div>
+      <div style="display:flex;align-items:center;gap:1rem">
+        <span class="exercise-time">⏱ ~70 min</span>
+        <span class="toggle-icon" id="ex2-icon">+</span>
+      </div>
+    </div>
+    <div class="exercise-body" id="ex2">
+      <p><strong>Objective:</strong> Apply OSINT (Open Source INTelligence) techniques to identify structural signatures of a disinformation / information operations campaign. You are not spreading theories — you are dissecting confirmed, documented cases.</p>
+
+      <h4>The 4-Stage Disinformation Anatomy</h4>
+      <div class="iw-grid" style="margin:1rem 0">
+        <div class="iw-cell">
+          <div class="iw-tag">Stage 1</div>
+          <h5>Fabrication</h5>
+          <p>Creating false content: fake quotes, manipulated images, invented news stories.</p>
+        </div>
+        <div class="iw-cell">
+          <div class="iw-tag">Stage 2</div>
+          <h5>Laundering</h5>
+          <p>Publishing through apparently credible channels so the content gains false legitimacy.</p>
+        </div>
+        <div class="iw-cell">
+          <div class="iw-tag">Stage 3</div>
+          <h5>Amplification</h5>
+          <p>Bot networks and coordinated accounts spread the content to target audiences.</p>
+        </div>
+        <div class="iw-cell">
+          <div class="iw-tag">Stage 4</div>
+          <h5>Narrative Anchoring</h5>
+          <p>Repetition until the message becomes part of the information environment regardless of truth.</p>
+        </div>
+      </div>
+
+      <h4>Available OSINT Tools (suggestions — use any equivalent you find)</h4>
+      <div style="border:1px solid var(--border);padding:1rem;margin:1rem 0">
+        <div class="tool-item">
+          <span class="tool-name">Botometer</span>
+          <span class="tool-desc">Scores Twitter/X accounts on probability of being a bot</span>
+          <a href="https://botometer.osome.iu.edu" class="tool-link" target="_blank">visit →</a>
+        </div>
+        <div class="tool-item">
+          <span class="tool-name">InVID / WeVerify</span>
+          <span class="tool-desc">Reverse image and video verification and provenance checking</span>
+          <a href="https://weverify.eu/tools/" class="tool-link" target="_blank">visit →</a>
+        </div>
+        <div class="tool-item">
+          <span class="tool-name">Maltego CE</span>
+          <span class="tool-desc">Community Edition of the professional OSINT link-analysis platform</span>
+          <a href="https://www.maltego.com/downloads/" class="tool-link" target="_blank">visit →</a>
+        </div>
+        <div class="tool-item">
+          <span class="tool-name">SpiderFoot</span>
+          <span class="tool-desc">Automated OSINT reconnaissance — maps online footprints</span>
+          <a href="https://www.spiderfoot.net" class="tool-link" target="_blank">visit →</a>
+        </div>
+        <div class="tool-item">
+          <span class="tool-name">ICANN WHOIS</span>
+          <span class="tool-desc">Domain registration and infrastructure lookup</span>
+          <a href="https://lookup.icann.org" class="tool-link" target="_blank">visit →</a>
+        </div>
+      </div>
+
+      <h4>Select One Documented Case</h4>
+      <ul>
+        <li><a href="https://www.disinfo.eu" target="_blank">EU DisinfoLab's "India Chronicles" Operation</a></li>
+        <li><a href="https://io.stanford.edu" target="_blank">Stanford Internet Observatory — Operation Secondary Infektion</a></li>
+        <li><a href="https://euvsdisinfo.eu" target="_blank">EU vs Disinfo Database</a></li>
+        <li><a href="https://dfrlab.org" target="_blank">DFRLab (Digital Forensic Research Lab) Atlantic Council</a></li>
+      </ul>
+
+      <h4>Deliverable: Your 5-Row Red Flag Checklist Table</h4>
+      <div class="code-block"><span class="comment">Build this table in your report:</span>
+
+<span class="key">| # | Indicator              | How to Check It        | Confidence |</span>
+<span class="val">|---|------------------------|------------------------|------------|</span>
+<span class="str">| 1 | [your indicator here]  | [tool/method]          | H/M/L      |</span>
+<span class="str">| 2 | ...                    | ...                    | ...        |</span>
+<span class="str">| 3 | ...                    | ...                    | ...        |</span>
+<span class="str">| 4 | ...                    | ...                    | ...        |</span>
+<span class="str">| 5 | ...                    | ...                    | ...        |</span></div>
+    </div>
+  </div>
+
+  <!-- EXERCISE 3 -->
+  <div class="exercise">
+    <div class="exercise-header" onclick="toggleExercise('ex3')">
+      <div class="exercise-title">
+        <span class="exercise-num">EX·03</span>
+        Attack Scenario Design &amp; Defensive Planning
+      </div>
+      <div style="display:flex;align-items:center;gap:1rem">
+        <span class="exercise-time">⏱ ~50 min</span>
+        <span class="toggle-icon" id="ex3-icon">+</span>
+      </div>
+    </div>
+    <div class="exercise-body" id="ex3">
+      <p><strong>Objective:</strong> Think like a defender by first thinking like an attacker. Design a plausible (fictional) cyber terrorism scenario, then systematically dismantle it. This is standard methodology at <a href="https://www.enisa.europa.eu" target="_blank">ENISA (European Union Agency for Cybersecurity)</a> and <a href="https://www.cisa.gov" target="_blank">CISA</a>.</p>
+
+      <h4>Step 1 — Choose a Critical Infrastructure Sector</h4>
+      <ul>
+        <li>Power grid / energy distribution</li>
+        <li>Water treatment and distribution</li>
+        <li>Hospital / emergency medical services network</li>
+        <li>Public transport coordination system</li>
+        <li>National election management infrastructure</li>
+      </ul>
+
+      <h4>Step 2 — Build a Fictional Threat Actor Profile</h4>
+      <p>Invent a plausible (not real) actor. Assign: name, type (nation-state / terrorist / hacktivist / insider), motivation, capability level, assumed resources.</p>
+
+      <h4>Step 3 — Map the Cyber Kill Chain</h4>
+      <p>Using <a href="https://www.lockheedmartin.com/en-us/capabilities/cyber/cyber-kill-chain.html" target="_blank">Lockheed Martin's Cyber Kill Chain</a> or MITRE ATT&amp;CK structure:</p>
+
+      <div class="kill-chain">
+        <div class="kc-step">
+          <div class="kc-num">01</div>
+          <div class="kc-name">Reconnaissance</div>
+        </div>
+        <div class="kc-step">
+          <div class="kc-num">02</div>
+          <div class="kc-name">Weaponisation</div>
+        </div>
+        <div class="kc-step">
+          <div class="kc-num">03</div>
+          <div class="kc-name">Delivery</div>
+        </div>
+        <div class="kc-step">
+          <div class="kc-num">04</div>
+          <div class="kc-name">Exploitation</div>
+        </div>
+        <div class="kc-step">
+          <div class="kc-num">05</div>
+          <div class="kc-name">Installation</div>
+        </div>
+        <div class="kc-step">
+          <div class="kc-num">06</div>
+          <div class="kc-name">C2</div>
+        </div>
+        <div class="kc-step">
+          <div class="kc-num">07</div>
+          <div class="kc-name">Action on Objectives</div>
+        </div>
+      </div>
+
+      <p>For each step: what the attacker does, what technique type is used, what goal is achieved. No need to specify exact tools.</p>
+
+      <h4>Step 4 — Countermeasures Per Step</h4>
+      <p>For each kill chain step, propose at least one realistic defence. Reference where applicable:</p>
+      <ul>
+        <li><a href="https://www.nist.gov/cyberframework" target="_blank">NIST (National Institute of Standards and Technology) Cybersecurity Framework</a></li>
+        <li><a href="https://www.iso.org/isoiec-27001-information-security.html" target="_blank">ISO/IEC 27001 Information Security Management</a></li>
+        <li><a href="https://www.cisecurity.org/controls" target="_blank">CIS (Center for Internet Security) Controls</a></li>
+      </ul>
+
+      <h4>Step 5 — The Single Weakest Link</h4>
+      <p>Identify the one point in your chain where a single defensive action would have broken the entire sequence. Justify your answer — this is the most important part of the exercise.</p>
+    </div>
+  </div>
+
+  <!-- REFLECTION -->
+  <div class="section-header" id="reflection">
+    <div class="section-num">Part 3 · Reflection</div>
+    <h2>Thinking About What You Found</h2>
+    <span class="weight-badge reflect">Weight: 1 · ~1.5 hours</span>
+    <div class="section-divider"></div>
+  </div>
+
+  <p>Before writing your report, take at least 30 minutes for structured reflection. Answer these five questions in full sentences in your lab journal:</p>
+
+  <ul id="reflection-list" class="checklist">
+    <li onclick="toggleCheck(this)"><span class="check-box"></span> <span><strong>Surprise:</strong> What was the single most surprising or counterintuitive thing you discovered this week?</span></li>
+    <li onclick="toggleCheck(this)"><span class="check-box"></span> <span><strong>Connection:</strong> How does Module 5 connect to Modules 3–4 (detection, vulnerability analysis, hacker techniques)?</span></li>
+    <li onclick="toggleCheck(this)"><span class="check-box"></span> <span><strong>Real-world anchor:</strong> Find one news story from the last 12 months relating to cyber terrorism or IW. Summarise it in 3 sentences and explain which concept it illustrates.</span></li>
+    <li onclick="toggleCheck(this)"><span class="check-box"></span> <span><strong>Limits:</strong> What could you <em>not</em> figure out this week? What would you need to learn to answer that open question?</span></li>
+    <li onclick="toggleCheck(this)"><span class="check-box"></span> <span><strong>Ethics checkpoint:</strong> At any moment during the lab, did you feel uncertain whether an action was ethically appropriate? Describe the moment and how you resolved it.</span></li>
+  </ul>
+
+  <!-- REPORT -->
+  <div class="section-header" id="report">
+    <div class="section-num">Part 3 · Deliverable</div>
+    <h2>Your Week 5 Report</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <div class="highlight-box" data-label="Format Requirement">
+    <p>Maximum <strong>4 pages A4</strong> · 11–12pt font · 1.15–1.5 line spacing · 2.5cm margins · PDF preferred<br>
+    Filename: <span class="mono cyan">LastName_FirstName_Week5_CyberTerrorism.pdf</span></p>
+  </div>
+
+  <h3>Mandatory Report Structure</h3>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Section</th><th>Length</th><th>What to Include</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>1. Introduction</strong></td><td>~0.5 page</td><td>Define cyber terrorism and IW; state why this matters to a CS (Computer Science) student; outline report scope</td></tr>
+        <tr><td><strong>2. Theoretical Framework</strong></td><td>~1 page</td><td>Key distinctions (terrorism vs. crime vs. hacktivism); at least 2 case studies with key takeaways</td></tr>
+        <tr><td><strong>3. Lab Findings</strong></td><td>~1.5 pages</td><td>ATT&amp;CK mapping results; disinformation analysis with indicator table; attack scenario + countermeasures</td></tr>
+        <tr><td><strong>4. Reflection &amp; Critical Analysis</strong></td><td>~0.5 page</td><td>Answer: what does studying IW teach that studying ordinary cybercrime does not?</td></tr>
+        <tr><td><strong>5. References</strong></td><td>—</td><td>Min. 6 references · IEEE or APA format</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Evaluation Rubric</h3>
+
+  <div class="rubric-bar" id="rubric">
+    <div class="rubric-row">
+      <span class="rubric-label">Conceptual Accuracy</span>
+      <div class="rubric-track"><div class="rubric-fill" data-w="25" style="background:var(--accent)"></div></div>
+      <span class="rubric-pct">25%</span>
+    </div>
+    <div class="rubric-row">
+      <span class="rubric-label">Lab Quality</span>
+      <div class="rubric-track"><div class="rubric-fill" data-w="35" style="background:var(--accent2)"></div></div>
+      <span class="rubric-pct">35%</span>
+    </div>
+    <div class="rubric-row">
+      <span class="rubric-label">Critical Thinking</span>
+      <div class="rubric-track"><div class="rubric-fill" data-w="25" style="background:var(--accent3)"></div></div>
+      <span class="rubric-pct">25%</span>
+    </div>
+    <div class="rubric-row">
+      <span class="rubric-label">Clarity &amp; Form</span>
+      <div class="rubric-track"><div class="rubric-fill" data-w="15" style="background:var(--accent4)"></div></div>
+      <span class="rubric-pct">15%</span>
+    </div>
+  </div>
+
+  <!-- RESOURCES -->
+  <div class="section-header" id="resources">
+    <div class="section-num">Reference</div>
+    <h2>Resources for Going Deeper</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <div class="resource-grid">
+    <a href="https://ccdcoe.org/research/tallinn-manual/" class="resource-card" target="_blank">
+      <div class="resource-type">Academic · Legal</div>
+      <div class="resource-name">Tallinn Manual 2.0</div>
+      <div class="resource-url">ccdcoe.org/research/tallinn-manual/</div>
+    </a>
+    <a href="https://attack.mitre.org" class="resource-card" target="_blank">
+      <div class="resource-type">Technical Reference</div>
+      <div class="resource-name">MITRE ATT&amp;CK</div>
+      <div class="resource-url">attack.mitre.org</div>
+    </a>
+    <a href="https://www.disinfo.eu" class="resource-card" target="_blank">
+      <div class="resource-type">Case Studies</div>
+      <div class="resource-name">EU DisinfoLab</div>
+      <div class="resource-url">disinfo.eu</div>
+    </a>
+    <a href="https://www.cisa.gov/resources-tools" class="resource-card" target="_blank">
+      <div class="resource-type">Institutional</div>
+      <div class="resource-name">CISA Resources</div>
+      <div class="resource-url">cisa.gov/resources-tools</div>
+    </a>
+    <a href="https://www.enisa.europa.eu/topics/cyber-threats/enisa-threat-landscape" class="resource-card" target="_blank">
+      <div class="resource-type">Annual Report</div>
+      <div class="resource-name">ENISA Threat Landscape</div>
+      <div class="resource-url">enisa.europa.eu</div>
+    </a>
+    <a href="https://dfrlab.org" class="resource-card" target="_blank">
+      <div class="resource-type">Research · Cases</div>
+      <div class="resource-name">DFRLab (Atlantic Council)</div>
+      <div class="resource-url">dfrlab.org</div>
+    </a>
+    <a href="https://krebsonsecurity.com" class="resource-card" target="_blank">
+      <div class="resource-type">Professional Blog</div>
+      <div class="resource-name">Krebs on Security</div>
+      <div class="resource-url">krebsonsecurity.com</div>
+    </a>
+    <a href="https://www.schneier.com" class="resource-card" target="_blank">
+      <div class="resource-type">Expert Commentary</div>
+      <div class="resource-name">Schneier on Security</div>
+      <div class="resource-url">schneier.com</div>
+    </a>
+    <a href="https://euvsdisinfo.eu" class="resource-card" target="_blank">
+      <div class="resource-type">Database</div>
+      <div class="resource-name">EU vs Disinfo</div>
+      <div class="resource-url">euvsdisinfo.eu</div>
+    </a>
+  </div>
+
+</div><!-- /.content -->
+
+<footer>
+  <div class="f-inner">
+    <div class="f-course">Introduction to Computer Security · Week 5 · Module 5</div>
+    <p>Cyber Terrorism and Information Warfare — Part I of the Continuous Project</p>
+    <p style="margin-top:0.5rem;font-size:0.65rem">All tools and techniques referenced are open and freely available. Use of this knowledge outside authorised educational environments is the sole responsibility of the individual.</p>
+  </div>
+</footer>
+
+<script>
+  // Progress bar
+  window.addEventListener('scroll', () => {
+    const doc = document.documentElement;
+    const scrolled = doc.scrollTop / (doc.scrollHeight - doc.clientHeight) * 100;
+    document.getElementById('progress').style.width = scrolled + '%';
+  });
+
+  // Case detail toggling
+  const openCases = {};
+  function toggleCase(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const isOpen = el.classList.contains('open');
+    document.querySelectorAll('.case-detail').forEach(d => d.classList.remove('open'));
+    if (!isOpen) el.classList.add('open');
+  }
+
+  // Exercise toggling
+  function toggleExercise(id) {
+    const body = document.getElementById(id);
+    const icon = document.getElementById(id + '-icon');
+    if (!body) return;
+    const isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    icon.classList.toggle('open', !isOpen);
+    icon.textContent = isOpen ? '+' : '×';
+  }
+
+  // Reflection checklist
+  function toggleCheck(li) {
+    const box = li.querySelector('.check-box');
+    const done = li.classList.toggle('done');
+    box.textContent = done ? '✓' : '';
+  }
+
+  // Rubric bar animation on scroll
+  const rubricObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.querySelectorAll('.rubric-fill').forEach(bar => {
+          const w = bar.getAttribute('data-w');
+          bar.style.width = w + '%';
+        });
+      }
+    });
+  }, { threshold: 0.3 });
+
+  const rubric = document.getElementById('rubric');
+  if (rubric) rubricObserver.observe(rubric);
+
+  // Nav active state on scroll
+  const sections = document.querySelectorAll('[id]');
+  const navLinks = document.querySelectorAll('.nav-link');
+  const scrollObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(l => l.classList.remove('active'));
+        const link = document.querySelector(`.nav-link[href="#${entry.target.id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { threshold: 0.4 });
+  sections.forEach(s => scrollObserver.observe(s));
+
+  // Animate hero elements on load
+  document.addEventListener('DOMContentLoaded', () => {
+    const items = document.querySelectorAll('.course-badge, .hero h1, .hero-subtitle, .hero-meta, .ponderation-display');
+    items.forEach((el, i) => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(20px)';
+      el.style.transition = `opacity 0.6s ease ${i * 0.12}s, transform 0.6s ease ${i * 0.12}s`;
+      setTimeout(() => {
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+      }, 100);
+    });
+  });
+</script>
+</body>
+</html>

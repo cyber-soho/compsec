@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Terrorism & Info Warfare Study App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for 3D Flashcard Flip */
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        .transition-transform { transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1); }
+        
+        /* Hide scrollbar for cleaner look if content overflows */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen font-sans text-slate-800">
+
+    <div class="max-w-4xl mx-auto pt-8 pb-12 px-4 sm:px-6">
+        
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-900 mb-2">Cyber Security Study App</h1>
+            <p class="text-slate-600">Cyber Terrorism & Information Warfare</p>
+        </header>
+
+        <!-- Main App Container -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+            
+            <!-- Tabs -->
+            <div class="flex border-b border-slate-200">
+                <button id="tab-flashcards" onclick="switchTab('flashcards')" class="flex-1 py-4 text-center font-medium text-blue-600 border-b-2 border-blue-600 bg-blue-50/50 transition-colors duration-200">
+                    Flashcards
+                </button>
+                <button id="tab-quiz" onclick="switchTab('quiz')" class="flex-1 py-4 text-center font-medium text-slate-500 hover:text-slate-700 hover:bg-slate-50 border-b-2 border-transparent transition-colors duration-200">
+                    Practice Quiz
+                </button>
+            </div>
+
+            <!-- Content Area -->
+            <div class="p-6 md:p-10 min-h-[500px] flex flex-col">
+
+                <!-- FLASHCARDS SECTION -->
+                <div id="section-flashcards" class="flex-1 flex flex-col">
+                    <div class="text-center mb-6 text-sm font-semibold text-slate-500 tracking-wide uppercase" id="fc-progress">
+                        Card 1 of 25
+                    </div>
+                    
+                    <!-- Flashcard Container (Perspective) -->
+                    <div class="flex-1 flex items-center justify-center perspective-1000 w-full max-w-2xl mx-auto cursor-pointer" onclick="flipCard()">
+                        <!-- Inner Card (Preserves 3D) -->
+                        <div id="flashcard-inner" class="relative w-full h-64 md:h-80 transform-style-3d transition-transform rounded-2xl shadow-md group hover:shadow-lg">
+                            
+                            <!-- Front Face -->
+                            <div class="absolute inset-0 w-full h-full bg-blue-600 text-white rounded-2xl p-8 flex items-center justify-center text-center backface-hidden border border-blue-700">
+                                <h2 id="fc-front" class="text-2xl md:text-3xl font-bold leading-tight">Front of Card</h2>
+                                <div class="absolute bottom-4 right-4 text-blue-200 opacity-70">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"></path><path d="M21 13a9 9 0 1 1-3-7.7L21 8"></path></svg>
+                                </div>
+                            </div>
+
+                            <!-- Back Face -->
+                            <div class="absolute inset-0 w-full h-full bg-white text-slate-800 rounded-2xl p-8 flex items-center justify-center text-center backface-hidden rotate-y-180 border-2 border-blue-100 overflow-y-auto no-scrollbar">
+                                <p id="fc-back" class="text-lg md:text-xl font-medium leading-relaxed">Back of Card</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Flashcard Controls -->
+                    <div class="flex items-center justify-between max-w-2xl mx-auto w-full mt-8">
+                        <button onclick="prevCard()" class="px-6 py-2.5 rounded-lg font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-300">
+                            &larr; Previous
+                        </button>
+                        <button onclick="flipCard()" class="px-6 py-2.5 rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                            Flip Card
+                        </button>
+                        <button onclick="nextCard()" class="px-6 py-2.5 rounded-lg font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-300">
+                            Next &rarr;
+                        </button>
+                    </div>
+                </div>
+
+                <!-- QUIZ SECTION -->
+                <div id="section-quiz" class="hidden flex-1 flex-col">
+                    <div id="quiz-container" class="max-w-3xl mx-auto w-full flex-1">
+                        
+                        <div class="flex justify-between items-center mb-6">
+                            <div class="text-sm font-semibold text-slate-500 tracking-wide uppercase" id="quiz-progress">
+                                Question 1 of 10
+                            </div>
+                            <div class="text-sm font-semibold text-blue-600 tracking-wide bg-blue-50 px-3 py-1 rounded-full" id="quiz-score-display">
+                                Score: 0
+                            </div>
+                        </div>
+
+                        <!-- Question Text -->
+                        <h2 id="quiz-question" class="text-xl md:text-2xl font-bold text-slate-900 mb-6 leading-snug">
+                            Question text goes here?
+                        </h2>
+
+                        <!-- Hint Area -->
+                        <div class="mb-6">
+                            <button onclick="toggleHint()" id="btn-hint" class="flex items-center text-sm font-medium text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-md transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                                Show Hint
+                            </button>
+                            <div id="quiz-hint" class="hidden mt-3 p-4 bg-amber-50 text-amber-900 border border-amber-200 rounded-lg text-sm italic">
+                                Hint text goes here.
+                            </div>
+                        </div>
+
+                        <!-- Options Container -->
+                        <div id="quiz-options" class="space-y-3 mb-8">
+                            <!-- Options will be injected here via JS -->
+                        </div>
+
+                        <!-- Feedback Area -->
+                        <div id="quiz-feedback" class="hidden p-5 rounded-xl border mb-6">
+                            <div class="flex items-start">
+                                <div id="feedback-icon" class="flex-shrink-0 mt-0.5 mr-3"></div>
+                                <div>
+                                    <h3 id="feedback-title" class="text-lg font-bold mb-1"></h3>
+                                    <p id="feedback-rationale" class="text-slate-700 text-sm md:text-base leading-relaxed"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Next Button -->
+                        <div class="text-right">
+                            <button id="btn-next-question" onclick="nextQuestion()" class="hidden px-8 py-3 rounded-lg font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                Next Question
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <!-- Final Score Screen -->
+                    <div id="quiz-results" class="hidden flex-1 flex flex-col items-center justify-center text-center max-w-2xl mx-auto w-full">
+                        <div class="w-24 h-24 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-6 shadow-inner">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg>
+                        </div>
+                        <h2 class="text-3xl font-bold text-slate-900 mb-2">Quiz Completed!</h2>
+                        <p class="text-lg text-slate-600 mb-8">You scored <span id="final-score" class="font-bold text-blue-600"></span> out of 10.</p>
+                        <button onclick="resetQuiz()" class="px-8 py-3 rounded-lg font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-md">
+                            Restart Quiz
+                        </button>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Logic -->
+    <script>
+        // --- DATA ---
+        
+        const flashcardsData = [
+            { front: "Cyber terrorism", back: "The deliberate use of computer networks to cause fear, disruption, or physical damage, driven by political, ideological, or religious motivation." },
+            { front: "Primary distinction between cybercrime and cyber terrorism", back: "Cybercrime is motivated by financial gain, whereas cyber terrorism is motivated by ideology." },
+            { front: "Hacktivism", back: "Politically motivated hacking designed primarily to embarrass a target or protest an action." },
+            { front: "Information Warfare (IW)", back: "The strategic use and abuse of information and communication technologies to gain an advantage over an adversary." },
+            { front: "Cyber terrorism vs. Information Warfare scope", back: "Cyber terrorism is typically an event-based tactic, while Information Warfare is a continuous, sustained strategy." },
+            { front: "PSYOP (Psychological Operations)", back: "A pillar of Information Warfare aimed at influencing the perceptions and behaviors of a target population." },
+            { front: "MILDEC (Military Deception)", back: "The practice of misleading adversaries about your own military capabilities." },
+            { front: "DDoS (Distributed Denial of Service)", back: "An attack that floods a target network with traffic until legitimate users can no longer connect." },
+            { front: "Spear-Phishing", back: "Deceptive messages targeted at specific individuals to trick them into revealing credentials." },
+            { front: "Supply Chain Attack", back: "Compromising a trusted vendor's systems to distribute malicious code to thousands of downstream targets at once." },
+            { front: "Zero-Day Exploit", back: "An attack targeting a software vulnerability that the vendor is unaware of and has had zero days to fix." },
+            { front: "IT vs. OT", back: "Information Technology (IT) handles data, while Operational Technology (OT) handles physical processes like industrial control systems." },
+            { front: "Stuxnet (2010)", back: "A sophisticated worm that destroyed Iranian nuclear centrifuges, proving software can cause physical destruction." },
+            { front: "Oldsmar Water Plant Attack (2021)", back: "An incident where attackers used a shared remote desktop password to dangerously increase chemical levels in a city's water supply." },
+            { front: "Advanced Persistent Threat (APT)", back: "Patient, well-funded, and often state-sponsored actors that maintain long-term access to target networks." },
+            { front: "Average APT Detection Time", back: "Approximately 21 days from the initial network compromise to detection." },
+            { front: "SolarWinds Attack (2020)", back: "A massive supply chain attack where a Russian APT injected a backdoor into a legitimate software update, infecting 18,000 organizations." },
+            { front: "Misinformation", back: "False information that is shared without any harmful intent." },
+            { front: "Disinformation", back: "False information deliberately created and spread to deceive and cause harm." },
+            { front: "Malinformation", back: "True information, such as private records, shared deliberately with harmful intent." },
+            { front: "Deepfakes", back: "AI-generated synthetic media that convincingly depicts people doing or saying things they never actually did." },
+            { front: "Defense in Depth", back: "A layered security approach where multiple overlapping defensive controls protect a system from compromise." },
+            { front: "NIST Cybersecurity Framework Core Functions", back: "Identify, Protect, Detect, Respond, and Recover." },
+            { front: "MITRE ATT&CK Framework", back: "A globally accessible knowledge base of adversary tactics and techniques based on real-world observations." },
+            { front: "Principle of Responsible Disclosure", back: "The ethical mandate to report discovered vulnerabilities privately to the vendor rather than exploiting or publicly releasing them." }
+        ];
+
+        const quizData = [
+            {
+                question: "A group encrypts a city's power grid control systems and demands $50 million in cryptocurrency to restore access. Based on the provided lecture definitions, how should this threat be classified?",
+                hint: "Focus on the ultimate goal of the attackers in this scenario: obtaining the $50 million payout.",
+                options: [
+                    { text: "Cybercrime", isCorrect: true, rationale: "While the target is critical infrastructure, the primary motive is financial gain (extortion), which places it firmly in the criminal category rather than terrorism." },
+                    { text: "Cyber terrorism", isCorrect: false, rationale: "Terrorism requires a political, ideological, or religious motive where fear and physical damage are the end goals, not financial payouts." },
+                    { text: "Hacktivism", isCorrect: false, rationale: "Hacktivists generally seek to protest or embarrass a target for a social cause, rather than extorting tens of millions of dollars." },
+                    { text: "Cyber Espionage", isCorrect: false, rationale: "Espionage involves secretly stealing information or state secrets for strategic advantage, not loudly locking systems for ransom." }
+                ]
+            },
+            {
+                question: "A military unit broadcasts fake radio signals and alters network traffic to make an adversary believe their main force is located 50 miles away from the actual staging area. Which pillar of Information Warfare does this represent?",
+                hint: "Consider the specific military term for creating a false impression to trick the enemy about your forces.",
+                options: [
+                    { text: "MILDEC (Military Deception)", isCorrect: true, rationale: "This action deliberately misleads adversary decision-makers about friendly military capabilities and locations to gain a tactical advantage." },
+                    { text: "PSYOP (Psychological Operations)", isCorrect: false, rationale: "PSYOP targets the emotions and reasoning of a broad population or group to influence behavior, rather than specifically tricking military intelligence regarding troop movements." },
+                    { text: "OPSEC (Operations Security)", isCorrect: false, rationale: "OPSEC is a defensive measure focused on protecting and hiding your own sensitive information, rather than actively projecting false information." },
+                    { text: "CNO (Computer Network Operations)", isCorrect: false, rationale: "While networks might be used, the core strategy here is the deception of the adversary's military intelligence, not just the technical exploitation of a network." }
+                ]
+            },
+            {
+                question: "A hacker group wants to infiltrate a highly secure government agency. Instead of attacking the agency directly, they breach a smaller firm that provides network monitoring software to the agency and insert malicious code into the next routine software patch. What type of attack vector is this?",
+                hint: "Think about how the attackers utilized the relationship between the target and the tools they rely on to operate.",
+                options: [
+                    { text: "Supply Chain Attack", isCorrect: true, rationale: "By compromising a trusted third-party vendor, the attackers bypass the primary target's strong defenses, using a legitimate software update as a Trojan horse." },
+                    { text: "Zero-Day Exploit", isCorrect: false, rationale: "While the malicious update might contain novel code, the attack method relies on exploiting the trust relationship between the vendor and the client, not necessarily a software flaw unknown to the vendor." },
+                    { text: "DDoS (Distributed Denial of Service)", isCorrect: false, rationale: "A DDoS attack floods a network to disrupt availability, which does not grant the attackers stealthy internal access via software updates." },
+                    { text: "Spear-Phishing", isCorrect: false, rationale: "This vector involves sending targeted, deceptive emails to individuals, not compromising a vendor's global software distribution infrastructure." }
+                ]
+            },
+            {
+                question: "During a heated election, an anonymous group gains access to a candidate's private, verified psychiatric records and publishes them online to damage the candidate's reputation. Under the taxonomy of false information, what is this an example of?",
+                hint: "Pay close attention to the fact that the leaked records are completely genuine, but the intent behind releasing them is malicious.",
+                options: [
+                    { text: "Malinformation", isCorrect: true, rationale: "The information released is entirely true and factual, but it is weaponized and shared deliberately with the intent to cause harm." },
+                    { text: "Disinformation", isCorrect: false, rationale: "This category specifically requires the information to be deliberately fabricated or false, whereas the medical records in this scenario are verified and true." },
+                    { text: "Misinformation", isCorrect: false, rationale: "This occurs when false information is shared by mistake without malicious intent, which contradicts the deliberate, reputation-damaging leak described." },
+                    { text: "Deepfake", isCorrect: false, rationale: "This refers specifically to AI-generated synthetic audio or video designed to mimic a real person, not the leaking of authentic text documents." }
+                ]
+            },
+            {
+                question: "A state-sponsored APT has successfully tricked an employee into clicking a malicious link (Initial Compromise) and installed a stealthy backdoor (Establish Foothold). To move further and access restricted databases, what is their most likely next step in the APT lifecycle?",
+                hint: "Consider what a standard employee account lacks that an attacker would desperately need to access highly restricted servers.",
+                options: [
+                    { text: "Escalate Privileges", isCorrect: true, rationale: "Before moving laterally or accessing restricted data, an attacker usually needs to upgrade their access from a standard compromised user account to an administrator or system-level account." },
+                    { text: "Data Exfiltration", isCorrect: false, rationale: "Stealing the data happens near the end of the lifecycle, well after the attacker has secured high-level permissions and mapped the network." },
+                    { text: "Reconnaissance", isCorrect: false, rationale: "This is the very first phase of an attack, involving researching the target from the outside, which has already been completed if a foothold exists." },
+                    { text: "Maintain Presence", isCorrect: false, rationale: "While persistence is established early, the immediate requirement to progress the attack toward secure databases is gaining higher administrative rights." }
+                ]
+            },
+            {
+                question: "A company's outer firewall is breached by an attacker using stolen credentials. However, the attacker is stopped when the system requires a multi-factor authentication (MFA) code, and further blocked by an endpoint detection system (EDR) when they attempt to run a script. What security strategy does this successfully demonstrate?",
+                hint: "Think of this approach like a medieval castle equipped with a moat, outer walls, inner walls, and a fortified keep.",
+                options: [
+                    { text: "Defense in Depth", isCorrect: true, rationale: "This scenario illustrates multiple, overlapping layers of security (perimeter, identity, endpoint) working together so that if one fails, others catch the threat." },
+                    { text: "Zero-Day Prevention", isCorrect: false, rationale: "The attack utilized stolen credentials rather than an unknown software vulnerability, so zero-day defenses are not the primary concept illustrated here." },
+                    { text: "Information Warfare", isCorrect: false, rationale: "This describes standard enterprise network defense tactics, not a nation-state strategy involving psychological operations or military deception." },
+                    { text: "Open Source Intelligence (OSINT)", isCorrect: false, rationale: "This refers to the gathering of publicly available information during the reconnaissance phase, not the deployment of layered defensive technical controls." }
+                ]
+            },
+            {
+                question: "When designing a cybersecurity posture for a new hospital, the CISO emphasizes that while firewalls are important, the primary investment will be in a 24/7 Security Operations Center (SOC) to spot anomalies within minutes. Which principle from modern incident response does this reflect?",
+                hint: "Consider what happens when an attacker inevitably bypasses the initial perimeter defenses of an organization.",
+                options: [
+                    { text: "Organizations survive breaches by detecting them quickly and responding effectively", isCorrect: true, rationale: "Modern frameworks like NIST recognize that prevention eventually fails, making rapid detection and containment the most critical factors in surviving an incident." },
+                    { text: "Prevention is the only layer of defense that truly matters", isCorrect: false, rationale: "Relying solely on preventing attacks is a flawed strategy, as APTs and sophisticated attacks will eventually bypass perimeter defenses." },
+                    { text: "Healthcare facilities are immune to cyber terrorism", isCorrect: false, rationale: "Healthcare systems are prime targets for cybercrime and terrorism because the critical nature of their work makes them more likely to pay ransoms quickly." },
+                    { text: "Incident response should only begin after a ransom is paid", isCorrect: false, rationale: "Incident response involves containment and eradication, and paying a ransom does not guarantee recovery or remove the attacker from the network." }
+                ]
+            },
+            {
+                question: "The Stuxnet worm specifically targeted Siemens Step 7 software to alter the speed of centrifuges while displaying 'normal' readings to the operators. Why is this event considered a massive paradigm shift in computer security?",
+                hint: "Think about the ultimate outcome of the centrifuges spinning wildly out of control due to the malicious code.",
+                options: [
+                    { text: "It proved that software could be used to cause direct physical destruction to industrial equipment", isCorrect: true, rationale: "Prior to this, malware was generally thought of as a tool to steal data or crash computers; this attack demonstrated that code could cross the digital barrier to destroy physical machinery." },
+                    { text: "It was the first time ransomware was used to extort a government", isCorrect: false, rationale: "The attack was not designed to extort money or lock files for a ransom; its goal was the silent sabotage of a nuclear program." },
+                    { text: "It demonstrated that deepfakes could be used to bypass biometric security", isCorrect: false, rationale: "The operation relied on exploiting SCADA systems and programmable logic controllers, not utilizing synthetic media or AI generation." },
+                    { text: "It showed that DDoS attacks could take down a national power grid", isCorrect: false, rationale: "The attack was highly targeted malware designed for specific industrial controllers, rather than a volume-based flood of network traffic." }
+                ]
+            },
+            {
+                question: "An operator at a chemical plant notices the mouse cursor moving on its own and changing the chemical mixture levels. The operator quickly disconnects the system. What key vulnerability and defensive lesson does the 2021 Oldsmar Water Plant attack highlight in this type of scenario?",
+                hint: "Look at the simplistic method the attackers used to gain access and the manual way the attack was ultimately thwarted.",
+                options: [
+                    { text: "The danger of outdated IT/OT convergence and the critical role of human vigilance", isCorrect: true, rationale: "The attack succeeded because legacy industrial systems were connected to the internet via easily compromised remote software, but was stopped purely by an alert human operator." },
+                    { text: "The necessity of zero-day exploits to breach ICS systems", isCorrect: false, rationale: "The attackers did not need complex zero-days; they simply logged in using a shared, exposed TeamViewer password." },
+                    { text: "The failure of AI-driven deepfake detection", isCorrect: false, rationale: "This incident involved unauthorized remote desktop access to manipulate software controls, not the use of synthetic media to trick personnel." },
+                    { text: "The impossibility of securing supply chain vendors", isCorrect: false, rationale: "The breach occurred due to poor internal password management and lack of firewalls, not a compromised software update from a trusted vendor." }
+                ]
+            },
+            {
+                question: "A malicious actor creates an incredibly realistic, AI-generated video of a central bank governor announcing a surprise interest rate hike, causing a temporary stock market crash. Which specific technology was used in this attack?",
+                hint: "Identify the technology specifically designed to synthesize convincing, fake audio and video of a person.",
+                options: [
+                    { text: "Deepfakes / GANs", isCorrect: true, rationale: "Generative Adversarial Networks (GANs) are the underlying AI technology used to create deepfakes—synthetic media that convincingly impersonates real individuals." },
+                    { text: "SCADA Manipulation", isCorrect: false, rationale: "This involves altering industrial control systems to affect physical machinery, not generating fake video content." },
+                    { text: "DDoS", isCorrect: false, rationale: "A Distributed Denial of Service attack attempts to crash servers with traffic, not manipulate financial markets through fabricated media." },
+                    { text: "Ransomware", isCorrect: false, rationale: "This technology encrypts an organization's files to extort money, rather than generating public disinformation." }
+                ]
+            }
+        ];
+
+        // --- APP STATE ---
+        let currentTab = 'flashcards';
+        
+        let fcIndex = 0;
+        let isFlipped = false;
+
+        let qIndex = 0;
+        let score = 0;
+        let quizAnswered = false;
+
+        // --- TAB LOGIC ---
+        function switchTab(tabId) {
+            currentTab = tabId;
+            
+            // Update Tab UI
+            const btnFc = document.getElementById('tab-flashcards');
+            const btnQuiz = document.getElementById('tab-quiz');
+            
+            if(tabId === 'flashcards') {
+                btnFc.className = "flex-1 py-4 text-center font-medium text-blue-600 border-b-2 border-blue-600 bg-blue-50/50 transition-colors duration-200";
+                btnQuiz.className = "flex-1 py-4 text-center font-medium text-slate-500 hover:text-slate-700 hover:bg-slate-50 border-b-2 border-transparent transition-colors duration-200";
+                
+                document.getElementById('section-flashcards').classList.remove('hidden');
+                document.getElementById('section-quiz').classList.add('hidden');
+                document.getElementById('section-quiz').classList.remove('flex');
+            } else {
+                btnQuiz.className = "flex-1 py-4 text-center font-medium text-blue-600 border-b-2 border-blue-600 bg-blue-50/50 transition-colors duration-200";
+                btnFc.className = "flex-1 py-4 text-center font-medium text-slate-500 hover:text-slate-700 hover:bg-slate-50 border-b-2 border-transparent transition-colors duration-200";
+                
+                document.getElementById('section-flashcards').classList.add('hidden');
+                document.getElementById('section-quiz').classList.remove('hidden');
+                document.getElementById('section-quiz').classList.add('flex');
+            }
+        }
+
+        // --- FLASHCARD LOGIC ---
+        function renderFlashcard() {
+            const cardInner = document.getElementById('flashcard-inner');
+            if(isFlipped) {
+                cardInner.classList.remove('rotate-y-180');
+                isFlipped = false;
+                
+                // Wait for animation to finish before changing text to prevent jarring UX
+                setTimeout(updateText, 300);
+            } else {
+                updateText();
+            }
+
+            function updateText() {
+                document.getElementById('fc-front').innerText = flashcardsData[fcIndex].front;
+                document.getElementById('fc-back').innerText = flashcardsData[fcIndex].back;
+                document.getElementById('fc-progress').innerText = `Card ${fcIndex + 1} of ${flashcardsData.length}`;
+            }
+        }
+
+        function flipCard() {
+            const cardInner = document.getElementById('flashcard-inner');
+            if (isFlipped) {
+                cardInner.classList.remove('rotate-y-180');
+            } else {
+                cardInner.classList.add('rotate-y-180');
+            }
+            isFlipped = !isFlipped;
+        }
+
+        function nextCard() {
+            fcIndex = (fcIndex + 1) % flashcardsData.length;
+            renderFlashcard();
+        }
+
+        function prevCard() {
+            fcIndex = (fcIndex - 1 + flashcardsData.length) % flashcardsData.length;
+            renderFlashcard();
+        }
+
+        // --- QUIZ LOGIC ---
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function renderQuestion() {
+            quizAnswered = false;
+            const q = quizData[qIndex];
+            
+            // Progress & Score
+            document.getElementById('quiz-progress').innerText = `Question ${qIndex + 1} of ${quizData.length}`;
+            document.getElementById('quiz-score-display').innerText = `Score: ${score}`;
+
+            // Text
+            document.getElementById('quiz-question').innerText = q.question;
+            
+            // Hint
+            document.getElementById('quiz-hint').innerText = q.hint;
+            document.getElementById('quiz-hint').classList.add('hidden');
+            document.getElementById('btn-hint').classList.remove('hidden');
+
+            // Feedback & Next Button Reset
+            document.getElementById('quiz-feedback').classList.add('hidden');
+            document.getElementById('btn-next-question').classList.add('hidden');
+
+            // Options
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+            
+            // Shuffle options for better learning experience
+            const shuffledOptions = shuffleArray([...q.options]);
+
+            shuffledOptions.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-4 rounded-xl border-2 border-slate-200 hover:border-blue-400 hover:bg-blue-50 transition-all font-medium text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 option-btn";
+                btn.innerText = opt.text;
+                btn.onclick = () => selectOption(btn, opt, shuffledOptions);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function toggleHint() {
+            document.getElementById('quiz-hint').classList.remove('hidden');
+            document.getElementById('btn-hint').classList.add('hidden');
+        }
+
+        function selectOption(selectedBtn, selectedOpt, allOptions) {
+            if(quizAnswered) return;
+            quizAnswered = true;
+
+            const allButtons = document.querySelectorAll('.option-btn');
+            
+            // Update Score
+            if(selectedOpt.isCorrect) score++;
+            document.getElementById('quiz-score-display').innerText = `Score: ${score}`;
+
+            // Styling buttons
+            allButtons.forEach((btn, i) => {
+                btn.classList.remove('hover:border-blue-400', 'hover:bg-blue-50', 'cursor-pointer');
+                btn.classList.add('cursor-default', 'opacity-60');
+                
+                const optData = allOptions[i];
+                if(optData.isCorrect) {
+                    btn.classList.remove('border-slate-200', 'opacity-60');
+                    btn.classList.add('border-green-500', 'bg-green-50', 'text-green-800');
+                } else if(btn === selectedBtn && !selectedOpt.isCorrect) {
+                    btn.classList.remove('border-slate-200');
+                    btn.classList.add('border-red-500', 'bg-red-50', 'text-red-800');
+                }
+            });
+
+            // Show Feedback
+            const feedbackBox = document.getElementById('quiz-feedback');
+            const feedbackTitle = document.getElementById('feedback-title');
+            const feedbackRationale = document.getElementById('feedback-rationale');
+            const feedbackIcon = document.getElementById('feedback-icon');
+
+            feedbackBox.classList.remove('hidden', 'bg-green-50', 'border-green-200', 'bg-red-50', 'border-red-200');
+            
+            if(selectedOpt.isCorrect) {
+                feedbackBox.classList.add('bg-green-50', 'border-green-200');
+                feedbackTitle.innerText = "Correct!";
+                feedbackTitle.className = "text-lg font-bold mb-1 text-green-800";
+                feedbackRationale.innerText = selectedOpt.rationale;
+                feedbackIcon.innerHTML = `<svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
+            } else {
+                feedbackBox.classList.add('bg-red-50', 'border-red-200');
+                feedbackTitle.innerText = "Incorrect";
+                feedbackTitle.className = "text-lg font-bold mb-1 text-red-800";
+                feedbackRationale.innerText = selectedOpt.rationale;
+                feedbackIcon.innerHTML = `<svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>`;
+            }
+
+            // Show Next Button
+            document.getElementById('btn-next-question').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            qIndex++;
+            if(qIndex < quizData.length) {
+                renderQuestion();
+            } else {
+                // Show final results
+                document.getElementById('quiz-container').classList.add('hidden');
+                document.getElementById('quiz-results').classList.remove('hidden');
+                document.getElementById('final-score').innerText = score;
+            }
+        }
+
+        function resetQuiz() {
+            qIndex = 0;
+            score = 0;
+            document.getElementById('quiz-container').classList.remove('hidden');
+            document.getElementById('quiz-results').classList.add('hidden');
+            renderQuestion();
+        }
+
+        // --- INITIALIZATION ---
+        window.onload = () => {
+            renderFlashcard();
+            renderQuestion();
+        };
+
+    </script>
+</body>
+</html>
+
+
+

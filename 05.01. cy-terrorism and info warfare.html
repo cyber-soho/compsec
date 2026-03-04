@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Terrorism & Info Warfare | Interactive Study Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Chosen Palette: Warm Neutrals (Stone) with Emerald (Defense) and Rose (Threat) Accents -->
+    <!-- Application Structure Plan: 
+         This SPA acts as a "Study Portal" with three main interactive tabs:
+         1. Intelligence Dashboard: Transforms the report into an interactive learning module (Radar charts for threats, interactive APT lifecycle stepper). This provides the necessary context and explores the report's structure non-linearly.
+         2. Flashcards (25 items): A dedicated memorization tool built directly from the report's glossary and key facts.
+         3. Practice Quiz (10 items): A scenario-based knowledge check applying the report's concepts.
+         Rationale: This tabbed structure caters to different learning phases (Exploration -> Memorization -> Application) without overwhelming the user with a massive single scrolling page.
+    -->
+    <!-- Visualization & Content Choices:
+         1. Threat Actor Radar Chart: (Chart.js) Compares Hacktivists, Criminals, and APTs across Stealth, Funding, and Impact. Goal: Compare. Library: Chart.js Canvas.
+         2. APT Lifecycle Stepper: (HTML/CSS/JS) Interactive sequence detailing the 8 phases of an APT. Goal: Process/Organize.
+         3. Flashcards 3D Flip: (CSS/JS) Memory retention tool. Goal: Inform.
+         4. Dynamic Quiz: (JS) Assesses understanding with detailed rationales. Goal: Inform/Change.
+         - Confirming NO SVG or Mermaid JS is used. Unicode icons represent concepts.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        /* Flashcard 3D Animations */
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        .transition-transform { transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1); }
+        
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f5f5f4; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #a8a29e; }
+
+        /* Chart Container (MANDATORY REQUIREMENT) */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800 font-sans min-h-screen flex flex-col">
+
+    <!-- Top Navigation -->
+    <nav class="bg-stone-900 text-stone-100 shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">🛡️</span>
+                    <span class="font-bold text-lg tracking-wide">Cyber<span class="text-emerald-400">.SoHo</span></span>
+                </div>
+                <div class="hidden md:flex space-x-2">
+                    <button id="tab-btn-dashboard" onclick="switchTab('dashboard')" class="px-4 py-2 rounded-md text-sm font-medium bg-stone-800 text-emerald-400 transition-colors">Intelligence Dashboard</button>
+                    <button id="tab-btn-flashcards" onclick="switchTab('flashcards')" class="px-4 py-2 rounded-md text-sm font-medium hover:bg-stone-800 hover:text-white transition-colors">Flashcards (25)</button>
+                    <button id="tab-btn-quiz" onclick="switchTab('quiz')" class="px-4 py-2 rounded-md text-sm font-medium hover:bg-stone-800 hover:text-white transition-colors">Mission Quiz (10)</button>
+                </div>
+                <!-- Mobile menu placeholder (simplified for single file) -->
+                <div class="md:hidden text-sm text-stone-400">Menu via Tabs Below</div>
+            </div>
+            <!-- Mobile Tabs -->
+            <div class="md:hidden flex space-x-1 pb-2 overflow-x-auto">
+                <button id="mobile-tab-btn-dashboard" onclick="switchTab('dashboard')" class="px-3 py-1 rounded-md text-xs font-medium bg-stone-800 text-emerald-400 whitespace-nowrap">Dashboard</button>
+                <button id="mobile-tab-btn-flashcards" onclick="switchTab('flashcards')" class="px-3 py-1 rounded-md text-xs font-medium hover:bg-stone-800 whitespace-nowrap">Flashcards</button>
+                <button id="mobile-tab-btn-quiz" onclick="switchTab('quiz')" class="px-3 py-1 rounded-md text-xs font-medium hover:bg-stone-800 whitespace-nowrap">Quiz</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- ========================================== -->
+        <!-- TAB 1: INTELLIGENCE DASHBOARD (REPORT)     -->
+        <!-- ========================================== -->
+        <section id="tab-dashboard" class="block space-y-12">
+            
+            <!-- Intro Paragraph per requirements -->
+            <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
+                <h1 class="text-3xl font-bold text-stone-900 mb-4">Threats, Attacks & Defenses Overview</h1>
+                <p class="text-stone-600 leading-relaxed text-lg">
+                    Welcome to the Intelligence Dashboard. This section synthesizes the core concepts of Cyber Terrorism and Information Warfare. Here, you will explore the differences between various threat actors, interact with the lifecycle of an Advanced Persistent Threat (APT), and understand the layered defenses required to protect critical infrastructure. Use this interactive briefing to grasp the strategic landscape before moving on to memorization (Flashcards) and application (Quiz).
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Radar Chart: Threat Actor Profiles -->
+                <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm flex flex-col">
+                    <h2 class="text-xl font-bold text-stone-800 mb-2">Threat Actor Capability Profiles</h2>
+                    <p class="text-sm text-stone-500 mb-4">Comparing Hacktivists, Cybercriminals, and Nation-State APTs based on report analysis.</p>
+                    <div class="flex-grow flex items-center justify-center">
+                        <div class="chart-container">
+                            <canvas id="threatRadarChart"></canvas>
+                        </div>
+                    </div>
+                    <p class="text-xs text-stone-400 mt-4 text-center">Data synthesized from "The Cyber Threat Spectrum" section.</p>
+                </div>
+
+                <!-- Info Cards: Key Concepts -->
+                <div class="space-y-4">
+                    <div class="bg-stone-800 text-stone-100 p-6 rounded-xl shadow-sm border border-stone-700">
+                        <div class="text-3xl mb-2">⚖️</div>
+                        <h3 class="text-lg font-bold text-emerald-400">Cybercrime vs. Cyber Terrorism</h3>
+                        <p class="text-sm text-stone-300 mt-2">
+                            The primary distinction is <strong>motive</strong>. Cybercriminals are driven by financial gain (e.g., ransomware for payout). Cyber terrorists are driven by ideology; physical disruption and terror are the intended goals, not collateral damage.
+                        </p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                        <div class="text-3xl mb-2">🏭</div>
+                        <h3 class="text-lg font-bold text-stone-800">The Stuxnet Paradigm</h3>
+                        <p class="text-sm text-stone-600 mt-2">
+                            A watershed moment in 2010. By targeting programmable logic controllers (PLCs) in Iran's Natanz facility, Stuxnet proved that malicious software could cause direct, catastrophic <strong>physical destruction</strong> to critical infrastructure.
+                        </p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-l-rose-500 border border-stone-200">
+                        <div class="text-3xl mb-2">🎭</div>
+                        <h3 class="text-lg font-bold text-stone-800">Information Warfare (IW)</h3>
+                        <p class="text-sm text-stone-600 mt-2">
+                            Unlike terrorism (a tactic), IW is a sustained strategy by nation-states to gain strategic superiority. It utilizes <strong>PSYOP</strong> (Psychological Operations) to influence perceptions through disinformation and deepfakes.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive APT Lifecycle -->
+            <div class="bg-white p-8 rounded-xl border border-stone-200 shadow-sm">
+                <h2 class="text-2xl font-bold text-stone-900 mb-2">The APT Lifecycle (Advanced Persistent Threat)</h2>
+                <p class="text-stone-500 mb-8">State-sponsored actors operate with patience. Click through the 8 phases to see how an attack unfolds over an average of 21 days.</p>
+                
+                <div class="flex flex-col md:flex-row gap-8">
+                    <!-- Stepper Menu -->
+                    <div class="md:w-1/3 flex flex-col space-y-2" id="apt-stepper">
+                        <!-- Buttons injected via JS -->
+                    </div>
+                    
+                    <!-- Detail View -->
+                    <div class="md:w-2/3 bg-stone-50 p-6 rounded-lg border border-stone-200 min-h-[250px] flex flex-col justify-center transition-opacity duration-300" id="apt-detail-view">
+                        <div class="text-4xl mb-4" id="apt-icon">🔍</div>
+                        <h3 class="text-xl font-bold text-stone-800 mb-2" id="apt-title">1. Reconnaissance</h3>
+                        <p class="text-stone-600" id="apt-desc">Researching the target organization, identifying employees, finding exposed infrastructure, and preparing the attack vector.</p>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 2: FLASHCARDS (25 Items)               -->
+        <!-- ========================================== -->
+        <section id="tab-flashcards" class="hidden">
+            <div class="max-w-3xl mx-auto">
+                <!-- Context Paragraph -->
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold text-stone-900 mb-2">Tactical Memorization</h1>
+                    <p class="text-stone-600">
+                        This section provides 25 targeted flashcards covering vocabulary, methodologies, and historical incidents extracted directly from the report. Use these to solidify your foundational knowledge of cyber terminology and threat frameworks.
+                    </p>
+                </div>
+
+                <div class="bg-white p-6 sm:p-10 rounded-2xl shadow-sm border border-stone-200 flex flex-col items-center">
+                    <!-- Progress -->
+                    <div class="w-full flex justify-between text-sm text-stone-500 font-medium mb-6 px-2">
+                        <span>Card <span id="fc-current" class="text-stone-900 font-bold">1</span> of 25</span>
+                        <span class="text-emerald-600 cursor-pointer hover:underline" onclick="flipCard()">Click card to reveal</span>
+                    </div>
+
+                    <!-- Flashcard 3D Container -->
+                    <div class="w-full h-64 sm:h-80 perspective-1000 cursor-pointer group" onclick="flipCard()">
+                        <div id="flashcard-inner" class="relative w-full h-full transform-style-3d transition-transform duration-500 shadow-md group-hover:shadow-lg rounded-xl">
+                            <!-- Front -->
+                            <div class="absolute w-full h-full backface-hidden bg-stone-50 border-2 border-stone-200 rounded-xl flex items-center justify-center p-8 text-center">
+                                <h2 id="fc-front-text" class="text-xl sm:text-2xl font-bold text-stone-800">Term or Concept</h2>
+                            </div>
+                            <!-- Back -->
+                            <div class="absolute w-full h-full backface-hidden bg-stone-800 border-2 border-stone-900 rounded-xl flex items-center justify-center p-8 text-center rotate-y-180">
+                                <p id="fc-back-text" class="text-lg sm:text-xl text-stone-100 font-medium leading-relaxed">Definition or Explanation</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Controls -->
+                    <div class="flex justify-center items-center space-x-6 w-full mt-8">
+                        <button onclick="prevCard()" class="p-3 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-600 transition-colors focus:outline-none">
+                            <span class="text-xl">◀</span>
+                        </button>
+                        <button onclick="flipCard()" class="px-8 py-3 bg-stone-800 hover:bg-stone-900 text-white rounded-lg font-medium transition-colors shadow-sm tracking-wide uppercase text-sm">
+                            Flip Card
+                        </button>
+                        <button onclick="nextCard()" class="p-3 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-600 transition-colors focus:outline-none">
+                            <span class="text-xl">▶</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 3: MISSION QUIZ (10 Items)             -->
+        <!-- ========================================== -->
+        <section id="tab-quiz" class="hidden">
+            <div class="max-w-3xl mx-auto">
+                <!-- Context Paragraph -->
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold text-stone-900 mb-2">Knowledge Verification</h1>
+                    <p class="text-stone-600">
+                        This section tests your ability to apply the concepts from the report. These 10 scenario-based and conceptual questions ensure you understand the "why" behind cyber defense, not just the definitions. Pay attention to the detailed rationales provided after each answer.
+                    </p>
+                </div>
+
+                <div id="quiz-container" class="bg-white p-6 sm:p-10 rounded-2xl shadow-sm border border-stone-200">
+                    
+                    <!-- Quiz Header -->
+                    <div class="flex justify-between items-center mb-8 pb-4 border-b border-stone-100">
+                        <span class="text-sm font-bold text-stone-400 uppercase tracking-wider">Question <span id="quiz-current" class="text-stone-800">1</span> / 10</span>
+                        <span class="text-sm font-medium bg-emerald-100 text-emerald-800 py-1.5 px-4 rounded-full">Score: <span id="quiz-score" class="font-bold">0</span></span>
+                    </div>
+
+                    <!-- Question -->
+                    <h3 id="quiz-question-text" class="text-xl sm:text-2xl font-semibold text-stone-900 mb-6 leading-snug">Question text goes here?</h3>
+
+                    <!-- Hint Toggle -->
+                    <div class="mb-6">
+                        <button onclick="toggleHint()" class="text-sm text-stone-500 hover:text-stone-800 font-medium flex items-center transition-colors">
+                            <span class="mr-1 text-lg">💡</span> Show Intelligence Hint
+                        </button>
+                        <div id="quiz-hint" class="hidden mt-3 p-4 bg-amber-50 border border-amber-200 text-amber-900 text-sm rounded-lg italic">
+                            Hint text goes here.
+                        </div>
+                    </div>
+
+                    <!-- Options -->
+                    <div id="quiz-options" class="space-y-3 mb-8">
+                        <!-- Buttons injected via JS -->
+                    </div>
+
+                    <!-- Rationale & Next (Hidden until answered) -->
+                    <div id="quiz-feedback" class="hidden bg-stone-50 rounded-xl p-6 border border-stone-200">
+                        <div class="flex items-start gap-4">
+                            <div id="feedback-icon" class="text-3xl mt-1">✅</div>
+                            <div class="flex-grow">
+                                <h4 id="feedback-title" class="font-bold text-lg mb-1 text-stone-900">Result</h4>
+                                <p id="feedback-rationale" class="text-stone-600 text-sm leading-relaxed mb-6 custom-scrollbar max-h-40 overflow-y-auto">Rationale text.</p>
+                                <button onclick="nextQuizQuestion()" class="w-full sm:w-auto px-6 py-3 bg-stone-900 hover:bg-stone-800 text-white rounded-lg font-medium transition-colors shadow-sm">
+                                    Proceed to Next Question
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quiz Results (Hidden initially) -->
+                <div id="quiz-results" class="hidden bg-white p-10 rounded-2xl shadow-sm border border-stone-200 text-center">
+                    <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-stone-100 text-5xl mb-6 shadow-inner" id="result-emoji">
+                        🎯
+                    </div>
+                    <h2 class="text-3xl font-bold text-stone-900 mb-2">Evaluation Complete</h2>
+                    <p class="text-lg text-stone-600 mb-8">You successfully verified <span id="final-score" class="font-bold text-emerald-600 text-2xl mx-1">0</span> out of 10 targets.</p>
+                    <button onclick="restartQuiz()" class="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors shadow-sm tracking-wide">
+                        Restart Mission
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-stone-900 text-stone-500 py-8 text-center text-sm border-t border-stone-800 mt-auto">
+        <p>&copy; 2026 Cyber.SoHo Educational Unit. Interactive Supplement.</p>
+    </footer>
+
+    <!-- Application Logic -->
+    <script>
+        // ==========================================
+        // DATA SOURCES
+        // ==========================================
+        
+        // Data for APT Lifecycle Stepper
+        const aptPhases = [
+            { title: "Reconnaissance", icon: "🔭", desc: "Research the target organization, identify employees, and find exposed infrastructure." },
+            { title: "Initial Compromise", icon: "🎣", desc: "Execute spear-phishing, watering hole, or supply chain attacks to breach the perimeter." },
+            { title: "Establish Foothold", icon: "⚓", desc: "Install backdoors and create persistence to survive system reboots." },
+            { title: "Escalate Privileges", icon: "🔑", desc: "Elevate access from a standard user to system administrator." },
+            { title: "Internal Recon", icon: "🗺️", desc: "Map the internal network to locate high-value data and critical systems." },
+            { title: "Lateral Movement", icon: "🕷️", desc: "Move from system to system within the network without raising alarms." },
+            { title: "Data Exfiltration", icon: "📤", desc: "Package and transmit targeted data out of the network, slowly to avoid detection." },
+            { title: "Maintain Presence", icon: "👻", desc: "Keep backdoors hidden for future access, long after the initial breach." }
+        ];
+
+        // Flashcards Data (25 Items based on Report)
+        const flashcardsData = [
+            { front: "Definition of Cyber Terrorism", back: "Deliberate use of networks to cause fear, disruption, or harm, driven by political, ideological, or religious motivation." },
+            { front: "Cybercrime vs. Cyber Terrorism", back: "Cybercrime is motivated by money; Cyber terrorism is motivated by ideology (collateral damage is the point)." },
+            { front: "Hacktivism", back: "Politically motivated hacking designed primarily to embarrass a target or protest an action." },
+            { front: "Information Warfare (IW)", back: "The strategic use and abuse of information technology by nation-states to gain an advantage over an adversary." },
+            { front: "Cyber Terrorism vs. IW", back: "Cyber terrorism is a specific tactic (an event); Information Warfare is an ongoing strategy." },
+            { front: "PSYOP (Psychological Operations)", back: "A pillar of Info Warfare focused on influencing perceptions, beliefs, and behaviors of a target population." },
+            { front: "DDoS (Distributed Denial of Service)", back: "Flooding a target network or server with traffic until legitimate users can no longer connect." },
+            { front: "Spear-Phishing", back: "Highly targeted deceptive messages designed to trick specific individuals into revealing credentials or executing malware." },
+            { front: "Supply Chain Attack", back: "Compromising a trusted software vendor to distribute malicious code to thousands of targets simultaneously (e.g., SolarWinds)." },
+            { front: "Zero-Day Exploit", back: "An attack targeting a software vulnerability that the vendor is unaware of and has had zero days to fix." },
+            { front: "IT vs. OT", back: "IT (Information Technology) handles data. OT (Operational Technology) handles physical processes (e.g., SCADA systems)." },
+            { front: "The Stuxnet Worm (2010)", back: "A sophisticated attack on Iranian centrifuges that proved software could cause direct physical destruction." },
+            { front: "Oldsmar Water Plant Attack (2021)", back: "An attacker used a shared TeamViewer password to remotely increase lye levels in a city's water supply." },
+            { front: "APT (Advanced Persistent Threat)", back: "A stealthy, continuous, state-sponsored hacking process targeting a specific entity for prolonged periods." },
+            { front: "Average APT Detection Time", back: "Approximately 21 days from initial compromise to detection, allowing attackers ample time to roam." },
+            { front: "Misinformation", back: "False information shared without harmful intent (e.g., an honest mistake)." },
+            { front: "Disinformation", back: "False information deliberately created and spread to deceive or cause harm." },
+            { front: "Malinformation", back: "True information (like private emails or records) shared deliberately with harmful intent." },
+            { front: "Deepfakes", back: "AI-generated synthetic media (video/audio) that convincingly depicts people doing or saying things they never did." },
+            { front: "Defense in Depth", back: "A layered security approach where multiple overlapping defensive controls protect a system (Perimeter, Network, Endpoint, Human)." },
+            { front: "NIST CSF Core Functions", back: "Identify, Protect, Detect, Respond, Recover." },
+            { front: "MITRE ATT&CK Framework", back: "A globally accessible knowledge base of adversary tactics and techniques based on real-world observations." },
+            { front: "Incident Response Priority", back: "Organizations that survive breaches aren't those that prevent everything, but those that detect quickly and respond effectively." },
+            { front: "Principle of Responsible Disclosure", back: "An ethical mandate to report discovered vulnerabilities to the vendor privately rather than exploiting or publicly releasing them immediately." },
+            { front: "The Human Layer of Defense", back: "Training, phishing simulations, and vigilance (as seen when an operator noticed the mouse moving in the Oldsmar attack)." }
+        ];
+
+        // Quiz Data (10 Items based on Report)
+        const quizData = [
+            {
+                question: "According to the FBI and cybersecurity frameworks, what is the primary distinction between cybercrime and cyber terrorism?",
+                hint: "Think about the end goal of the attacker. Why are they performing the hack?",
+                options: [
+                    { text: "Cyber terrorism is motivated by ideology and politics, while cybercrime is motivated by financial gain.", isCorrect: true, rationale: "Motive is the defining factor. While tools (like ransomware) overlap, criminals want money, whereas terrorists want to cause fear, disruption, or physical harm to advance an ideology." },
+                    { text: "Cyber terrorism targets hardware, while cybercrime targets software.", isCorrect: false, rationale: "Both threat actors target software to achieve their goals; the target type does not define the classification." },
+                    { text: "Cybercrime is committed by nation-states, while cyber terrorism is committed by lone wolves.", isCorrect: false, rationale: "Nation-states usually engage in cyber espionage or warfare, not standard cybercrime. Terrorists can be groups or individuals." },
+                    { text: "Cyber terrorism exclusively uses zero-day exploits.", isCorrect: false, rationale: "Zero-days are used by various actors, especially APTs and state-sponsored groups, not exclusively terrorists." }
+                ]
+            },
+            {
+                question: "Which incident definitively proved to the world that a cyber attack could cause direct, catastrophic physical destruction to critical infrastructure?",
+                hint: "This attack targeted programmable logic controllers (PLCs) in a nuclear enrichment facility.",
+                options: [
+                    { text: "The Stuxnet Worm (2010)", isCorrect: true, rationale: "Stuxnet manipulated Siemens Step 7 software to make Iranian centrifuges spin out of control and physically tear themselves apart, crossing the barrier from digital to physical destruction." },
+                    { text: "The SolarWinds Attack (2020)", isCorrect: false, rationale: "SolarWinds was a massive supply chain espionage attack focusing on data theft, not physical destruction." },
+                    { text: "The Oldsmar Water Plant Breach (2021)", isCorrect: false, rationale: "While it aimed to cause physical harm by altering chemical levels, it was caught and stopped before physical destruction or harm occurred." },
+                    { text: "The OPM Breach", isCorrect: false, rationale: "The Office of Personnel Management breach was a massive theft of sensitive data, not a physical attack." }
+                ]
+            },
+            {
+                question: "An attacker breaches a small software vendor to inject a backdoor into a routine software update, which is then downloaded by 18,000 global organizations. What type of attack is this?",
+                hint: "Instead of attacking the fortress directly, the attacker compromised the merchant delivering goods to the fortress.",
+                options: [
+                    { text: "A Supply Chain Attack", isCorrect: true, rationale: "By compromising a trusted vendor in the 'supply chain' (like SolarWinds), attackers bypass direct defenses of thousands of downstream targets simultaneously." },
+                    { text: "A Distributed Denial of Service (DDoS)", isCorrect: false, rationale: "DDoS involves flooding a network with traffic to cause an outage, not injecting backdoors into updates." },
+                    { text: "A Spear-Phishing Campaign", isCorrect: false, rationale: "Spear-phishing targets specific individuals via email; it does not involve altering software update mechanisms." },
+                    { text: "A Psychological Operation (PSYOP)", isCorrect: false, rationale: "PSYOPs are designed to influence public opinion and perception, not establish network backdoors." }
+                ]
+            },
+            {
+                question: "In the context of Information Warfare, which type of deceptive content is defined as 'true information shared deliberately with harmful intent'?",
+                options: [
+                    { text: "Malinformation", isCorrect: true, rationale: "Malinformation relies on factual data (like leaking private emails or medical records) but weaponizes it to cause targeted harm or reputational damage." },
+                    { text: "Misinformation", isCorrect: false, rationale: "Misinformation is false information shared without malicious intent (e.g., sharing a rumor you believe is true)." },
+                    { text: "Disinformation", isCorrect: false, rationale: "Disinformation is deliberately fabricated false information created to deceive." },
+                    { text: "Deepfakes", isCorrect: false, rationale: "Deepfakes are a specific technology (AI-generated synthetic media), not the general classification for weaponized true information." }
+                ],
+                hint: "Pay attention to the prefix. 'Mis-' is a mistake, 'Dis-' is deceit, what represents malice?"
+            },
+            {
+                question: "According to the U.S. DoD model, Information Warfare is a broad strategy consisting of five pillars. Which pillar involves misleading adversaries about your own military capabilities?",
+                hint: "Think about the military term for trickery or creating false impressions.",
+                options: [
+                    { text: "MILDEC (Military Deception)", isCorrect: true, rationale: "MILDEC encompasses actions executed to deliberately mislead adversary decision-makers, causing them to take actions that contribute to the accomplishment of the friendly mission." },
+                    { text: "OPSEC (Operations Security)", isCorrect: false, rationale: "OPSEC is about protecting your own sensitive information from being discovered, not actively misleading the enemy." },
+                    { text: "PSYOP (Psychological Operations)", isCorrect: false, rationale: "PSYOP targets the emotions, motives, and reasoning of a population or group, rather than specifically tricking military intelligence regarding capabilities." },
+                    { text: "CNO (Computer Network Operations)", isCorrect: false, rationale: "CNO refers strictly to the technical attacks, defenses, and exploitations over computer networks." }
+                ]
+            },
+            {
+                question: "Based on the APT Lifecycle, during an average 21-day dwell time, what phase occurs immediately after an attacker establishes a foothold but before they start moving to other machines?",
+                hint: "Once they are in, they need to ensure they have enough power/rights on that specific machine to do real damage or install deeper tools.",
+                options: [
+                    { text: "Escalate Privileges", isCorrect: true, rationale: "After establishing a basic foothold (often as a standard user via phishing), the attacker must exploit local vulnerabilities to gain Administrator or SYSTEM access before they can effectively map the network or move laterally." },
+                    { text: "Data Exfiltration", isCorrect: false, rationale: "Data exfiltration happens near the end of the lifecycle, after the attacker has found the data and secured a high-level presence." },
+                    { text: "Initial Compromise", isCorrect: false, rationale: "Initial compromise is the step *before* establishing a foothold." },
+                    { text: "Reconnaissance", isCorrect: false, rationale: "Reconnaissance is the very first step, happening outside the network before any compromise occurs." }
+                ]
+            },
+            {
+                question: "Why was the cyber attack on the Oldsmar water plant nearly successful in poisoning the water supply?",
+                hint: "The attackers didn't use a sophisticated zero-day; they used a basic administrative oversight on a remote access tool.",
+                options: [
+                    { text: "Operators shared a single password for remote access software (TeamViewer) on an outdated system without a firewall.", isCorrect: true, rationale: "The attack highlighted basic security failures: lack of segmentation, obsolete OS, and horrible credential management (shared passwords not revoked when employees left)." },
+                    { text: "The attackers deployed a highly sophisticated zero-day exploit against the SCADA hardware.", isCorrect: false, rationale: "The attack was unsophisticated; they simply logged in via TeamViewer using compromised credentials." },
+                    { text: "An insider threat physically altered the chemical mix at the plant.", isCorrect: false, rationale: "It was a remote cyber attack, not a physical insider threat." },
+                    { text: "The plant's AI monitoring system was tricked by a deepfake audio command.", isCorrect: false, rationale: "Deepfakes were not involved; it was a direct manipulation of the control software GUI." }
+                ]
+            },
+            {
+                question: "Which of the following represents the core philosophy of 'Defense in Depth'?",
+                hint: "Think about a medieval castle: it has a moat, an outer wall, an inner wall, and a keep.",
+                options: [
+                    { text: "An attacker must defeat multiple overlapping security layers, whereas a defender only needs one layer to succeed in stopping them.", isCorrect: true, rationale: "Defense in depth assumes perimeter breaches will happen. By layering network, endpoint, data, and human defenses, a failure in one area does not result in total compromise." },
+                    { text: "All security budget should be spent on the strongest possible perimeter firewall.", isCorrect: false, rationale: "This is the 'eggs in one basket' approach. Defense in depth explicitly avoids relying on a single perimeter." },
+                    { text: "Replacing all human operators with automated AI security tools.", isCorrect: false, rationale: "The human element is considered a crucial layer of defense in depth (e.g., spotting phishing, noticing anomalies)." },
+                    { text: "Keeping all software updated prevents all Advanced Persistent Threats.", isCorrect: false, rationale: "While patching is important, APTs often use zero-days or stolen credentials, meaning patches alone are not enough." }
+                ]
+            },
+            {
+                question: "What makes Advanced Persistent Threats (APTs), typically backed by nation-states, so much more dangerous than standard cybercriminal gangs?",
+                hint: "Consider what a government has that a criminal gang does not in terms of resources and legal status.",
+                options: [
+                    { text: "They possess virtually unlimited budgets, intelligence agency backing, and legal immunity in their home countries.", isCorrect: true, rationale: "Nation-states do not need to worry about profitability or local law enforcement. They can spend millions developing a single exploit for a strategic goal." },
+                    { text: "They are the only groups capable of using ransomware.", isCorrect: false, rationale: "Ransomware is predominantly used by financially motivated cybercriminals, though states occasionally use it for disruption." },
+                    { text: "They only attack targets within their own physical borders.", isCorrect: false, rationale: "APTs operate globally, attacking foreign governments, infrastructure, and corporations." },
+                    { text: "They rely exclusively on physical infiltration of data centers rather than remote hacking.", isCorrect: false, rationale: "APTs primarily operate remotely across networks, though they may rarely use physical means." }
+                ]
+            },
+            {
+                question: "When prevention fails and a breach occurs, the NIST SP 800-61 framework dictates a specific Incident Response Lifecycle. What is the critical phase immediately following 'Detection & Analysis'?",
+                hint: "Once you realize a threat actor is inside your house, what must you do before you start fixing the broken windows?",
+                options: [
+                    { text: "Containment, Eradication & Recovery", isCorrect: true, rationale: "You must first contain the threat (stop it from spreading), eradicate it (remove the attacker's access/malware), and then recover systems to normal operations." },
+                    { text: "Preparation", isCorrect: false, rationale: "Preparation happens before an incident ever occurs (setting up policies and tools)." },
+                    { text: "Post-Incident Activity", isCorrect: false, rationale: "Post-incident activity (lessons learned) is the final step, occurring after the threat is removed and systems are recovered." },
+                    { text: "Public Disclosure and PR Management", isCorrect: false, rationale: "While communications are part of response, the technical framework prioritizes containing and removing the threat." }
+                ]
+            }
+        ];
+
+        // ==========================================
+        // TAB MANAGEMENT
+        // ==========================================
+        function switchTab(tabId) {
+            // Hide all sections
+            document.getElementById('tab-dashboard').classList.add('hidden');
+            document.getElementById('tab-flashcards').classList.add('hidden');
+            document.getElementById('tab-quiz').classList.add('hidden');
+            
+            // Reset Desktop Button Styles
+            const desktopBtns = ['dashboard', 'flashcards', 'quiz'];
+            desktopBtns.forEach(id => {
+                const btn = document.getElementById(`tab-btn-${id}`);
+                btn.className = "px-4 py-2 rounded-md text-sm font-medium hover:bg-stone-800 hover:text-white transition-colors text-stone-300";
+            });
+            
+            // Reset Mobile Button Styles
+            desktopBtns.forEach(id => {
+                const btn = document.getElementById(`mobile-tab-btn-${id}`);
+                btn.className = "px-3 py-1 rounded-md text-xs font-medium hover:bg-stone-800 whitespace-nowrap text-stone-300";
+            });
+
+            // Show active section
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            
+            // Highlight active buttons
+            const activeDesktop = document.getElementById(`tab-btn-${tabId}`);
+            activeDesktop.className = "px-4 py-2 rounded-md text-sm font-medium bg-stone-800 text-emerald-400 transition-colors shadow-inner";
+            
+            const activeMobile = document.getElementById(`mobile-tab-btn-${tabId}`);
+            activeMobile.className = "px-3 py-1 rounded-md text-xs font-medium bg-stone-800 text-emerald-400 whitespace-nowrap shadow-inner";
+        }
+
+        // ==========================================
+        // TAB 1: DASHBOARD LOGIC (Chart & Stepper)
+        // ==========================================
+        
+        // Initialize Chart.js
+        const ctxRadar = document.getElementById('threatRadarChart').getContext('2d');
+        new Chart(ctxRadar, {
+            type: 'radar',
+            data: {
+                labels: ['Funding/Resources', 'Stealth/Patience', 'Technical Sophistication', 'Target Scope', 'Potential for Physical Damage'],
+                datasets: [
+                    {
+                        label: 'Nation-State APT',
+                        data: [100, 95, 95, 80, 90],
+                        backgroundColor: 'rgba(16, 185, 129, 0.2)', // Emerald
+                        borderColor: 'rgba(16, 185, 129, 1)',
+                        pointBackgroundColor: 'rgba(16, 185, 129, 1)',
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Cybercriminal Gang',
+                        data: [60, 50, 70, 90, 30],
+                        backgroundColor: 'rgba(244, 63, 94, 0.2)', // Rose
+                        borderColor: 'rgba(244, 63, 94, 1)',
+                        pointBackgroundColor: 'rgba(244, 63, 94, 1)',
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Hacktivist Collective',
+                        data: [20, 30, 40, 60, 10],
+                        backgroundColor: 'rgba(168, 162, 158, 0.2)', // Stone
+                        borderColor: 'rgba(168, 162, 158, 1)',
+                        pointBackgroundColor: 'rgba(168, 162, 158, 1)',
+                        borderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: { color: 'rgba(0,0,0,0.1)' },
+                        grid: { color: 'rgba(0,0,0,0.1)' },
+                        pointLabels: { font: { size: 11, family: 'sans-serif' }, color: '#444' },
+                        ticks: { display: false, min: 0, max: 100 }
+                    }
+                },
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+                }
+            }
+        });
+
+        // APT Stepper Logic
+        const stepperContainer = document.getElementById('apt-stepper');
+        
+        function updateAPT(index, activeBtn) {
+            // Update buttons
+            Array.from(stepperContainer.children).forEach(b => {
+                b.className = 'w-full text-left p-3 rounded-md text-sm font-medium transition-colors border border-transparent hover:bg-stone-100 text-stone-600';
+            });
+            activeBtn.className = 'w-full text-left p-3 rounded-md text-sm font-bold transition-colors bg-stone-800 text-emerald-400 border border-stone-700 shadow-sm';
+
+            // Update Content with fade
+            const detailView = document.getElementById('apt-detail-view');
+            detailView.style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('apt-icon').innerText = aptPhases[index].icon;
+                document.getElementById('apt-title').innerText = `${index + 1}. ${aptPhases[index].title}`;
+                document.getElementById('apt-desc').innerText = aptPhases[index].desc;
+                detailView.style.opacity = '1';
+            }, 200);
+        }
+
+        // Generate APT Buttons
+        aptPhases.forEach((phase, index) => {
+            const btn = document.createElement('button');
+            // Default select first item
+            if(index === 0) {
+                btn.className = 'w-full text-left p-3 rounded-md text-sm font-bold transition-colors bg-stone-800 text-emerald-400 border border-stone-700 shadow-sm';
+            } else {
+                btn.className = 'w-full text-left p-3 rounded-md text-sm font-medium transition-colors border border-transparent hover:bg-stone-100 text-stone-600';
+            }
+            btn.innerText = `${index + 1}. ${phase.title}`;
+            btn.onclick = () => updateAPT(index, btn);
+            stepperContainer.appendChild(btn);
+        });
+
+        // ==========================================
+        // TAB 2: FLASHCARDS LOGIC
+        // ==========================================
+        let currentFcIndex = 0;
+        let isFlipped = false;
+
+        function loadFlashcard() {
+            const card = flashcardsData[currentFcIndex];
+            document.getElementById('fc-front-text').innerText = card.front;
+            document.getElementById('fc-back-text').innerText = card.back;
+            document.getElementById('fc-current').innerText = currentFcIndex + 1;
+            
+            // Reset flip state
+            if (isFlipped) {
+                document.getElementById('flashcard-inner').classList.remove('rotate-y-180');
+                isFlipped = false;
+            }
+        }
+
+        function flipCard() {
+            const inner = document.getElementById('flashcard-inner');
+            isFlipped ? inner.classList.remove('rotate-y-180') : inner.classList.add('rotate-y-180');
+            isFlipped = !isFlipped;
+        }
+
+        function nextCard() {
+            currentFcIndex = (currentFcIndex + 1) % flashcardsData.length;
+            loadFlashcard();
+        }
+
+        function prevCard() {
+            currentFcIndex = (currentFcIndex - 1 + flashcardsData.length) % flashcardsData.length;
+            loadFlashcard();
+        }
+
+        // ==========================================
+        // TAB 3: QUIZ LOGIC
+        // ==========================================
+        let currentQuizIndex = 0;
+        let quizScore = 0;
+        let isQuizAnswered = false;
+
+        function shuffleArray(array) {
+            const newArr = [...array];
+            for (let i = newArr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+            }
+            return newArr;
+        }
+
+        function loadQuizQuestion() {
+            if (currentQuizIndex >= quizData.length) {
+                showQuizResults();
+                return;
+            }
+
+            const q = quizData[currentQuizIndex];
+            isQuizAnswered = false;
+            
+            // Reset UI Elements
+            document.getElementById('quiz-current').innerText = currentQuizIndex + 1;
+            document.getElementById('quiz-question-text').innerText = q.question;
+            document.getElementById('quiz-hint').innerText = q.hint;
+            document.getElementById('quiz-hint').classList.add('hidden');
+            document.getElementById('quiz-feedback').classList.add('hidden');
+            
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+
+            // Shuffle options for current question
+            const shuffledOptions = shuffleArray(q.options);
+            shuffledOptions.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-4 rounded-xl border-2 border-stone-200 hover:border-emerald-500 hover:bg-stone-50 font-medium text-stone-700 transition-all focus:outline-none shadow-sm";
+                btn.innerText = opt.text;
+                btn.onclick = () => selectQuizAnswer(opt, btn, shuffledOptions);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function toggleHint() {
+            document.getElementById('quiz-hint').classList.toggle('hidden');
+        }
+
+        function selectQuizAnswer(selectedOption, selectedBtn, allOptions) {
+            if (isQuizAnswered) return;
+            isQuizAnswered = true;
+
+            const optionsContainer = document.getElementById('quiz-options');
+            const buttons = optionsContainer.children;
+
+            const fbTitle = document.getElementById('feedback-title');
+            const fbIcon = document.getElementById('feedback-icon');
+
+            if (selectedOption.isCorrect) {
+                quizScore++;
+                document.getElementById('quiz-score').innerText = quizScore;
+                fbTitle.innerText = "Target Confirmed (Correct)";
+                fbTitle.className = "font-bold text-lg mb-1 text-emerald-700";
+                fbIcon.innerText = "✅";
+            } else {
+                fbTitle.innerText = "Target Missed (Incorrect)";
+                fbTitle.className = "font-bold text-lg mb-1 text-rose-700";
+                fbIcon.innerText = "❌";
+            }
+
+            document.getElementById('feedback-rationale').innerText = selectedOption.rationale;
+            document.getElementById('quiz-feedback').classList.remove('hidden');
+
+            // Style buttons to indicate correct/incorrect states
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].disabled = true;
+                buttons[i].classList.remove('hover:border-emerald-500', 'hover:bg-stone-50', 'cursor-pointer');
+                
+                if (allOptions[i].isCorrect) {
+                    buttons[i].classList.add('bg-emerald-50', 'border-emerald-500', 'text-emerald-900');
+                } else if (buttons[i] === selectedBtn && !selectedOption.isCorrect) {
+                    buttons[i].classList.add('bg-rose-50', 'border-rose-400', 'text-rose-900');
+                } else {
+                    buttons[i].classList.add('opacity-40');
+                }
+            }
+        }
+
+        function nextQuizQuestion() {
+            currentQuizIndex++;
+            loadQuizQuestion();
+        }
+
+        function showQuizResults() {
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('quiz-results').classList.remove('hidden');
+            document.getElementById('final-score').innerText = quizScore;
+            
+            const emoji = document.getElementById('result-emoji');
+            if(quizScore >= 8) emoji.innerText = "🏆";
+            else if (quizScore >= 5) emoji.innerText = "👍";
+            else emoji.innerText = "📚";
+        }
+
+        function restartQuiz() {
+            currentQuizIndex = 0;
+            quizScore = 0;
+            document.getElementById('quiz-score').innerText = quizScore;
+            document.getElementById('quiz-results').classList.add('hidden');
+            document.getElementById('quiz-container').classList.remove('hidden');
+            loadQuizQuestion();
+        }
+
+        // ==========================================
+        // INITIALIZATION
+        // ==========================================
+        window.onload = () => {
+            loadFlashcard();
+            loadQuizQuestion();
+        };
+
+    </script>
+</body>
+</html>
+
+
+
