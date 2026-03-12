@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Industrial Espionage in Cyberspace - Interactive Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chosen Palette: Warm Neutral Executive. Backgrounds in stone-50/100, text in stone-800, accents in slate-800 (primary) and rust-600 (warnings/alerts). -->
+    <!-- Application Structure Plan: The SPA uses a narrative dashboard structure, progressing logically from 'The Problem/Impact' -> 'The Threat Actors/Methods' -> 'Real-World Proof' -> 'Defense & Strategy'. This linear storytelling approach, enhanced with non-linear interactive explorers within sections (like the case study viewer and Zero Trust calculator), ensures the user understands the gravity of the threat before exploring technical mitigations, making the dense educational content highly digestible. -->
+    <!-- Visualization & Content Choices: 
+         1. Economics of IP Theft -> Goal: Compare -> Viz: Bar Chart (Chart.js) -> Interaction: Hover tooltips -> Justification: Stark visual contrast between R&D costs and theft costs.
+         2. APT Lifecycle -> Goal: Process/Organize -> Viz: Interactive Timeline (HTML/JS) -> Interaction: Click phases to reveal details -> Justification: Breaks down complex kill chains into bite-sized steps. NO SVG/Mermaid used.
+         3. Case Studies -> Goal: Inform/Organize -> Viz: Dynamic Detail Viewer (HTML/JS) -> Interaction: Select case from list to update content -> Justification: Prevents text wall, encourages exploration of historical data.
+         4. Zero Trust -> Goal: Inform/Change -> Viz: Interactive Calculator (HTML/JS) -> Interaction: Toggle risk signals to see score change -> Justification: Gamifies the concept of access control, making abstract rules concrete. 
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            background-color: #fafaf9;
+            color: #292524;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (max-width: 640px) {
+            .chart-container {
+                height: 250px;
+            }
+        }
+        .nav-link.active {
+            border-bottom: 2px solid #1e293b;
+            font-weight: 600;
+        }
+        .timeline-btn.active {
+            background-color: #1e293b;
+            color: #fff;
+            border-color: #1e293b;
+        }
+        .case-btn.active {
+            background-color: #e2e8f0;
+            border-left: 4px solid #1e293b;
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-slate-300 selection:text-slate-900">
+
+    <nav class="fixed top-0 w-full bg-stone-50/90 backdrop-blur-md border-b border-stone-200 z-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-xl font-bold text-slate-800">🔐 Cyber.SoHo</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#overview" class="nav-link text-stone-600 hover:text-slate-900 px-1 py-2 text-sm transition-colors active">Overview</a>
+                    <a href="#threats" class="nav-link text-stone-600 hover:text-slate-900 px-1 py-2 text-sm transition-colors">Threat Landscape</a>
+                    <a href="#cases" class="nav-link text-stone-600 hover:text-slate-900 px-1 py-2 text-sm transition-colors">Case Studies</a>
+                    <a href="#defenses" class="nav-link text-stone-600 hover:text-slate-900 px-1 py-2 text-sm transition-colors">Defenses & Zero Trust</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-20 pb-24">
+        
+        <header class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12 text-center">
+            <p class="text-sm font-semibold tracking-wider text-slate-500 uppercase mb-3">Educational Series &middot; Part I</p>
+            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-6">Industrial Espionage in Cyberspace</h1>
+            <p class="text-xl text-stone-600 leading-relaxed max-w-3xl mx-auto">
+                The covert, unauthorized collection of confidential business or government information. It's not science fiction—it is the theft of time, decades of R&D, and competitive advantage costing the global economy <strong class="text-slate-800">$600 billion USD per year</strong>.
+            </p>
+            <div class="mt-8 inline-flex items-center justify-center px-6 py-3 bg-slate-100 border border-slate-200 rounded-lg text-slate-700 font-mono text-sm shadow-sm">
+                TARGET DATA + COVERT ACCESS + EXFILTRATION = STOLEN ADVANTAGE
+            </div>
+        </header>
+
+        <section id="overview" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 scroll-mt-20 border-t border-stone-200">
+            <div class="mb-10 max-w-3xl">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">The Asymmetric Economics of IP Theft</h2>
+                <p class="text-lg text-stone-600 leading-relaxed">
+                    This section illustrates why industrial espionage is so devastating to organizations. The primary goal of a cyber espionage campaign is not immediate financial payout (like cybercrime), but strategic intelligence acquisition. The charts below demonstrate the stark reality of intellectual property theft: attackers bypass decades of legitimate investment for a fraction of the cost, gaining an insurmountable time advantage.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-2">Cost & Time Comparison: R&D vs. Espionage</h3>
+                    <p class="text-sm text-stone-500 mb-6">Comparing a legitimate company's investment to a state-backed rival's theft costs (based on average case models).</p>
+                    <div class="chart-container">
+                        <canvas id="economicsChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="space-y-6">
+                    <div class="bg-slate-50 p-6 rounded-xl border border-slate-100">
+                        <h4 class="font-bold text-slate-900 mb-3 flex items-center">💎 The Crown Jewels (What gets stolen?)</h4>
+                        <ul class="space-y-3 text-stone-700">
+                            <li class="flex items-start"><span class="mr-2">💡</span> <span><strong>Intellectual Property:</strong> Source code, patents, chemical formulas (e.g., DuPont Kevlar case).</span></li>
+                            <li class="flex items-start"><span class="mr-2">🛡️</span> <span><strong>Military/Defense:</strong> Weapon designs, encryption keys. Value is incalculable.</span></li>
+                            <li class="flex items-start"><span class="mr-2">📊</span> <span><strong>Business Intelligence:</strong> Pricing strategies, M&A plans, sealed bids.</span></li>
+                            <li class="flex items-start"><span class="mr-2">⚙️</span> <span><strong>Infrastructure:</strong> SCADA diagrams, network maps, targeting blueprints.</span></li>
+                        </ul>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-white p-5 rounded-xl border border-stone-200 text-center shadow-sm">
+                            <div class="text-3xl font-bold text-slate-900 mb-1">197 Days</div>
+                            <div class="text-xs text-stone-500 uppercase tracking-wide">Average Dwell Time</div>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl border border-stone-200 text-center shadow-sm">
+                            <div class="text-3xl font-bold text-slate-900 mb-1">8.5 Years</div>
+                            <div class="text-xs text-stone-500 uppercase tracking-wide">Time Advantage Stolen</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="threats" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 scroll-mt-20 border-t border-stone-200 bg-stone-100/50 rounded-3xl my-8">
+            <div class="mb-10 max-w-3xl">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">The Threat Landscape: Actors & Methods</h2>
+                <p class="text-lg text-stone-600 leading-relaxed">
+                    Understanding the enemy is the first step in defense. This section breaks down who conducts these attacks (from state-sponsored groups to compromised insiders) and the specific, multi-phased lifecycle they use to infiltrate networks. Interact with the Advanced Persistent Threat (APT) timeline to understand how an attack unfolds over months or years.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <div class="bg-white p-6 rounded-xl border-t-4 border-slate-800 shadow-sm">
+                    <div class="text-2xl mb-3">🏛️</div>
+                    <h3 class="font-bold text-slate-900 mb-2">Nation-State Actors</h3>
+                    <p class="text-sm text-stone-600 mb-3">Government-sponsored with military or intelligence backing. Goals include military superiority and economic dominance.</p>
+                    <div class="text-xs font-mono bg-stone-100 text-stone-600 px-2 py-1 rounded inline-block">Examples: APT10, Lazarus Group, Cozy Bear</div>
+                </div>
+                <div class="bg-white p-6 rounded-xl border-t-4 border-slate-600 shadow-sm">
+                    <div class="text-2xl mb-3">🏢</div>
+                    <h3 class="font-bold text-slate-900 mb-2">Corporate Competitors</h3>
+                    <p class="text-sm text-stone-600 mb-3">Entities that hire hackers or place moles. Goals include stealing pricing, product designs, and client lists prior to launch.</p>
+                    <div class="text-xs font-mono bg-stone-100 text-stone-600 px-2 py-1 rounded inline-block">Motive: Direct market advantage</div>
+                </div>
+                <div class="bg-white p-6 rounded-xl border-t-4 border-slate-400 shadow-sm">
+                    <div class="text-2xl mb-3">👤</div>
+                    <h3 class="font-bold text-slate-900 mb-2">Insider Threats</h3>
+                    <p class="text-sm text-stone-600 mb-3">Individuals with authorized access. Can be malicious (revenge/money), negligent (mistakes), or compromised (blackmailed).</p>
+                    <div class="text-xs font-mono bg-stone-100 text-stone-600 px-2 py-1 rounded inline-block">Advantage: Keys to the front door</div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-8 shadow-sm border border-stone-200">
+                <h3 class="text-xl font-bold text-slate-900 mb-6 border-b border-stone-100 pb-4">The 5 Phases of an APT Campaign</h3>
+                
+                <div class="flex flex-wrap gap-2 mb-8" id="apt-buttons">
+                    <button class="timeline-btn active px-4 py-2 rounded-lg border border-stone-300 text-sm font-medium transition-colors" data-phase="1">1. Reconnaissance</button>
+                    <button class="timeline-btn px-4 py-2 rounded-lg border border-stone-300 text-sm font-medium transition-colors" data-phase="2">2. Initial Access</button>
+                    <button class="timeline-btn px-4 py-2 rounded-lg border border-stone-300 text-sm font-medium transition-colors" data-phase="3">3. Establish Foothold</button>
+                    <button class="timeline-btn px-4 py-2 rounded-lg border border-stone-300 text-sm font-medium transition-colors" data-phase="4">4. Lateral Movement</button>
+                    <button class="timeline-btn px-4 py-2 rounded-lg border border-stone-300 text-sm font-medium transition-colors" data-phase="5">5. Exfiltration</button>
+                </div>
+
+                <div id="apt-content" class="min-h-[150px] bg-slate-50 p-6 rounded-xl border border-slate-100 fade-in">
+                </div>
+            </div>
+
+            <h3 class="text-xl font-bold text-slate-900 mt-12 mb-6">Common Attack Vectors</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-stone-200">
+                    <h4 class="font-bold text-slate-800">Spear Phishing</h4>
+                    <p class="text-sm text-stone-600 mt-2">Targeted email exploiting trust. The attacker researches the victim first. 91% of attacks begin here.</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-stone-200">
+                    <h4 class="font-bold text-slate-800">Watering Hole Attacks</h4>
+                    <p class="text-sm text-stone-600 mt-2">Poisoning websites frequently visited by the target community. The prey comes to the trap.</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-stone-200">
+                    <h4 class="font-bold text-slate-800">Supply Chain Attacks</h4>
+                    <p class="text-sm text-stone-600 mt-2">Attacking a trusted supplier to reach the real target via legitimate updates (e.g., SolarWinds).</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-stone-200">
+                    <h4 class="font-bold text-slate-800">Zero-Day Exploits</h4>
+                    <p class="text-sm text-stone-600 mt-2">Vulnerabilities unknown to the vendor. Bought and stockpiled like weapons by nation-states.</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-stone-200">
+                    <h4 class="font-bold text-slate-800">TEMPEST / Physical</h4>
+                    <p class="text-sm text-stone-600 mt-2">Capturing electromagnetic emissions from electronics outside a building to reconstruct data.</p>
+                </div>
+            </div>
+
+        </section>
+
+        <section id="cases" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 scroll-mt-20 border-t border-stone-200">
+            <div class="mb-10 max-w-3xl">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">Landmark Case Studies</h2>
+                <p class="text-lg text-stone-600 leading-relaxed">
+                    Theory becomes reality when we analyze historical breaches. This interactive viewer allows you to explore major espionage events that redefined global cybersecurity. Select a case study on the left to reveal the targets, methods, and critical takeaways on the right, demonstrating the diverse capabilities of advanced threat actors.
+                </p>
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-8 bg-white p-2 rounded-2xl shadow-sm border border-stone-200">
+                <div class="w-full md:w-1/3 flex flex-col gap-2 border-r border-stone-100 pr-0 md:pr-4" id="case-list">
+                </div>
+                <div class="w-full md:w-2/3 p-6 bg-stone-50 rounded-xl min-h-[300px]" id="case-detail">
+                </div>
+            </div>
+        </section>
+
+        <section id="defenses" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 scroll-mt-20 border-t border-stone-200 bg-slate-900 text-stone-300 rounded-3xl my-8">
+            <div class="mb-10 max-w-3xl">
+                <h2 class="text-3xl font-bold text-white mb-4">Defenses & Zero Trust Architecture</h2>
+                <p class="text-lg text-slate-400 leading-relaxed">
+                    Traditional "castle and moat" security fails when the attacker spends months inside the walls. Modern defense relies on <strong>Zero Trust Architecture (ZTA)</strong>: "Never trust. Always verify." Use the calculator below to see how context signals dictate access decisions in real-time, assuming a breach has already happened.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                
+                <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+                    <h3 class="text-xl font-bold text-white mb-4">Zero Trust Risk Calculator</h3>
+                    <p class="text-sm text-slate-400 mb-6">Toggle the context signals of an incoming access request. If the risk score crosses the threshold, access is stepped-up or denied.</p>
+                    
+                    <div class="space-y-4 mb-8" id="zt-toggles">
+                        <label class="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg cursor-pointer hover:bg-slate-700 transition">
+                            <span class="text-slate-200">MFA verification failed</span>
+                            <input type="checkbox" value="40" class="w-5 h-5 zt-checkbox accent-red-500">
+                        </label>
+                        <label class="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg cursor-pointer hover:bg-slate-700 transition">
+                            <span class="text-slate-200">Device health low (<60/100)</span>
+                            <input type="checkbox" value="20" class="w-5 h-5 zt-checkbox accent-red-500">
+                        </label>
+                        <label class="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg cursor-pointer hover:bg-slate-700 transition">
+                            <span class="text-slate-200">Unknown geographic location</span>
+                            <input type="checkbox" value="15" class="w-5 h-5 zt-checkbox accent-red-500">
+                        </label>
+                        <label class="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg cursor-pointer hover:bg-slate-700 transition">
+                            <span class="text-slate-200">After-hours access attempt</span>
+                            <input type="checkbox" value="15" class="w-5 h-5 zt-checkbox accent-red-500">
+                        </label>
+                        <label class="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg cursor-pointer hover:bg-slate-700 transition">
+                            <span class="text-slate-200">Wrong role for resource</span>
+                            <input type="checkbox" value="25" class="w-5 h-5 zt-checkbox accent-red-500">
+                        </label>
+                    </div>
+
+                    <div class="p-6 rounded-xl bg-slate-900 border border-slate-700 text-center transition-colors duration-300" id="zt-result-box">
+                        <div class="text-sm font-bold tracking-widest uppercase mb-2 text-slate-400">Total Risk Score</div>
+                        <div class="text-5xl font-mono font-bold text-white mb-4" id="zt-score">0</div>
+                        <div class="inline-block px-6 py-2 rounded-full font-bold text-lg bg-green-500/20 text-green-400 border border-green-500/30" id="zt-action">
+                            ALLOW ACCESS
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+                        <h4 class="font-bold text-white mb-3">Layered Defense Stack</h4>
+                        <ul class="space-y-4 text-sm">
+                            <li><strong class="text-slate-200 block">DLP (Data Loss Prevention)</strong> Monitors and blocks unauthorized data movement based on content, file type, or abnormal volume.</li>
+                            <li><strong class="text-slate-200 block">Software Supply Chain Security</strong> Verifying vendor updates via SBOMs (Software Bill of Materials) and Hash verification.</li>
+                            <li><strong class="text-slate-200 block">Threat Intelligence</strong> Proactively collecting data on adversary TTPs (Tactics, Techniques, and Procedures) using frameworks like MITRE ATT&CK.</li>
+                            <li><strong class="text-slate-200 block">Human Defenses</strong> Brief, regular micro-training and building a culture of reporting. A trained employee is worth more than a $1M security tool.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+                        <h4 class="font-bold text-white mb-3 text-red-400">⚖️ The Attribution & Legal Problem</h4>
+                        <p class="text-sm mb-3">Even "high confidence" attribution is rarely sufficient for criminal prosecution due to obfuscation (VPNs, TOR, false flags). International cyber law is decades behind.</p>
+                        <ul class="text-xs space-y-2 font-mono bg-slate-900 p-3 rounded text-slate-400">
+                            <li>US: CFAA (Computer Fraud and Abuse Act)</li>
+                            <li>US: EEA (Economic Espionage Act)</li>
+                            <li>EU: NIS2 Directive & GDPR</li>
+                            <li>Intl: Budapest Convention</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-stone-100 border-t border-stone-200 py-12 text-center text-sm text-stone-500">
+        <p class="mb-2">© 2024 Cyber.SoHo — Educational Series.</p>
+        <p class="max-w-xl mx-auto">Security is not a product you buy. It is a discipline you practice — every day, at every level of the organization.</p>
+    </footer>
+
+    <script>
+        // Data Structures
+        const aptPhases = {
+            1: { title: "Reconnaissance", desc: "Attacker researches target via LinkedIn, GitHub, websites. Identifies employees, tools, and maps network perimeter via OSINT.", insight: "APT attackers may spend weeks doing research before sending a single malicious packet." },
+            2: { title: "Initial Access", desc: "Exploitation via zero-day vulnerabilities, targeted spear phishing, or compromising a trusted supplier (supply chain).", insight: "Exploits trust rather than just technology." },
+            3: { title: "Establish Foothold", desc: "Installation of backdoors/RATs. Setup of Command and Control (C2) communication. May lie dormant to evade sandboxes.", insight: "Malware might delay execution by 14 days to appear benign during initial automated scanning." },
+            4: { title: "Lateral Movement", desc: "Harvesting credentials (e.g., via Mimikatz). Pivoting from entry point to high-value internal servers, escalating to Domain Admin.", insight: "Average attacker dwell time inside a network undetected is 197 days." },
+            5: { title: "Exfiltration", desc: "Identifying, encrypting, and compressing target data. Exfiltration via encrypted tunnels, DNS tunneling, or cloud storage.", insight: "Data is quietly copied out in small chunks to blend with normal traffic." }
+        };
+
+        const caseStudies = [
+            { id: "stuxnet", name: "Stuxnet (2010)", target: "Iranian Natanz nuclear centrifuges", methods: "USB drive (air-gapped network), FOUR simultaneous zero-days, targeted PLCs.", takeaway: "Proved that cyber weapons can cause physical damage at industrial scale. Destroyed ~1,000 centrifuges." },
+            { id: "solarwinds", name: "SolarWinds SUNBURST (2020)", target: "18,000+ organizations (US Treasury, NATO)", methods: "Compromised build pipeline. Backdoor embedded in digitally signed Orion update.", takeaway: "Trust in software updates is the final trust. Victims did nothing wrong; they were betrayed by a trusted vendor." },
+            { id: "aurora", name: "Operation Aurora (2009)", target: "Google, Adobe, Intel, 20+ companies", methods: "Zero-day exploit in IE, spear phishing via LinkedIn profiling.", takeaway: "Even the most technically sophisticated companies on Earth are vulnerable. Prompted Google to publicly accuse China." },
+            { id: "nightdragon", name: "Operation Night Dragon (2006-11)", target: "Global oil, energy, petrochemical", methods: "SQL injection, spear phishing, RATs, hijacked VPN sessions.", takeaway: "Five years of undetected access. Attackers stole sealed bids and SCADA diagrams worth billions for the cost of a phishing email." },
+            { id: "apt1", name: "Mandiant APT1 Report (2013)", target: "141 organizations across 20 sectors", methods: "PLA Unit 61398 tracked for years. Terabytes stolen per victim.", takeaway: "First time a private company publicly named/attributed a state-sponsored group, leading to federal indictments." }
+        ];
+
+        // Economics Chart
+        const initChart = () => {
+            const ctx = document.getElementById('economicsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Legitimate Investment', 'Stolen IP Cost'],
+                    datasets: [
+                        {
+                            label: 'Financial Cost (Millions USD)',
+                            data: [170, 5.5],
+                            backgroundColor: ['#1e293b', '#ef4444'],
+                            borderRadius: 6,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Time Required (Years)',
+                            data: [10, 1.5],
+                            backgroundColor: ['#94a3b8', '#fca5a5'],
+                            borderRadius: 6,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8 } },
+                        tooltip: { backgroundColor: 'rgba(30, 41, 59, 0.9)', padding: 12, cornerRadius: 8 }
+                    },
+                    scales: {
+                        y: { type: 'linear', display: true, position: 'left', title: { display: true, text: '$ Millions' }, grid: { color: '#f5f5f4' } },
+                        y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: 'Years' }, grid: { drawOnChartArea: false } }
+                    }
+                }
+            });
+        };
+
+        // APT Interactivity
+        const initAPT = () => {
+            const buttons = document.querySelectorAll('.timeline-btn');
+            const content = document.getElementById('apt-content');
+
+            const renderPhase = (phaseNum) => {
+                const data = aptPhases[phaseNum];
+                content.innerHTML = `
+                    <h4 class="text-lg font-bold text-slate-900 mb-2">${data.title}</h4>
+                    <p class="text-sm text-stone-700 mb-4">${data.desc}</p>
+                    <div class="bg-white px-4 py-3 rounded border-l-4 border-slate-800 text-sm italic text-stone-600 shadow-sm">
+                        " ${data.insight} "
+                    </div>
+                `;
+                // Trigger re-animation
+                content.classList.remove('fade-in');
+                void content.offsetWidth;
+                content.classList.add('fade-in');
+            };
+
+            buttons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    buttons.forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    renderPhase(e.target.dataset.phase);
+                });
+            });
+            renderPhase(1); // Initial load
+        };
+
+        // Case Studies Interactivity
+        const initCases = () => {
+            const listContainer = document.getElementById('case-list');
+            const detailContainer = document.getElementById('case-detail');
+
+            const renderDetail = (caseData) => {
+                detailContainer.innerHTML = `
+                    <h3 class="text-2xl font-bold text-slate-900 mb-4">${caseData.name}</h3>
+                    <div class="space-y-4">
+                        <div><strong class="text-xs uppercase tracking-wider text-slate-500 block mb-1">Target</strong><span class="text-stone-800">${caseData.target}</span></div>
+                        <div><strong class="text-xs uppercase tracking-wider text-slate-500 block mb-1">Methods</strong><span class="text-stone-800">${caseData.methods}</span></div>
+                        <div class="mt-6 p-4 bg-slate-800 text-slate-100 rounded-lg">
+                            <strong class="block mb-1 text-slate-300 uppercase tracking-widest text-xs">Key Takeaway</strong>
+                            ${caseData.takeaway}
+                        </div>
+                    </div>
+                `;
+                detailContainer.classList.remove('fade-in');
+                void detailContainer.offsetWidth;
+                detailContainer.classList.add('fade-in');
+            };
+
+            caseStudies.forEach((c, index) => {
+                const btn = document.createElement('button');
+                btn.className = `case-btn w-full text-left px-4 py-3 rounded text-sm font-medium text-stone-700 hover:bg-stone-100 transition-colors ${index === 0 ? 'active' : ''}`;
+                btn.textContent = c.name;
+                btn.onclick = (e) => {
+                    document.querySelectorAll('.case-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    renderDetail(c);
+                };
+                listContainer.appendChild(btn);
+            });
+            renderDetail(caseStudies[0]);
+        };
+
+        // Zero Trust Calculator
+        const initZeroTrust = () => {
+            const checkboxes = document.querySelectorAll('.zt-checkbox');
+            const scoreDisplay = document.getElementById('zt-score');
+            const actionDisplay = document.getElementById('zt-action');
+            const resultBox = document.getElementById('zt-result-box');
+
+            const updateScore = () => {
+                let score = 0;
+                checkboxes.forEach(cb => {
+                    if (cb.checked) score += parseInt(cb.value);
+                });
+
+                scoreDisplay.textContent = score;
+
+                // Reset classes
+                actionDisplay.className = "inline-block px-6 py-2 rounded-full font-bold text-lg border";
+                resultBox.className = "p-6 rounded-xl bg-slate-900 border text-center transition-colors duration-300";
+
+                if (score >= 50) {
+                    actionDisplay.textContent = "DENY ACCESS";
+                    actionDisplay.classList.add('bg-red-500/20', 'text-red-400', 'border-red-500/30');
+                    resultBox.classList.add('border-red-500/50', 'shadow-[0_0_15px_rgba(239,68,68,0.2)]');
+                } else if (score >= 25) {
+                    actionDisplay.textContent = "STEP-UP AUTHENTICATION";
+                    actionDisplay.classList.add('bg-orange-500/20', 'text-orange-400', 'border-orange-500/30');
+                    resultBox.classList.add('border-orange-500/50');
+                } else {
+                    actionDisplay.textContent = "ALLOW ACCESS";
+                    actionDisplay.classList.add('bg-green-500/20', 'text-green-400', 'border-green-500/30');
+                    resultBox.classList.add('border-slate-700');
+                }
+            };
+
+            checkboxes.forEach(cb => cb.addEventListener('change', updateScore));
+        };
+
+        // Scroll Spy for Navigation
+        const initScrollSpy = () => {
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionHeight = section.clientHeight;
+                    if (scrollY >= (sectionTop - 200)) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').includes(current)) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        };
+
+        // Initialize all
+        document.addEventListener('DOMContentLoaded', () => {
+            initChart();
+            initAPT();
+            initCases();
+            initZeroTrust();
+            initScrollSpy();
+        });
+    </script>
+</body>
+</html>
+
+

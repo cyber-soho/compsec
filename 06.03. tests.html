@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Industrial Espionage in Cyberspace - Study Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 3D Flip Card CSS */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+        .card-inner {
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+        }
+        /* FIXED: Apply rotation to the element that has both classes */
+        .card-inner.flipped {
+            transform: rotateY(180deg);
+        }
+        
+        /* Smooth fade transitions for tabs */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans text-slate-800">
+
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-900 mb-2">Industrial Espionage in Cyberspace</h1>
+            <p class="text-slate-500">Interactive Study Guide</p>
+        </header>
+
+        <!-- Tab Navigation -->
+        <div class="flex justify-center mb-8 border-b border-slate-200">
+            <button id="tab-btn-flashcards" onclick="switchTab('flashcards')" class="px-6 py-3 text-lg font-semibold border-b-2 border-blue-600 text-blue-600 transition-colors duration-200">
+                Flashcards (25)
+            </button>
+            <button id="tab-btn-quiz" onclick="switchTab('quiz')" class="px-6 py-3 text-lg font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 transition-colors duration-200">
+                Practice Quiz (10)
+            </button>
+        </div>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="relative bg-white rounded-2xl shadow-xl p-6 md:p-10 min-h-[500px]">
+            
+            <!-- FLASHCARDS SECTION -->
+            <section id="flashcards-section" class="fade-in block">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-slate-800">Review Concepts</h2>
+                    <span id="fc-counter" class="text-sm font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full">1 / 25</span>
+                </div>
+
+                <!-- Card Container -->
+                <div class="perspective-1000 w-full h-80 cursor-pointer" onclick="flipCard()">
+                    <div id="flashcard-inner" class="card-inner relative w-full h-full transform-style-3d shadow-md rounded-2xl">
+                        <!-- Front -->
+                        <div class="absolute w-full h-full backface-hidden bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-100 rounded-2xl flex flex-col justify-center items-center p-8 text-center">
+                            <span class="absolute top-4 right-4 text-xs font-semibold text-blue-400 uppercase tracking-wider">Front</span>
+                            <p id="fc-front-text" class="text-2xl font-bold text-slate-800"></p>
+                            <p class="absolute bottom-4 text-sm text-slate-400">Click to flip</p>
+                        </div>
+                        <!-- Back -->
+                        <div class="absolute w-full h-full backface-hidden bg-white border-2 border-indigo-100 rounded-2xl flex flex-col justify-center items-center p-8 text-center rotate-y-180">
+                            <span class="absolute top-4 right-4 text-xs font-semibold text-indigo-400 uppercase tracking-wider">Back</span>
+                            <p id="fc-back-text" class="text-xl font-medium text-slate-700"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="flex justify-between mt-8">
+                    <button onclick="prevCard()" id="btn-prev-card" class="px-5 py-2.5 rounded-lg font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                        &larr; Previous
+                    </button>
+                    <button onclick="nextCard()" id="btn-next-card" class="px-5 py-2.5 rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-md shadow-blue-200">
+                        Next &rarr;
+                    </button>
+                </div>
+            </section>
+
+            <!-- QUIZ SECTION -->
+            <section id="quiz-section" class="fade-in hidden">
+                
+                <!-- Quiz Active State -->
+                <div id="quiz-active-container">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-bold text-slate-800">Knowledge Check</h2>
+                        <span id="quiz-counter" class="text-sm font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full">Question 1 of 10</span>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="w-full bg-slate-100 rounded-full h-2 mb-8">
+                        <div id="quiz-progress" class="bg-indigo-600 h-2 rounded-full transition-all duration-300" style="width: 10%"></div>
+                    </div>
+
+                    <div class="mb-8">
+                        <h3 id="quiz-question-text" class="text-xl font-semibold text-slate-800 mb-4 leading-relaxed"></h3>
+                        
+                        <!-- Hint Toggle -->
+                        <div class="mb-6">
+                            <button onclick="toggleHint()" class="text-sm text-amber-600 font-medium hover:text-amber-700 flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                                Show Hint
+                            </button>
+                            <div id="quiz-hint-container" class="hidden mt-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+                                <span class="font-bold">Hint:</span> <span id="quiz-hint-text"></span>
+                            </div>
+                        </div>
+
+                        <!-- Options -->
+                        <div id="quiz-options-container" class="space-y-3">
+                            <!-- Options rendered via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Feedback Area -->
+                    <div id="quiz-feedback-container" class="hidden mb-6 p-4 rounded-lg border">
+                        <p id="quiz-feedback-title" class="font-bold text-lg mb-1"></p>
+                        <p id="quiz-feedback-rationale" class="text-slate-700"></p>
+                    </div>
+
+                    <!-- Quiz Controls -->
+                    <div class="flex justify-end border-t border-slate-100 pt-6">
+                        <button id="btn-submit-quiz" onclick="submitAnswer()" class="px-6 py-3 rounded-lg font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-md shadow-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                            Check Answer
+                        </button>
+                        <button id="btn-next-quiz" onclick="nextQuestion()" class="hidden px-6 py-3 rounded-lg font-medium text-white bg-slate-800 hover:bg-slate-900 transition shadow-md">
+                            Next Question &rarr;
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quiz Results State -->
+                <div id="quiz-results-container" class="hidden text-center py-10">
+                    <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-indigo-100 text-indigo-600 mb-6">
+                        <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                    </div>
+                    <h2 class="text-3xl font-bold text-slate-800 mb-2">Quiz Complete!</h2>
+                    <p class="text-lg text-slate-600 mb-6">You scored <span id="quiz-final-score" class="font-bold text-indigo-600 text-2xl">0</span> out of 10.</p>
+                    <button onclick="restartQuiz()" class="px-8 py-3 rounded-lg font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-md shadow-indigo-200">
+                        Retake Quiz
+                    </button>
+                </div>
+
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // --- DATA ---
+        const flashcardsData = [
+            { front: "Industrial Espionage", back: "The covert, unauthorized collection of confidential business or government information to gain a competitive, political, or military advantage." },
+            { front: "Core formula of cyber industrial espionage", back: "Target Data + Covert Access + Exfiltration = Stolen Advantage" },
+            { front: "Primary goal of cyber espionage vs. cybercrime", back: "Strategic intelligence acquisition over a long period, rather than fast, immediate financial gain." },
+            { front: "APT (Advanced Persistent Threat)", back: "Patient, precise attackers who operate stealthily over months or years, often backed by nation-states." },
+            { front: "Three main categories of threat actors", back: "Nation-State Actors, Corporate Competitors, and Insider Threats." },
+            { front: "Phase 1 of an APT Campaign", back: "Reconnaissance: Researching the target via Open Source Intelligence (OSINT) to identify employees, roles, and tools." },
+            { front: "Phase 2 of an APT Campaign", back: "Initial Access: Infiltrating the network via zero-day vulnerabilities, spear phishing, or supply chain compromises." },
+            { front: "Phase 4 of an APT Campaign", back: "Lateral Movement: Harvesting credentials and pivoting from the initial entry point to high-value internal servers." },
+            { front: "Average attacker dwell time", back: "197 days inside a network before being detected." },
+            { front: "Spear Phishing", back: "Highly targeted phishing where the attacker researches the specific victim first to exploit their trust." },
+            { front: "Watering Hole Attack", back: "Poisoning a specific, legitimate website that the target community frequently visits." },
+            { front: "Supply Chain Attack", back: "Attacking a trusted supplier to reach the ultimate target, often by embedding backdoors in legitimate software updates." },
+            { front: "Zero-Day Exploit", back: "An attack utilizing a software vulnerability that is currently unknown to the software vendor." },
+            { front: "TEMPEST / Physical Attack", back: "Capturing and reconstructing data from the electromagnetic radio frequency (RF) emissions of electronics from outside a building." },
+            { front: "Estimated annual global cost of IP theft", back: "Approximately $600 billion USD." },
+            { front: "Average time advantage gained by IP theft", back: "8.5 years of a competitor's R&D bypassed." },
+            { front: "Operation Aurora (2009-2010)", back: "A major Chinese state-sponsored attack targeting Google and others using an Internet Explorer zero-day exploit." },
+            { front: "Stuxnet (2010)", back: "The first known cyber weapon to cause physical destruction, specifically targeting Iranian nuclear centrifuges." },
+            { front: "Core principle of Zero Trust Architecture (ZTA)", back: "Never trust. Always verify." },
+            { front: "Most effective technical defense against credential theft", back: "MFA (Multi-Factor Authentication)." },
+            { front: "DLP (Data Loss Prevention)", back: "A system that monitors, detects, and blocks the unauthorized movement of sensitive data outside the organization." },
+            { front: "Software Bill of Materials (SBOM)", back: "A comprehensive list of every component within a software product, essential for securing the software supply chain." },
+            { front: "MITRE ATT&CK", back: "A free, publicly accessible encyclopedia of adversary tactics, techniques, and procedures." },
+            { front: "TTPs in Threat Intelligence", back: "Tactics (the 'why'), Techniques (the 'how'), and Procedures (the specific tools or commands used)." },
+            { front: "Mandiant APT1 Report (2013)", back: "A landmark threat intelligence report that was the first to publicly name and attribute cyber espionage to a specific Chinese military unit." }
+        ];
+
+        const quizData = [
+            {
+                question: "What is the primary metric of success for cyber industrial espionage campaigns compared to traditional cybercrime?",
+                hint: "Consider the long-term goals of a nation-state versus the immediate needs of a criminal gang.",
+                options: [
+                    { text: "Immediate financial payout through ransomware deployment.", isCorrect: false, rationale: "This is the primary goal of cybercrime, which focuses on fast, hit-and-run financial gain rather than long-term strategic advantage." },
+                    { text: "The speed at which a network is compromised and abandoned.", isCorrect: false, rationale: "Espionage attackers are patient and precise, often maintaining access for months or years rather than acting quickly." },
+                    { text: "The acquisition of strategic intelligence and intellectual property over time.", isCorrect: true, rationale: "The core formula of espionage relies on covert access and exfiltration to steal decades of R&D and gain an insurmountable competitive or military advantage." },
+                    { text: "The public disruption of a target organization's services.", isCorrect: false, rationale: "While disruption can be a goal of cyber warfare, espionage prioritizes stealth and remaining undetected to continuously siphon data." }
+                ]
+            },
+            {
+                question: "An employee who unintentionally falls for a spear-phishing email and provides an attacker with network access is classified as which type of threat actor?",
+                hint: "This person didn't mean to cause harm, but their lack of awareness led to a breach.",
+                options: [
+                    { text: "Malicious Insider", isCorrect: false, rationale: "A malicious insider acts deliberately out of motives like revenge, financial gain, or ideology, rather than making an honest mistake." },
+                    { text: "Negligent Insider", isCorrect: true, rationale: "This category covers employees who make careless mistakes, such as clicking malicious links or losing hardware, due to a lack of training or attention." },
+                    { text: "Compromised Insider", isCorrect: false, rationale: "A compromised insider is someone who has been actively recruited, coerced, or blackmailed by an outside actor to facilitate an attack." },
+                    { text: "Corporate Competitor", isCorrect: false, rationale: "While a competitor might launch the phishing attack, the employee clicking the link remains an internal vulnerability, not the external actor themselves." }
+                ]
+            },
+            {
+                question: "During which phase of an Advanced Persistent Threat (APT) campaign does an attacker typically use tools like Mimikatz to harvest credentials and pivot to high-value internal servers?",
+                hint: "This phase involves moving away from the initial entry point to expand influence across the network.",
+                options: [
+                    { text: "Reconnaissance", isCorrect: false, rationale: "Reconnaissance happens before the attacker even touches the target's network, involving external research via Open Source Intelligence (OSINT)." },
+                    { text: "Initial Access", isCorrect: false, rationale: "This phase is about getting through the front door via zero-days or phishing, not navigating the internal network." },
+                    { text: "Establish Foothold", isCorrect: false, rationale: "Establishing a foothold involves installing backdoors and setting up command and control (C2), which precedes widespread internal exploration." },
+                    { text: "Lateral Movement", isCorrect: true, rationale: "Once inside, attackers escalate privileges and move horizontally through the network to locate the 'crown jewels' before exfiltration." }
+                ]
+            },
+            {
+                question: "Which scenario best describes a \"Watering Hole\" attack?",
+                hint: "Instead of hunting the prey directly, the attacker waits at a place the prey is known to gather.",
+                options: [
+                    { text: "Sending a highly personalized email to an executive with a malicious payload.", isCorrect: false, rationale: "This describes spear phishing, which is a direct, targeted communication rather than a passive trap." },
+                    { text: "Compromising a specific website frequently visited by the target community.", isCorrect: true, rationale: "Attackers poison a trusted, niche site (like an aerospace engineering forum) knowing their targets will eventually visit and trigger the exploit." },
+                    { text: "Embedding a backdoor in a legitimate software vendor's update.", isCorrect: false, rationale: "This is a supply chain attack, which leverages vendor trust to distribute malware to thousands of downstream customers." },
+                    { text: "Capturing electromagnetic emissions from outside a target building.", isCorrect: false, rationale: "This describes a TEMPEST or physical attack, which relies on hardware radiation rather than web browsing habits." }
+                ]
+            },
+            {
+                question: "What made the Stuxnet malware (discovered in 2010) historically unique in the realm of cyber warfare and espionage?",
+                hint: "Think about what happened to the Iranian nuclear facilities as a result of the code executing.",
+                options: [
+                    { text: "It was the first attack to steal over a terabyte of intellectual property.", isCorrect: false, rationale: "While massive data theft is common in espionage (like APT1), Stuxnet's primary goal was not data exfiltration." },
+                    { text: "It compromised the build pipeline of a major IT management software.", isCorrect: false, rationale: "This describes the 2020 SolarWinds SUNBURST attack, not Stuxnet." },
+                    { text: "It publicly named and attributed a state-sponsored group to a specific country.", isCorrect: false, rationale: "The Mandiant APT1 report achieved this milestone, whereas Stuxnet's creators remain officially unacknowledged." },
+                    { text: "It was the first known malware to cause physical destruction to industrial infrastructure.", isCorrect: true, rationale: "By manipulating Programmable Logic Controllers (PLCs), it forced nuclear centrifuges to spin out of control while feeding fake 'normal' readings to operators." }
+                ]
+            },
+            {
+                question: "The 2020 SolarWinds SUNBURST attack is a prime example of which type of attack vector?",
+                hint: "The attackers compromised a trusted vendor to reach thousands of downstream targets simultaneously.",
+                options: [
+                    { text: "TEMPEST Attack", isCorrect: false, rationale: "TEMPEST attacks require physical proximity to capture electromagnetic emissions, whereas SolarWinds was a massive remote digital breach." },
+                    { text: "Supply Chain Attack", isCorrect: true, rationale: "By inserting a backdoor into a digitally signed, legitimate software update, attackers bypassed perimeter defenses to infect 18,000+ organizations." },
+                    { text: "Watering Hole Attack", isCorrect: false, rationale: "A watering hole attack relies on victims visiting a compromised website, not downloading a required enterprise software update." },
+                    { text: "Zero-Day Exploit", isCorrect: false, rationale: "While zero-days are often used by advanced actors, the defining characteristic of SUNBURST was the poisoning of a trusted vendor's distribution mechanism." }
+                ]
+            },
+            {
+                question: "Under a Zero Trust Architecture (ZTA), what happens when an employee successfully passes MFA but attempts to access a sensitive resource from an unknown geographic location at 3 AM?",
+                hint: "ZTA relies on the principle of \"Never trust. Always verify,\" meaning context matters just as much as identity.",
+                options: [
+                    { text: "Access is immediately granted because the identity was verified via MFA.", isCorrect: false, rationale: "Traditional security might allow this, but Zero Trust constantly re-evaluates risk based on context, not just initial authentication." },
+                    { text: "The system assumes a breach has happened and permanently locks the account.", isCorrect: false, rationale: "While Zero Trust assumes a hostile environment, permanently locking an account for an anomaly would cause massive operational disruption." },
+                    { text: "The system calculates a high risk score and demands step-up authentication or denies access.", isCorrect: true, rationale: "Because the context (time and location) signals high risk, the architecture dynamically adjusts its trust level, requiring further proof or blocking the action." },
+                    { text: "The perimeter firewall automatically blocks the connection based on the foreign IP address.", isCorrect: false, rationale: "Zero Trust moves away from relying solely on network perimeters and firewalls, focusing instead on identity, device health, and contextual signals." }
+                ]
+            },
+            {
+                question: "What is the primary purpose of a Software Bill of Materials (SBOM) in defending against supply chain espionage?",
+                hint: "You cannot secure what you don't know exists in your technology stack.",
+                options: [
+                    { text: "To document every component used in a software product to verify its integrity.", isCorrect: true, rationale: "An SBOM provides visibility into all dependencies and libraries, allowing defenders to check for known vulnerabilities or compromised elements within vendor tools." },
+                    { text: "To monitor and block unauthorized data movement outside the corporate network.", isCorrect: false, rationale: "This is the function of Data Loss Prevention (DLP) software, not an SBOM." },
+                    { text: "To classify the tactics, techniques, and procedures (TTPs) of known adversaries.", isCorrect: false, rationale: "This is the purpose of threat intelligence frameworks like MITRE ATT&CK." },
+                    { text: "To cryptographically hash network traffic to prevent man-in-the-middle attacks.", isCorrect: false, rationale: "While hashing is used for file verification, an SBOM itself is an inventory list, not an active network encryption tool." }
+                ]
+            },
+            {
+                question: "Which resource provides a free, publicly accessible encyclopedia of adversary tactics, techniques, and procedures (TTPs)?",
+                hint: "This resource acts as an attacker's playbook, mapping out everything from Reconnaissance to Exfiltration.",
+                options: [
+                    { text: "GDPR (General Data Protection Regulation)", isCorrect: false, rationale: "GDPR is a legal framework for data privacy in the EU, not a technical repository of threat actor behaviors." },
+                    { text: "CIS Controls", isCorrect: false, rationale: "CIS provides prioritized defensive security controls, but it is not an encyclopedia of specific adversary behaviors." },
+                    { text: "MITRE ATT&CK", isCorrect: true, rationale: "This framework maps real-world adversary behaviors across the entire attack lifecycle, helping defenders proactively understand and detect threats." },
+                    { text: "CVE Database", isेक्ट: false, rationale: "The CVE database lists known software vulnerabilities, but it does not detail the broader tactics and procedures used by threat actors." }
+                ]
+            },
+            {
+                question: "Why is it exceedingly difficult to achieve courtroom-level criminal prosecution against nation-state actors for cyber espionage?",
+                hint: "Digital footprints can be faked, bounced through multiple countries, and disguised to look like someone else.",
+                options: [
+                    { text: "The Economic Espionage Act (EEA) explicitly prevents the prosecution of foreign nationals.", isCorrect: false, rationale: "The EEA actually covers both domestic and foreign-directed IP theft, so the law itself does not prevent prosecution." },
+                    { text: "Attackers use obfuscation techniques like false flags, TOR, and VPN chains to mask their true origin.", isCorrect: true, rationale: "These techniques make definitive attribution incredibly difficult to prove in a court of law, often limiting responses to diplomatic sanctions." },
+                    { text: "Data Loss Prevention (DLP) tools automatically delete forensic evidence to protect user privacy.", isCorrect: false, rationale: "DLP tools are designed to block exfiltration and log events; they do not destroy forensic evidence." },
+                    { text: "The average attacker dwell time means the statute of limitations has usually expired.", isCorrect: false, rationale: "While dwell times are long (average 197 days), this does not typically exceed federal statutes of limitations for espionage." }
+                ]
+            }
+        ];
+
+        // --- STATE VARIABLES ---
+        let currentTab = 'flashcards';
+        
+        // Flashcards state
+        let currentFcIndex = 0;
+        let isFlipped = false;
+        
+        // Quiz state
+        let currentQuizIndex = 0;
+        let selectedOptionIndex = null;
+        let quizScore = 0;
+        let quizAnswered = false;
+
+        // --- TAB LOGIC ---
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            // Update Tab Styling
+            const fcBtn = document.getElementById('tab-btn-flashcards');
+            const quizBtn = document.getElementById('tab-btn-quiz');
+            
+            if(tab === 'flashcards') {
+                fcBtn.className = "px-6 py-3 text-lg font-semibold border-b-2 border-blue-600 text-blue-600 transition-colors duration-200";
+                quizBtn.className = "px-6 py-3 text-lg font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 transition-colors duration-200";
+                
+                document.getElementById('flashcards-section').classList.remove('hidden');
+                document.getElementById('quiz-section').classList.add('hidden');
+                updateFlashcardUI();
+            } else {
+                quizBtn.className = "px-6 py-3 text-lg font-semibold border-b-2 border-indigo-600 text-indigo-600 transition-colors duration-200";
+                fcBtn.className = "px-6 py-3 text-lg font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 transition-colors duration-200";
+                
+                document.getElementById('quiz-section').classList.remove('hidden');
+                document.getElementById('flashcards-section').classList.add('hidden');
+                if(currentQuizIndex === 0 && quizScore === 0 && !quizAnswered) {
+                    renderQuizQuestion();
+                }
+            }
+        }
+
+        // --- FLASHCARD LOGIC ---
+        function updateFlashcardUI() {
+            const fc = flashcardsData[currentFcIndex];
+            document.getElementById('fc-front-text').textContent = fc.front;
+            document.getElementById('fc-back-text').textContent = fc.back;
+            document.getElementById('fc-counter').textContent = `${currentFcIndex + 1} / ${flashcardsData.length}`;
+            
+            // Reset flip state
+            isFlipped = false;
+            document.getElementById('flashcard-inner').classList.remove('flipped');
+            
+            // Update buttons
+            document.getElementById('btn-prev-card').disabled = currentFcIndex === 0;
+            document.getElementById('btn-next-card').disabled = currentFcIndex === flashcardsData.length - 1;
+        }
+
+        function flipCard() {
+            isFlipped = !isFlipped;
+            const innerCard = document.getElementById('flashcard-inner');
+            if (isFlipped) {
+                innerCard.classList.add('flipped');
+            } else {
+                innerCard.classList.remove('flipped');
+            }
+        }
+
+        function nextCard() {
+            if (currentFcIndex < flashcardsData.length - 1) {
+                currentFcIndex++;
+                updateFlashcardUI();
+            }
+        }
+
+        function prevCard() {
+            if (currentFcIndex > 0) {
+                currentFcIndex--;
+                updateFlashcardUI();
+            }
+        }
+
+        // --- QUIZ LOGIC ---
+        function renderQuizQuestion() {
+            const q = quizData[currentQuizIndex];
+            selectedOptionIndex = null;
+            quizAnswered = false;
+
+            document.getElementById('quiz-counter').textContent = `Question ${currentQuizIndex + 1} of ${quizData.length}`;
+            document.getElementById('quiz-progress').style.width = `${((currentQuizIndex) / quizData.length) * 100}%`;
+            document.getElementById('quiz-question-text').textContent = q.question;
+            
+            // Setup Hint
+            document.getElementById('quiz-hint-text').textContent = q.hint;
+            document.getElementById('quiz-hint-container').classList.add('hidden');
+
+            // Render Options
+            const optionsContainer = document.getElementById('quiz-options-container');
+            optionsContainer.innerHTML = '';
+            
+            q.options.forEach((opt, index) => {
+                const optDiv = document.createElement('div');
+                optDiv.className = `p-4 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-indigo-400 hover:bg-indigo-50 transition duration-200 group`;
+                optDiv.id = `quiz-opt-${index}`;
+                optDiv.onclick = () => selectOption(index);
+                
+                optDiv.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="w-5 h-5 rounded-full border-2 border-slate-300 mr-3 flex-shrink-0 flex items-center justify-center group-hover:border-indigo-500" id="quiz-radio-${index}">
+                            <div class="w-2.5 h-2.5 rounded-full bg-indigo-600 hidden"></div>
+                        </div>
+                        <span class="text-slate-700">${opt.text}</span>
+                    </div>
+                `;
+                optionsContainer.appendChild(optDiv);
+            });
+
+            // Reset UI states
+            document.getElementById('quiz-feedback-container').classList.add('hidden');
+            const submitBtn = document.getElementById('btn-submit-quiz');
+            submitBtn.disabled = true;
+            submitBtn.classList.remove('hidden');
+            document.getElementById('btn-next-quiz').classList.add('hidden');
+        }
+
+        function toggleHint() {
+            const hintBox = document.getElementById('quiz-hint-container');
+            hintBox.classList.toggle('hidden');
+        }
+
+        function selectOption(index) {
+            if (quizAnswered) return; // Prevent changing answer after submission
+
+            selectedOptionIndex = index;
+            const q = quizData[currentQuizIndex];
+
+            // Reset all options UI
+            q.options.forEach((_, i) => {
+                const optDiv = document.getElementById(`quiz-opt-${i}`);
+                const radioInner = document.querySelector(`#quiz-radio-${i} div`);
+                const radioOuter = document.getElementById(`quiz-radio-${i}`);
+                
+                optDiv.className = `p-4 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-indigo-400 hover:bg-indigo-50 transition duration-200 group`;
+                radioInner.classList.add('hidden');
+                radioOuter.className = "w-5 h-5 rounded-full border-2 border-slate-300 mr-3 flex-shrink-0 flex items-center justify-center group-hover:border-indigo-500";
+            });
+
+            // Highlight selected
+            const selectedDiv = document.getElementById(`quiz-opt-${index}`);
+            const selectedRadioInner = document.querySelector(`#quiz-radio-${index} div`);
+            const selectedRadioOuter = document.getElementById(`quiz-radio-${index}`);
+
+            selectedDiv.className = `p-4 border-2 border-indigo-600 bg-indigo-50 rounded-xl cursor-pointer transition duration-200`;
+            selectedRadioInner.classList.remove('hidden');
+            selectedRadioOuter.className = "w-5 h-5 rounded-full border-2 border-indigo-600 mr-3 flex-shrink-0 flex items-center justify-center";
+
+            document.getElementById('btn-submit-quiz').disabled = false;
+        }
+
+        function submitAnswer() {
+            if (selectedOptionIndex === null || quizAnswered) return;
+            
+            quizAnswered = true;
+            const q = quizData[currentQuizIndex];
+            const isCorrect = q.options[selectedOptionIndex].isCorrect;
+            
+            if (isCorrect) quizScore++;
+
+            // Reveal correct/incorrect UI
+            q.options.forEach((opt, i) => {
+                const optDiv = document.getElementById(`quiz-opt-${i}`);
+                optDiv.style.cursor = 'default';
+                
+                if (opt.isCorrect) {
+                    optDiv.className = `p-4 border-2 border-green-500 bg-green-50 rounded-xl transition duration-200`;
+                } else if (i === selectedOptionIndex && !isCorrect) {
+                    optDiv.className = `p-4 border-2 border-red-400 bg-red-50 rounded-xl transition duration-200 opacity-75`;
+                } else {
+                    optDiv.className = `p-4 border-2 border-slate-200 rounded-xl opacity-50`;
+                }
+            });
+
+            // Show Feedback
+            const feedbackContainer = document.getElementById('quiz-feedback-container');
+            const feedbackTitle = document.getElementById('quiz-feedback-title');
+            const feedbackRationale = document.getElementById('quiz-feedback-rationale');
+            
+            feedbackContainer.classList.remove('hidden');
+            if (isCorrect) {
+                feedbackContainer.className = "mb-6 p-4 rounded-lg border-l-4 border-green-500 bg-green-50";
+                feedbackTitle.textContent = "Correct!";
+                feedbackTitle.className = "font-bold text-lg mb-1 text-green-800";
+            } else {
+                feedbackContainer.className = "mb-6 p-4 rounded-lg border-l-4 border-red-500 bg-red-50";
+                feedbackTitle.textContent = "Incorrect";
+                feedbackTitle.className = "font-bold text-lg mb-1 text-red-800";
+            }
+            feedbackRationale.textContent = q.options[selectedOptionIndex].rationale;
+
+            // Toggle Buttons
+            document.getElementById('btn-submit-quiz').classList.add('hidden');
+            
+            const nextBtn = document.getElementById('btn-next-quiz');
+            nextBtn.classList.remove('hidden');
+            if (currentQuizIndex === quizData.length - 1) {
+                nextBtn.innerHTML = "See Results";
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuizIndex < quizData.length - 1) {
+                currentQuizIndex++;
+                renderQuizQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quiz-active-container').classList.add('hidden');
+            document.getElementById('quiz-results-container').classList.remove('hidden');
+            document.getElementById('quiz-final-score').textContent = quizScore;
+        }
+
+        function restartQuiz() {
+            currentQuizIndex = 0;
+            quizScore = 0;
+            document.getElementById('quiz-results-container').classList.add('hidden');
+            document.getElementById('quiz-active-container').classList.remove('hidden');
+            renderQuizQuestion();
+        }
+
+        // Initialize first view
+        updateFlashcardUI();
+
+    </script>
+</body>
+</html>
+
+
+

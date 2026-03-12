@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Week 6 · Module 6 — Industrial Espionage in Cyberspace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Syne:wght@400;600;800&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0d0f;
+    --surface: #111417;
+    --surface2: #161a1e;
+    --border: #1e2328;
+    --accent: #e8c547;
+    --accent2: #e05c3a;
+    --accent3: #4ecdc4;
+    --text: #d4d8dd;
+    --text-dim: #7a8390;
+    --text-bright: #f0f3f6;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'Syne', sans-serif;
+    --serif: 'Lora', serif;
+    --radius: 4px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--serif);
+    font-size: 16px;
+    line-height: 1.75;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* ── SCANLINE EFFECT ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 9998;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative;
+    padding: 80px 5vw 60px;
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  header::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 600px; height: 600px;
+    background: radial-gradient(ellipse, rgba(232,197,71,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .header-meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+
+  .badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: var(--radius);
+    border: 1px solid;
+  }
+
+  .badge-week { color: var(--accent); border-color: rgba(232,197,71,0.35); background: rgba(232,197,71,0.07); }
+  .badge-part { color: var(--accent3); border-color: rgba(78,205,196,0.35); background: rgba(78,205,196,0.07); }
+  .badge-weight { color: var(--accent2); border-color: rgba(224,92,58,0.35); background: rgba(224,92,58,0.07); }
+
+  h1 {
+    font-family: var(--sans);
+    font-size: clamp(32px, 5vw, 64px);
+    font-weight: 800;
+    line-height: 1.05;
+    color: var(--text-bright);
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+
+  h1 span { color: var(--accent); }
+
+  .header-sub {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+  }
+
+  .header-stats {
+    display: flex;
+    gap: 40px;
+    margin-top: 40px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+
+  .stat-item { display: flex; flex-direction: column; gap: 4px; }
+  .stat-value {
+    font-family: var(--sans);
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--accent);
+  }
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  /* ── NAVIGATION ── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(11,13,15,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 5vw;
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  nav::-webkit-scrollbar { display: none; }
+
+  nav a {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    text-decoration: none;
+    padding: 16px 18px;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  nav a:hover, nav a.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 60px 5vw 120px;
+  }
+
+  /* ── SECTIONS ── */
+  section {
+    margin-bottom: 80px;
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  section.visible { opacity: 1; transform: translateY(0); }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    min-width: 32px;
+  }
+
+  h2 {
+    font-family: var(--sans);
+    font-size: clamp(20px, 3vw, 28px);
+    font-weight: 800;
+    color: var(--text-bright);
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text-bright);
+    margin: 32px 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  h3::before {
+    content: '//';
+    font-family: var(--mono);
+    color: var(--accent);
+    font-size: 13px;
+  }
+
+  p { margin-bottom: 16px; color: var(--text); }
+
+  a { color: var(--accent3); text-decoration: none; border-bottom: 1px solid rgba(78,205,196,0.3); transition: border-color 0.2s; }
+  a:hover { border-bottom-color: var(--accent3); }
+
+  strong { color: var(--text-bright); font-weight: 600; }
+  em { color: var(--accent); font-style: italic; }
+
+  /* ── DISCLAIMER BOX ── */
+  .disclaimer {
+    background: linear-gradient(135deg, rgba(224,92,58,0.08), rgba(224,92,58,0.04));
+    border: 1px solid rgba(224,92,58,0.3);
+    border-left: 4px solid var(--accent2);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    margin-bottom: 48px;
+  }
+
+  .disclaimer-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .disclaimer-title::before { content: '⚠'; font-size: 14px; }
+
+  /* ── CALLOUT BOX ── */
+  .callout {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin: 24px 0;
+  }
+
+  .callout-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  /* ── TABLES ── */
+  .table-wrap {
+    overflow-x: auto;
+    margin: 24px 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  thead {
+    background: var(--surface2);
+  }
+
+  th {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    padding: 14px 18px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 12px 18px;
+    border-bottom: 1px solid rgba(30,35,40,0.8);
+    vertical-align: top;
+    color: var(--text);
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* ── KILL CHAIN VISUAL ── */
+  .kill-chain {
+    display: flex;
+    gap: 0;
+    margin: 32px 0;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .phase {
+    flex: 1;
+    min-width: 120px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-right: none;
+    padding: 20px 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+    position: relative;
+  }
+
+  .phase:last-child { border-right: 1px solid var(--border); }
+
+  .phase:hover, .phase.active {
+    background: rgba(232,197,71,0.08);
+    border-color: rgba(232,197,71,0.4);
+  }
+
+  .phase-num {
+    font-family: var(--mono);
+    font-size: 24px;
+    font-weight: 600;
+    color: rgba(232,197,71,0.25);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .phase.active .phase-num { color: var(--accent); }
+
+  .phase-name {
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .phase.active .phase-name { color: var(--text-bright); }
+
+  .phase-detail {
+    display: none;
+    margin-top: 0;
+    background: var(--surface);
+    border: 1px solid rgba(232,197,71,0.3);
+    border-top: none;
+    border-radius: 0 0 var(--radius) var(--radius);
+    padding: 20px 24px;
+    font-size: 14px;
+  }
+
+  .phase-detail.visible { display: block; }
+
+  /* ── LAB STEPS ── */
+  .lab-steps { margin: 24px 0; }
+
+  .lab-step {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 4px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+
+  .lab-step:hover { border-color: var(--accent3); }
+
+  .lab-step-num {
+    min-width: 56px;
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--accent3);
+    border-right: 1px solid var(--border);
+    padding: 20px;
+  }
+
+  .lab-step-content {
+    padding: 20px;
+    flex: 1;
+  }
+
+  .lab-step-title {
+    font-family: var(--sans);
+    font-weight: 600;
+    color: var(--text-bright);
+    margin-bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .lab-step-time {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(232,197,71,0.1);
+    padding: 2px 8px;
+    border-radius: var(--radius);
+  }
+
+  .lab-step-body {
+    display: none;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 14px;
+  }
+
+  .lab-step-body.open { display: block; }
+
+  .lab-step-body ul {
+    margin: 8px 0 8px 20px;
+  }
+
+  .lab-step-body li {
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+
+  /* ── CHECKLIST ── */
+  .checklist { margin: 16px 0; }
+
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(30,35,40,0.5);
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .check-item:last-child { border-bottom: none; }
+
+  .check-box {
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    border: 1px solid var(--accent3);
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+    transition: background 0.15s;
+  }
+
+  .check-item.checked .check-box {
+    background: var(--accent3);
+  }
+
+  .check-item.checked .check-box::after {
+    content: '✓';
+    font-size: 11px;
+    color: var(--bg);
+    font-weight: 700;
+  }
+
+  .check-item.checked .check-label {
+    text-decoration: line-through;
+    color: var(--text-dim);
+  }
+
+  .check-label { font-size: 14px; color: var(--text); }
+
+  /* ── RESOURCES GRID ── */
+  .resources-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  .resource-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    transition: border-color 0.2s, transform 0.2s;
+    text-decoration: none;
+    border-bottom: none;
+    display: block;
+  }
+
+  .resource-card:hover {
+    border-color: var(--accent3);
+    transform: translateY(-2px);
+  }
+
+  .resource-name {
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-bright);
+    margin-bottom: 4px;
+  }
+
+  .resource-url {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent3);
+  }
+
+  /* ── CASE STUDY ── */
+  .case-study {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin: 24px 0;
+  }
+
+  .case-study-header {
+    background: linear-gradient(135deg, rgba(232,197,71,0.1), rgba(224,92,58,0.06));
+    border-bottom: 1px solid var(--border);
+    padding: 20px 28px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .case-study-icon {
+    font-size: 24px;
+    filter: grayscale(0.3);
+  }
+
+  .case-study-title {
+    font-family: var(--sans);
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-bright);
+  }
+
+  .case-study-body {
+    padding: 24px 28px;
+    font-size: 15px;
+  }
+
+  .timeline {
+    position: relative;
+    margin: 20px 0;
+    padding-left: 28px;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--accent), var(--accent2));
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+    padding-left: 12px;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -21px;
+    top: 7px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+  }
+
+  .timeline-phase {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+
+  .timeline-text { font-size: 14px; color: var(--text); }
+
+  /* ── PROGRESS ── */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    z-index: 200;
+    transition: width 0.1s;
+  }
+
+  /* ── DEFINITION TOOLTIPS ── */
+  abbr {
+    text-decoration: underline dotted rgba(78,205,196,0.5);
+    cursor: help;
+    color: var(--accent3);
+  }
+
+  /* ── CODE ── */
+  code {
+    font-family: var(--mono);
+    font-size: 13px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 2px 7px;
+    border-radius: var(--radius);
+    color: var(--accent);
+  }
+
+  /* ── REPORT REQUIREMENTS ── */
+  .report-section {
+    background: linear-gradient(135deg, rgba(78,205,196,0.05), rgba(78,205,196,0.02));
+    border: 1px solid rgba(78,205,196,0.2);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-top: 24px;
+  }
+
+  .report-item {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+    align-items: flex-start;
+  }
+
+  .report-num {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent3);
+    min-width: 28px;
+  }
+
+  /* ── DEFENSIVE CONTROLS TABLE highlight ── */
+  .control-key { color: var(--accent3); font-family: var(--mono); font-size: 13px; }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 48px 5vw;
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+  }
+
+  footer span { color: var(--accent); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px) {
+    .header-stats { gap: 24px; }
+    .kill-chain { flex-direction: column; }
+    .phase { border-right: 1px solid var(--border); border-bottom: none; }
+    .phase:last-child { border-bottom: 1px solid var(--border); }
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .live-dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    background: var(--accent2);
+    border-radius: 50%;
+    margin-right: 6px;
+    animation: pulse 2s ease-in-out infinite;
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progress"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-meta">
+    <span class="badge badge-part">Part I — Threats, Attacks &amp; Defenses</span>
+    <span class="badge badge-week">Week 6 · Module 6</span>
+    <span class="badge badge-weight">Weight 1–2–1</span>
+  </div>
+  <h1>Industrial Espionage<br><span>in Cyberspace</span></h1>
+  <p class="header-sub">Introduction to Computer Security · University Undergraduate Course</p>
+  <div class="header-stats">
+    <div class="stat-item">
+      <span class="stat-value">6h</span>
+      <span class="stat-label">Minimum Workload</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value">4pp</span>
+      <span class="stat-label">Max Report Length</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value">5</span>
+      <span class="stat-label">Attack Phases</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value">$100B+</span>
+      <span class="stat-label">Annual IP Theft Loss</span>
+    </div>
+  </div>
+</header>
+
+<!-- NAVIGATION -->
+<nav id="mainnav">
+  <a href="#disclaimer" class="active">⚠ Disclaimer</a>
+  <a href="#intro">Introduction</a>
+  <a href="#landscape">Landscape</a>
+  <a href="#lifecycle">Attack Lifecycle</a>
+  <a href="#techniques">Techniques</a>
+  <a href="#defense">Defense</a>
+  <a href="#casestudy">Case Study</a>
+  <a href="#lab">Lab</a>
+  <a href="#report">Report</a>
+  <a href="#resources">Resources</a>
+</nav>
+
+<main>
+
+  <!-- DISCLAIMER -->
+  <section id="disclaimer">
+    <div class="disclaimer">
+      <div class="disclaimer-title">Critical Disclaimer — Read Before Proceeding</div>
+      <p>The techniques, tools, and methodologies introduced in this module are presented <strong>strictly for educational and defensive purposes</strong>. They mirror real-world practices used by cybersecurity professionals, penetration testers, and threat intelligence analysts operating under <strong>explicit legal authorisation</strong>.</p>
+      <p style="margin-top:12px;">The instructor and the institution <strong>bear no responsibility for any misuse</strong> of the knowledge conveyed here. Applying these techniques against systems, networks, or individuals without written permission is <strong>illegal</strong> in virtually every jurisdiction.</p>
+      <p style="margin-top:12px;"><strong>All tools named in this module are open-source examples only.</strong> You are strongly encouraged — and expected — to research, compare, substitute, or even <em>build your own tools</em>. Creativity and independent research are core competencies this course develops.</p>
+    </div>
+  </section>
+
+  <!-- INTRODUCTION -->
+  <section id="intro">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2>Why This Topic Matters</h2>
+    </div>
+    <p>Imagine spending three years developing a prototype battery that outperforms every competitor on the market. You file the patents. You plan the product launch. Then, six months before release, a foreign competitor announces an almost identical product at half the price — and they have never published a single paper on the underlying chemistry.</p>
+    <p>This is not a hypothetical scenario. It is the recurring pattern of <strong>industrial espionage in cyberspace</strong>: the deliberate theft of trade secrets, intellectual property <abbr title="Intellectual Property">(IP)</abbr>, strategic plans, and competitive intelligence through digital means.</p>
+    <p>Unlike traditional corporate espionage — which relied on bribed employees or stolen briefcases — cyber-enabled economic espionage can be conducted remotely, at massive scale, with a level of plausible deniability that physical theft never allowed.</p>
+    <div class="callout">
+      <div class="callout-label">Why You Specifically Need to Know This</div>
+      <p style="margin:0;font-size:14px;">You may one day build the systems that protect — or inadvertently expose — such secrets. You may work as a security analyst tasked with detecting these campaigns. Understanding how adversaries think and operate is the first step toward defending against them.</p>
+    </div>
+  </section>
+
+  <!-- LANDSCAPE -->
+  <section id="landscape">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2>Defining the Landscape</h2>
+    </div>
+
+    <h3>What Is Industrial Espionage?</h3>
+    <p><strong>Industrial espionage</strong> is the covert acquisition of confidential business or technical information for competitive, financial, or strategic advantage. When conducted through digital networks, it becomes <strong>cyber-enabled industrial espionage</strong>.</p>
+    <p>Key targets typically include trade secrets, <abbr title="Research and Development">R&amp;D</abbr> data, business intelligence, personnel data, and source code assets.</p>
+
+    <h3>Who Are the Threat Actors?</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Actor Type</th>
+            <th>Motivation</th>
+            <th>Example Profile</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Nation-state groups (<abbr title="Advanced Persistent Threat">APT</abbr>)</strong></td>
+            <td>Economic, strategic, military advantage</td>
+            <td>State-sponsored groups targeting defence, energy, pharma sectors</td>
+          </tr>
+          <tr>
+            <td><strong>Organised criminal groups</strong></td>
+            <td>Financial gain — IP resale, market manipulation</td>
+            <td>Criminal syndicates with technical capabilities</td>
+          </tr>
+          <tr>
+            <td><strong>Insider threats</strong></td>
+            <td>Financial reward, coercion, ideology, disgruntlement</td>
+            <td>Employees, contractors, trusted partners</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <div class="callout-label">Definition — APT (Advanced Persistent Threat)</div>
+      <p style="margin:0;font-size:14px;">A category of highly resourced, skilled threat actors who maintain long-term, stealthy access to a target network — often for months or years. The word "persistent" is key: they do not smash and grab; they settle in and observe.</p>
+    </div>
+
+    <h3>The Scale of the Problem</h3>
+    <p>The <a href="https://www.ipcommission.org/" target="_blank" rel="noopener"><strong>Commission on the Theft of American Intellectual Property</strong></a> estimated annual losses from IP theft globally at hundreds of billions of dollars. The <a href="https://www.enisa.europa.eu/" target="_blank" rel="noopener"><strong>European Union Agency for Cybersecurity (ENISA)</strong></a> consistently lists industrial espionage as a top-tier threat in its annual landscape reports. The <a href="https://www.fbi.gov/investigate/cyber" target="_blank" rel="noopener"><strong>FBI's (Federal Bureau of Investigation) Cyber Division</strong></a> has described economic espionage as "the greatest long-term threat to the nation's economy."</p>
+  </section>
+
+  <!-- KILL CHAIN / LIFECYCLE -->
+  <section id="lifecycle">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2>The Attack Lifecycle</h2>
+    </div>
+    <p>Industrial espionage campaigns follow a structured lifecycle — a variation of the <strong>Cyber Kill Chain</strong> framework developed by <a href="https://www.lockheedmartin.com/en-us/capabilities/cyber/cyber-kill-chain.html" target="_blank" rel="noopener"><strong>Lockheed Martin</strong></a>. Click any phase below to explore it.</p>
+
+    <div class="kill-chain" id="killchain">
+      <div class="phase active" data-phase="0" onclick="togglePhase(0)">
+        <div class="phase-num">01</div>
+        <div class="phase-name">Reconnaissance</div>
+      </div>
+      <div class="phase" data-phase="1" onclick="togglePhase(1)">
+        <div class="phase-num">02</div>
+        <div class="phase-name">Initial Access</div>
+      </div>
+      <div class="phase" data-phase="2" onclick="togglePhase(2)">
+        <div class="phase-num">03</div>
+        <div class="phase-name">Persistence</div>
+      </div>
+      <div class="phase" data-phase="3" onclick="togglePhase(3)">
+        <div class="phase-num">04</div>
+        <div class="phase-name">Collection</div>
+      </div>
+      <div class="phase" data-phase="4" onclick="togglePhase(4)">
+        <div class="phase-num">05</div>
+        <div class="phase-name">Cover Tracks</div>
+      </div>
+    </div>
+
+    <div id="phase-details">
+      <div class="phase-detail visible" id="pd0">
+        <strong>Phase 1 — Reconnaissance (Intelligence Gathering)</strong><br><br>
+        Before launching any attack, the adversary builds a detailed picture of the target. <strong>Passive reconnaissance</strong> uses publicly available sources: company websites, LinkedIn profiles, <abbr title="A protocol for querying domain registration information">WHOIS</abbr> records, <abbr title="Domain Name System — the internet's address book">DNS</abbr> entries, job listings, academic papers, patents, and public code repositories.<br><br>
+        <strong>Active reconnaissance</strong> directly probes the target: port scanning, banner grabbing (capturing service version information), and DNS enumeration to map subdomains. This is the longest and most patient phase — a well-resourced adversary may spend months here.
+      </div>
+      <div class="phase-detail" id="pd1">
+        <strong>Phase 2 — Weaponisation and Initial Access</strong><br><br>
+        With a target profile assembled, the adversary prepares a delivery mechanism. <strong>Spear-phishing</strong> (targeted phishing, individually crafted using gathered intelligence) is statistically the most common vector. Messages may spoof trusted colleagues, reference real recent projects, and carry malicious attachments or credential-harvesting links.<br><br>
+        <strong>Watering-hole attacks</strong> compromise websites frequented by target employees. <strong>Supply-chain compromise</strong> targets vendors or software providers of the actual target, using less-defended links as entry points. See the <a href="https://attack.mitre.org/" target="_blank" rel="noopener">MITRE ATT&amp;CK® Framework</a> for catalogued techniques.
+      </div>
+      <div class="phase-detail" id="pd2">
+        <strong>Phase 3 — Establishing Persistence and Lateral Movement</strong><br><br>
+        Once inside, the goal is remaining undetected while exploring. <strong>Persistence mechanisms</strong> (registry run keys, scheduled tasks, cron jobs, backdoor services) ensure the implant survives reboots.<br><br>
+        <strong>Lateral movement</strong> pivots from the initial machine to others: credential dumping, <strong>Pass-the-Hash (PtH)</strong> attacks (using a password hash directly, without cracking it), and exploiting trust relationships — shared service accounts, <abbr title="Secure Shell — a cryptographic network protocol">SSH</abbr> keys, or Kerberos tickets in Windows domain environments.
+      </div>
+      <div class="phase-detail" id="pd3">
+        <strong>Phase 4 — Collection and Exfiltration</strong><br><br>
+        The core objective: locating and extracting the target IP. Collection may use keyloggers, screen capture, file-share traversal, or email archive exfiltration.<br><br>
+        <strong>Exfiltration</strong> must evade security controls: data staged in encrypted archives, sent over <abbr title="Hypertext Transfer Protocol Secure">HTTPS</abbr> to blend with normal traffic, using <strong>DNS tunnelling</strong> (encoding data within DNS queries to bypass firewalls), or targeting cloud storage services as exfiltration destinations.
+      </div>
+      <div class="phase-detail" id="pd4">
+        <strong>Phase 5 — Covering Tracks</strong><br><br>
+        Advanced actors invest considerable effort erasing evidence: deleting or tampering with system logs, <strong>timestomping</strong> (modifying file timestamps to obscure when files were accessed), removing tools and implants after use, and deploying <strong>anti-forensics</strong> techniques to frustrate post-incident investigation.
+      </div>
+    </div>
+  </section>
+
+  <!-- TECHNIQUES -->
+  <section id="techniques">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2>Key Techniques in Depth</h2>
+    </div>
+
+    <h3>Social Engineering at Scale</h3>
+    <p>The human element remains the most reliably exploitable vulnerability. Social engineering manipulates people — rather than technology — to obtain information or access. Key forms include:</p>
+    <ul style="margin: 12px 0 16px 24px;">
+      <li style="margin-bottom:8px;"><strong>Vishing (voice phishing)</strong> — impersonating IT support, executives, or vendors over telephone</li>
+      <li style="margin-bottom:8px;"><strong>Pretexting</strong> — fabricating a scenario to elicit information (e.g., posing as an auditor)</li>
+      <li style="margin-bottom:8px;"><strong>Business Email Compromise (<abbr title="Business Email Compromise">BEC</abbr>)</strong> — hijacking or spoofing an executive's email to authorise fraudulent transfers or data sharing</li>
+    </ul>
+    <p>The <a href="https://www.social-engineer.org/" target="_blank" rel="noopener">Social Engineering Framework</a> and the <a href="https://www.sans.org/" target="_blank" rel="noopener">SANS Institute</a> publish extensive resources on recognising and defending against these tactics.</p>
+
+    <h3>OSINT (Open-Source Intelligence) for Competitive Profiling</h3>
+    <p>A structured OSINT investigation of a company might include:</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Source</th><th>Information Gained</th><th>Adversarial Value</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Corporate filings / registrations</td><td>Structure, ownership, subsidiaries</td><td>Identifying weak links in the chain</td></tr>
+          <tr><td><a href="https://www.uspto.gov/" target="_blank" rel="noopener">USPTO</a> / <a href="https://www.epo.org/" target="_blank" rel="noopener">EPO</a> patent databases</td><td>Technological direction, innovation areas</td><td>Knowing exactly what IP to steal</td></tr>
+          <tr><td>Technical job postings</td><td>Software versions, technology stack</td><td>Targeting known vulnerabilities in listed software</td></tr>
+          <tr><td>Public code repositories</td><td>Accidentally committed credentials / keys</td><td>Direct access credentials</td></tr>
+          <tr><td><a href="https://www.shodan.io/" target="_blank" rel="noopener">Shodan</a></td><td>Internet-exposed internal systems</td><td>Finding unpatched, publicly accessible devices</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Network-Based Espionage</h3>
+    <p><strong>Man-in-the-Middle (<abbr title="Man-in-the-Middle">MitM</abbr>) attacks</strong> intercept communications between two parties. Targets include unencrypted Wi-Fi at industry conferences, poorly secured <abbr title="Virtual Private Network">VPN</abbr> configurations, and weaknesses in <abbr title="Secure Sockets Layer / Transport Layer Security">SSL/TLS</abbr> certificate validation.</p>
+    <p><strong>Adversary-in-the-Browser</strong> attacks target the browser session itself — injecting malicious scripts to capture form data, session tokens, or <abbr title="Application Programming Interface">API</abbr> responses.</p>
+  </section>
+
+  <!-- DEFENSE -->
+  <section id="defense">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2>Defensive Strategies — The Blue Team Perspective</h2>
+    </div>
+
+    <h3>Technical Controls</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Control</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="control-key">DLP</span> (Data Loss Prevention) software</td><td>Monitors and restricts movement of sensitive data; flags or blocks large file transfers to external destinations</td></tr>
+          <tr><td><span class="control-key">SIEM</span> (Security Information and Event Management)</td><td>Aggregates logs from across the environment; correlates events to detect attack patterns</td></tr>
+          <tr><td>Network segmentation</td><td>Limits the blast radius of a compromise — an attacker who breaches one segment cannot freely reach all others</td></tr>
+          <tr><td><span class="control-key">MFA</span> (Multi-Factor Authentication)</td><td>Makes credential theft alone insufficient for access</td></tr>
+          <tr><td><span class="control-key">EDR</span> (Endpoint Detection and Response)</td><td>Deep visibility into activity on individual devices; detects persistence mechanisms and lateral movement</td></tr>
+          <tr><td>Encryption at rest and in transit</td><td>Ensures exfiltrated data, if captured, is unreadable without the appropriate key</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Legal and Policy Frameworks</h3>
+    <p>Combating industrial espionage is not only a technical problem — it is a legal and policy one:</p>
+    <ul style="margin: 12px 0 16px 24px;">
+      <li style="margin-bottom:10px;"><a href="https://www.law.cornell.edu/uscode/text/18/part-I/chapter-90" target="_blank" rel="noopener"><strong>Economic Espionage Act (EEA) of 1996</strong></a> — United States — criminalises trade-secret theft benefiting a foreign government or entity.</li>
+      <li style="margin-bottom:10px;"><a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32016L0943" target="_blank" rel="noopener"><strong>EU Trade Secrets Directive (2016/943)</strong></a> — harmonises civil law protection of trade secrets across EU member states.</li>
+      <li style="margin-bottom:10px;"><a href="https://www.coe.int/en/web/cybercrime/the-budapest-convention" target="_blank" rel="noopener"><strong>Budapest Convention on Cybercrime</strong></a> — provides an international legal framework for cooperation in investigating cybercrime across borders.</li>
+    </ul>
+  </section>
+
+  <!-- CASE STUDY -->
+  <section id="casestudy">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2>Case Study — Anatomy of a Campaign</h2>
+    </div>
+
+    <div class="case-study">
+      <div class="case-study-header">
+        <span class="case-study-icon">🏭</span>
+        <div>
+          <div class="case-study-title">AeroTech GmbH — Composite Materials Division</div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--text-dim);margin-top:4px;">Composite teaching scenario — synthesised from publicly documented incidents</div>
+        </div>
+      </div>
+      <div class="case-study-body">
+        <p>A mid-sized European aerospace manufacturer develops a novel composite material for aircraft fuselage construction. Their research team includes academics who regularly publish papers and present at international conferences.</p>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-phase">Phase 1 — Reconnaissance</div>
+            <div class="timeline-text">The adversary identifies the research team via LinkedIn and conference programmes. Job postings reveal a specific engineering simulation platform version. Patent filings reveal the R&amp;D direction. A GitHub search finds a configuration file with internal IP address ranges, accidentally committed by a junior engineer.</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-phase">Phase 2 — Initial Access</div>
+            <div class="timeline-text">A researcher receives a spear-phishing email, apparently from a conference organiser they recently met, asking them to review a draft programme document. The attached PDF exploits a known vulnerability in an unpatched PDF reader to execute a payload.</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-phase">Phase 3 — Persistence &amp; Lateral Movement</div>
+            <div class="timeline-text">The attacker establishes persistence via a scheduled task masquerading as a legitimate Windows maintenance process. Over four weeks, they methodically traverse the network, targeting the R&amp;D file server.</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-phase">Phase 4 — Exfiltration</div>
+            <div class="timeline-text">~40 GB of technical specifications and unpublished research reports are staged in encrypted archives and exfiltrated via HTTPS to a cloud storage endpoint.</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-phase">Phase 5 — Detection (six months later)</div>
+            <div class="timeline-text">Detected not by automated tooling, but by a security analyst who notices anomalously large outbound HTTPS transfers to an unfamiliar cloud domain in historical log data — triggered during a routine audit.</div>
+          </div>
+        </div>
+        <div class="callout" style="margin-top:20px;">
+          <div class="callout-label">Discussion Questions for Your Report</div>
+          <ol style="margin: 8px 0 0 20px;font-size:14px;">
+            <li style="margin-bottom:8px;">At which phase could the attack most effectively have been disrupted, and with which specific control?</li>
+            <li style="margin-bottom:8px;">How might the principle of least privilege have altered the impact of Phase 3?</li>
+            <li>What role did human behaviour play at each stage? Was any phase purely technical?</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LAB -->
+  <section id="lab">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <h2>Lab Exercise</h2>
+    </div>
+
+    <div class="disclaimer" style="border-left-color:var(--accent3);background:linear-gradient(135deg,rgba(78,205,196,0.06),rgba(78,205,196,0.02));">
+      <div class="disclaimer-title" style="color:var(--accent3);">Lab Scope — Fictional Target · Isolated Environment Only</div>
+      <p>This lab is conducted strictly against a fictional company provided by your instructor. No technique described here is to be applied against any real system, organisation, or individual — ever, for any reason, without explicit written authorisation.</p>
+      <p style="margin-top:8px;"><strong>Tool freedom:</strong> Every tool named below is an open-source example to illustrate a concept. Research alternatives, compare capabilities, and develop your own scripts where your skills allow. <em>Creativity in tooling is valued as highly as technical execution.</em></p>
+    </div>
+
+    <p><strong>Objective:</strong> Conduct a structured <abbr title="Open-Source Intelligence">OSINT</abbr> reconnaissance investigation of the fictional company "InnovateTech Solutions", producing a threat intelligence-style profile demonstrating how an adversary would collect actionable intelligence prior to an attack.</p>
+
+    <div class="lab-steps">
+
+      <div class="lab-step" onclick="toggleStep(0)">
+        <div class="lab-step-num">1</div>
+        <div class="lab-step-content">
+          <div class="lab-step-title">
+            Define the Target Scope
+            <span class="lab-step-time">30 min</span>
+          </div>
+          <div class="lab-step-body" id="step0">
+            <p>Before beginning any searches, write down your answers to these scoping questions:</p>
+            <ul>
+              <li>What types of information are you looking for? (employees, tech stack, IP addresses, leaked credentials, R&amp;D direction)</li>
+              <li>What would be most valuable to a competitor? Why?</li>
+              <li>What ethical boundaries define what you will and will not collect in this exercise?</li>
+            </ul>
+            <p>This mirrors what professional threat intelligence analysts do before any engagement.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="lab-step" onclick="toggleStep(1)">
+        <div class="lab-step-num">2</div>
+        <div class="lab-step-content">
+          <div class="lab-step-title">
+            Passive Web Reconnaissance
+            <span class="lab-step-time">60 min</span>
+          </div>
+          <div class="lab-step-body" id="step1">
+            <ul>
+              <li>Run advanced search-engine queries using operators: <code>site:</code>, <code>filetype:</code>, <code>inurl:</code></li>
+              <li>Look up the domain in a WHOIS database (e.g., <a href="https://who.is" target="_blank" rel="noopener">who.is</a> or <a href="https://www.iana.org/whois" target="_blank" rel="noopener">iana.org/whois</a>)</li>
+              <li>Check the <a href="https://web.archive.org/" target="_blank" rel="noopener">Wayback Machine</a> for historical versions of the site</li>
+              <li>Search public code repositories for commits mentioning the target domain</li>
+              <li><strong>Record every finding</strong> in a table: Source → Information Type → Adversarial Value</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="lab-step" onclick="toggleStep(2)">
+        <div class="lab-step-num">3</div>
+        <div class="lab-step-content">
+          <div class="lab-step-title">
+            Employee &amp; Personnel Profiling
+            <span class="lab-step-time">45 min</span>
+          </div>
+          <div class="lab-step-body" id="step2">
+            <ul>
+              <li>Search professional networking platforms for company employees</li>
+              <li>Identify high-value roles: executives, senior engineers, IT administrators</li>
+              <li>Note technology tools and skills listed — this reveals the technology stack</li>
+              <li>Search for patents or conference papers authored by company employees at <a href="https://www.uspto.gov/" target="_blank" rel="noopener">USPTO</a> or <a href="https://www.epo.org/" target="_blank" rel="noopener">EPO</a></li>
+            </ul>
+            <div class="callout" style="margin-top:12px;">
+              <div class="callout-label">Reflection Question</div>
+              <p style="margin:0;font-size:13px;">What does this data tell you about the company's research direction and potential vulnerabilities in its human layer?</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lab-step" onclick="toggleStep(3)">
+        <div class="lab-step-num">4</div>
+        <div class="lab-step-content">
+          <div class="lab-step-title">
+            Technical Footprinting
+            <span class="lab-step-time">45 min</span>
+          </div>
+          <div class="lab-step-body" id="step3">
+            <ul>
+              <li>Perform DNS lookups: MX records (mail servers), name servers, subdomains using <code>nslookup</code> or <code>dig</code></li>
+              <li>Query <a href="https://crt.sh/" target="_blank" rel="noopener">crt.sh</a> (certificate transparency logs) — SSL/TLS certificate history often reveals internal subdomains</li>
+              <li>If authorised by your instructor, query <a href="https://www.shodan.io/" target="_blank" rel="noopener">Shodan</a> for internet-exposed assets</li>
+              <li><strong>Research your own alternative tools</strong> — compare at least two options and justify your choice in the report</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="lab-step" onclick="toggleStep(4)">
+        <div class="lab-step-num">5</div>
+        <div class="lab-step-content">
+          <div class="lab-step-title">
+            Synthesise Intelligence Profile
+            <span class="lab-step-time">60 min</span>
+          </div>
+          <div class="lab-step-body" id="step4">
+            <p>Compile all findings into a structured intelligence report:</p>
+            <ol style="margin: 8px 0 0 20px;">
+              <li style="margin-bottom:6px;"><strong>Executive Summary</strong> — 2–3 sentences summarising most significant findings</li>
+              <li style="margin-bottom:6px;"><strong>Company Overview</strong> — structure, sector, key personnel</li>
+              <li style="margin-bottom:6px;"><strong>Technology Stack Assessment</strong> — systems and software in use</li>
+              <li style="margin-bottom:6px;"><strong>Attack Surface Summary</strong> — most exploitable entry points</li>
+              <li><strong>Recommended Defensive Measures</strong> — immediate steps for the company's security team</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <div class="lab-step" onclick="toggleStep(5)">
+        <div class="lab-step-num">6</div>
+        <div class="lab-step-content">
+          <div class="lab-step-title">
+            Reflection — Switch to Defender Mode
+            <span class="lab-step-time">30 min</span>
+          </div>
+          <div class="lab-step-body" id="step5">
+            <p>After completing the OSINT profile, switch your perspective entirely. Answer these questions in your report:</p>
+            <ul>
+              <li>Which of your findings could have been prevented through better organisational hygiene?</li>
+              <li>What would a DLP (Data Loss Prevention) policy need to look like to address the risks you identified?</li>
+              <li>What single defensive control would have the highest impact-to-cost ratio for this organisation?</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- REPORT -->
+  <section id="report">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <h2>Report Requirements</h2>
+    </div>
+
+    <div class="callout" style="border-left-color:var(--accent2);background:linear-gradient(135deg,rgba(224,92,58,0.08),rgba(224,92,58,0.03));">
+      <div class="callout-label" style="color:var(--accent2);">Maximum 4 Pages A4 — Hard Limit</div>
+      <p style="margin:0;font-size:14px;">Your written report must not exceed 4 pages A4, including any figures and tables. Be selective: quality of analysis over quantity of text.</p>
+    </div>
+
+    <div class="report-section">
+      <div class="report-item">
+        <div class="report-num">01</div>
+        <div><strong>Introduction</strong> — Why does industrial espionage matter in the current threat landscape? Cite at least one real statistic or official source.</div>
+      </div>
+      <div class="report-item">
+        <div class="report-num">02</div>
+        <div><strong>Methodology</strong> — How did you conduct your OSINT investigation? What tools did you use and why? What alternatives did you consider?</div>
+      </div>
+      <div class="report-item">
+        <div class="report-num">03</div>
+        <div><strong>Findings</strong> — Your structured intelligence profile of the fictional target. Table format strongly recommended.</div>
+      </div>
+      <div class="report-item">
+        <div class="report-num">04</div>
+        <div><strong>Analysis</strong> — Answer the case study discussion questions and the lab reflection questions from Steps 5 and 6.</div>
+      </div>
+      <div class="report-item" style="margin-bottom:0;">
+        <div class="report-num">05</div>
+        <div><strong>Conclusion</strong> — Three key takeaways and their applicability to real defensive practice.</div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:32px;">Interactive Submission Checklist</h3>
+    <p style="font-size:14px;color:var(--text-dim);">Click items to mark them complete. Your progress is saved during this session.</p>
+    <div class="checklist" id="checklist">
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box"></div>
+        <div class="check-label">Report is no longer than 4 pages A4</div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box"></div>
+        <div class="check-label">All five required sections are present and substantive</div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box"></div>
+        <div class="check-label">All abbreviations explained on first use (e.g., OSINT — Open-Source Intelligence)</div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box"></div>
+        <div class="check-label">At least three external sources cited (MITRE ATT&amp;CK, ENISA, NIST, or others)</div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box"></div>
+        <div class="check-label">Your own tool research documented — not just examples from the lecture</div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box"></div>
+        <div class="check-label">Perspective switches between offensive (how attacker sees it) and defensive (how to stop it)</div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box"></div>
+        <div class="check-label">No content copied from lecture — all findings and analysis are your own work</div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box"></div>
+        <div class="check-label">Raw notes and findings saved for reuse in Weeks 7 and 8</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESOURCES -->
+  <section id="resources">
+    <div class="section-header">
+      <span class="section-num">09</span>
+      <h2>Resources &amp; Further Reading</h2>
+    </div>
+    <p>All resources below are official or authoritative sources. Explore beyond this list — independent research is expected.</p>
+    <div class="resources-grid">
+      <a class="resource-card" href="https://attack.mitre.org" target="_blank" rel="noopener">
+        <div class="resource-name">MITRE ATT&amp;CK® Framework</div>
+        <div class="resource-url">attack.mitre.org</div>
+      </a>
+      <a class="resource-card" href="https://www.enisa.europa.eu/publications/enisa-threat-landscape" target="_blank" rel="noopener">
+        <div class="resource-name">ENISA Threat Landscape Report</div>
+        <div class="resource-url">enisa.europa.eu</div>
+      </a>
+      <a class="resource-card" href="https://www.nist.gov/cyberframework" target="_blank" rel="noopener">
+        <div class="resource-name">NIST Cybersecurity Framework</div>
+        <div class="resource-url">nist.gov/cyberframework</div>
+      </a>
+      <a class="resource-card" href="https://www.shodan.io" target="_blank" rel="noopener">
+        <div class="resource-name">Shodan — Device Search Engine</div>
+        <div class="resource-url">shodan.io</div>
+      </a>
+      <a class="resource-card" href="https://crt.sh" target="_blank" rel="noopener">
+        <div class="resource-name">crt.sh — Certificate Transparency</div>
+        <div class="resource-url">crt.sh</div>
+      </a>
+      <a class="resource-card" href="https://github.com/laramies/theHarvester" target="_blank" rel="noopener">
+        <div class="resource-name">theHarvester — OSINT Tool</div>
+        <div class="resource-url">github.com/laramies/theHarvester</div>
+      </a>
+      <a class="resource-card" href="https://www.maltego.com/" target="_blank" rel="noopener">
+        <div class="resource-name">Maltego Community Edition</div>
+        <div class="resource-url">maltego.com</div>
+      </a>
+      <a class="resource-card" href="https://web.archive.org" target="_blank" rel="noopener">
+        <div class="resource-name">Wayback Machine — Internet Archive</div>
+        <div class="resource-url">web.archive.org</div>
+      </a>
+      <a class="resource-card" href="https://www.lockheedmartin.com/en-us/capabilities/cyber/cyber-kill-chain.html" target="_blank" rel="noopener">
+        <div class="resource-name">Cyber Kill Chain — Lockheed Martin</div>
+        <div class="resource-url">lockheedmartin.com</div>
+      </a>
+      <a class="resource-card" href="https://www.coe.int/en/web/cybercrime/the-budapest-convention" target="_blank" rel="noopener">
+        <div class="resource-name">Budapest Convention on Cybercrime</div>
+        <div class="resource-url">coe.int</div>
+      </a>
+      <a class="resource-card" href="https://www.sans.org/reading-room/" target="_blank" rel="noopener">
+        <div class="resource-name">SANS Institute Reading Room</div>
+        <div class="resource-url">sans.org/reading-room</div>
+      </a>
+      <a class="resource-card" href="https://www.ipcommission.org/" target="_blank" rel="noopener">
+        <div class="resource-name">IP Commission Report</div>
+        <div class="resource-url">ipcommission.org</div>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p><span>Week 6 · Module 6</span> — Introduction to Computer Security</p>
+  <p style="margin-top:6px;">All tools and techniques described are for educational and defensive awareness purposes only.</p>
+  <p style="margin-top:6px;color:rgba(122,131,144,0.5);">Instructor accepts no liability for misuse · Continuous Project — Full Project spans all modules per attached course outline</p>
+</footer>
+
+<script>
+  // ── PROGRESS BAR ──
+  window.addEventListener('scroll', () => {
+    const doc = document.documentElement;
+    const scrolled = (doc.scrollTop / (doc.scrollHeight - doc.clientHeight)) * 100;
+    document.getElementById('progress').style.width = scrolled + '%';
+  });
+
+  // ── INTERSECTION OBSERVER for section animations ──
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        // Update nav active state
+        const id = e.target.id;
+        document.querySelectorAll('nav a').forEach(a => {
+          a.classList.toggle('active', a.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { rootMargin: '-10% 0px -60% 0px' });
+
+  document.querySelectorAll('section').forEach(s => observer.observe(s));
+
+  // ── KILL CHAIN TOGGLE ──
+  function togglePhase(idx) {
+    document.querySelectorAll('.phase').forEach((p, i) => {
+      p.classList.toggle('active', i === idx);
+    });
+    document.querySelectorAll('.phase-detail').forEach((d, i) => {
+      d.classList.toggle('visible', i === idx);
+    });
+  }
+
+  // ── LAB STEP TOGGLE ──
+  function toggleStep(idx) {
+    const body = document.getElementById('step' + idx);
+    body.classList.toggle('open');
+  }
+
+  // ── CHECKLIST ──
+  function toggleCheck(el) {
+    el.classList.toggle('checked');
+  }
+
+  // ── NAV CLICK SMOOTH SCROLL ──
+  document.querySelectorAll('nav a').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+</script>
+</body>
+</html>
