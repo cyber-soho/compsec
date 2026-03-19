@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Introduction to Computer Security — Mid-Term Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Anybody:wght@400;600;800&family=Nunito+Sans:ital,opsz,wght@0,6..12,300;0,6..12,400;0,6..12,600;0,6..12,700;1,6..12,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #FAFAF7;
+  --bg-card: #FFFFFF;
+  --bg-sidebar: #1C2333;
+  --bg-hero: linear-gradient(135deg, #1C2333 0%, #2A3A5C 50%, #1C2333 100%);
+  --bg-code: #F4F1EC;
+  --bg-answer: #F0F7F0;
+  --bg-explanation: #FFF9ED;
+  --bg-chaptertag: #EDF2FC;
+  --bg-option: #F8F8F6;
+  --bg-option-hover: #EDF2FC;
+  --bg-correct: #E8F5E9;
+  --text: #2C2C2C;
+  --text-secondary: #5A5A5A;
+  --text-muted: #8A8A8A;
+  --text-on-dark: #E8E6E1;
+  --accent: #2E5BBA;
+  --accent-light: #4A7AE5;
+  --accent-dark: #1A3A7A;
+  --highlight: #D4A843;
+  --highlight-light: #F5E6C0;
+  --green: #2D8A4E;
+  --green-light: #E8F5E9;
+  --red: #C0392B;
+  --red-light: #FDEDEC;
+  --border: #E2E0DB;
+  --border-light: #EEEDEA;
+  --shadow: 0 2px 12px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.10);
+  --radius: 10px;
+  --radius-sm: 6px;
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-heading: 'Anybody', 'Helvetica Neue', sans-serif;
+  --font-body: 'Nunito Sans', 'Helvetica Neue', sans-serif;
+  --sidebar-w: 280px;
+  --topbar-h: 0px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; font-size: 16px; }
+
+body {
+  font-family: var(--font-body);
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.72;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ═══ SCROLLBAR ═══ */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: #C0BDB6; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #9A978F; }
+
+/* ═══ SIDEBAR ═══ */
+.sidebar {
+  position: fixed; top: 0; left: 0; width: var(--sidebar-w); height: 100vh;
+  background: var(--bg-sidebar);
+  color: var(--text-on-dark);
+  z-index: 100; overflow-y: auto; overflow-x: hidden;
+  display: flex; flex-direction: column;
+  transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+  box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+}
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+.sidebar-brand {
+  padding: 28px 22px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.sidebar-brand h2 {
+  font-family: var(--font-display);
+  font-size: 1.15rem; font-weight: 400; color: #FFF; letter-spacing: 0.01em; line-height: 1.35;
+}
+.sidebar-brand span { color: var(--highlight); }
+
+.sidebar-progress {
+  padding: 16px 22px; border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.progress-bar-bg {
+  height: 6px; border-radius: 3px; background: rgba(255,255,255,0.1); overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%; width: 0%; border-radius: 3px;
+  background: linear-gradient(90deg, var(--highlight), #E8C86A);
+  transition: width 0.6s cubic-bezier(.4,0,.2,1);
+}
+.progress-label {
+  font-size: 0.7rem; color: rgba(255,255,255,0.45); margin-top: 6px;
+  font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+}
+
+.nav-section { padding: 14px 0; flex: 1; }
+.nav-section-title {
+  font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.3); padding: 6px 22px; font-weight: 700;
+}
+.nav-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 22px; font-size: 0.82rem; color: rgba(255,255,255,0.6);
+  text-decoration: none; cursor: pointer; transition: all 0.2s;
+  border-left: 3px solid transparent; font-weight: 400;
+}
+.nav-link:hover { color: #FFF; background: rgba(255,255,255,0.04); }
+.nav-link.active {
+  color: #FFF; background: rgba(255,255,255,0.07);
+  border-left-color: var(--highlight); font-weight: 600;
+}
+.nav-link .nav-icon { font-size: 0.95rem; width: 22px; text-align: center; flex-shrink: 0; }
+.nav-link .nav-num {
+  font-size: 0.6rem; font-weight: 800; background: rgba(255,255,255,0.08);
+  padding: 2px 7px; border-radius: 3px; margin-left: auto; font-family: var(--font-heading);
+}
+
+.sidebar-toggle {
+  display: none; position: fixed; top: 14px; left: 14px; z-index: 200;
+  width: 42px; height: 42px; border-radius: 8px; border: none;
+  background: var(--bg-sidebar); color: #FFF; font-size: 1.3rem;
+  cursor: pointer; box-shadow: var(--shadow-lg);
+  align-items: center; justify-content: center;
+}
+
+/* ═══ MAIN ═══ */
+.main { margin-left: var(--sidebar-w); min-height: 100vh; }
+
+/* ═══ HERO ═══ */
+.hero {
+  background: var(--bg-hero);
+  color: #FFF; padding: 90px 60px 70px; position: relative; overflow: hidden;
+}
+.hero::before {
+  content: ''; position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.hero-inner { max-width: 800px; position: relative; z-index: 1; }
+.hero-badge {
+  display: inline-block; font-family: var(--font-heading); font-size: 0.65rem;
+  font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em;
+  background: rgba(212,168,67,0.2); color: var(--highlight);
+  padding: 5px 14px; border-radius: 20px; margin-bottom: 20px;
+  border: 1px solid rgba(212,168,67,0.25);
+}
+.hero h1 {
+  font-family: var(--font-display); font-size: 2.8rem; font-weight: 400;
+  line-height: 1.18; margin-bottom: 14px; letter-spacing: -0.01em;
+}
+.hero h1 em { font-style: italic; color: var(--highlight); }
+.hero-sub {
+  font-size: 1.05rem; color: rgba(255,255,255,0.65); max-width: 600px;
+  line-height: 1.65; margin-bottom: 28px;
+}
+.hero-stats {
+  display: flex; gap: 32px; flex-wrap: wrap;
+}
+.hero-stat {
+  text-align: center; padding: 14px 0;
+}
+.hero-stat-num {
+  font-family: var(--font-heading); font-size: 1.8rem; font-weight: 800;
+  color: var(--highlight); display: block; line-height: 1;
+}
+.hero-stat-label {
+  font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.4); margin-top: 5px; font-weight: 600;
+}
+
+/* ═══ CONTENT CONTAINER ═══ */
+.content { max-width: 860px; margin: 0 auto; padding: 50px 40px 80px; }
+
+/* ═══ SECTION (PARTS) ═══ */
+.part-header {
+  text-align: center; padding: 30px 0 20px;
+}
+.part-label {
+  font-family: var(--font-heading); font-size: 0.65rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 0.18em; color: var(--accent);
+  margin-bottom: 6px;
+}
+.part-title {
+  font-family: var(--font-display); font-size: 2rem; color: var(--text);
+  font-weight: 400; line-height: 1.25;
+}
+.part-divider {
+  width: 60px; height: 3px; background: var(--highlight);
+  margin: 18px auto 0; border-radius: 2px;
+}
+
+/* ═══ CHAPTER BLOCKS ═══ */
+.chapter {
+  background: var(--bg-card); border-radius: var(--radius);
+  box-shadow: var(--shadow); margin-bottom: 24px;
+  border: 1px solid var(--border-light); overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+.chapter:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+.chapter-header {
+  display: flex; align-items: center; gap: 16px;
+  padding: 20px 26px; cursor: pointer; user-select: none;
+  transition: background 0.15s;
+}
+.chapter-header:hover { background: rgba(0,0,0,0.015); }
+.chapter-num {
+  font-family: var(--font-heading); font-size: 0.7rem; font-weight: 800;
+  color: #FFF; background: var(--accent);
+  width: 36px; height: 36px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.chapter-title {
+  font-family: var(--font-display); font-size: 1.2rem; color: var(--text);
+  flex: 1; line-height: 1.3;
+}
+.chapter-toggle {
+  font-size: 1.2rem; color: var(--text-muted);
+  transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+}
+.chapter.open .chapter-toggle { transform: rotate(180deg); }
+.chapter-body {
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.5s cubic-bezier(.4,0,.2,1);
+}
+.chapter.open .chapter-body { max-height: 200000px; }
+.chapter-content { padding: 0 26px 26px; }
+.chapter-content h3 {
+  font-family: var(--font-heading); font-size: 1rem; font-weight: 700;
+  color: var(--accent-dark); margin: 24px 0 10px; padding-bottom: 6px;
+  border-bottom: 2px solid var(--highlight-light);
+}
+.chapter-content p {
+  margin-bottom: 12px; color: var(--text); font-size: 0.92rem; line-height: 1.75;
+}
+.chapter-content a {
+  color: var(--accent); font-weight: 600; text-decoration: none;
+  border-bottom: 1px solid rgba(46,91,186,0.25);
+  transition: border-color 0.2s;
+}
+.chapter-content a:hover { border-bottom-color: var(--accent); }
+
+/* ═══ CASE STUDY CARDS ═══ */
+.case-study {
+  background: var(--bg-card); border-radius: var(--radius); margin-bottom: 20px;
+  border: 1px solid var(--border-light); box-shadow: var(--shadow); overflow: hidden;
+}
+.case-header {
+  display: flex; align-items: center; gap: 14px;
+  padding: 18px 24px; cursor: pointer; user-select: none;
+}
+.case-header:hover { background: rgba(0,0,0,0.012); }
+.case-num {
+  font-family: var(--font-heading); font-weight: 800; font-size: 0.75rem;
+  color: var(--highlight); background: var(--highlight-light);
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.case-title {
+  font-family: var(--font-display); font-size: 1.05rem; color: var(--text); flex: 1;
+}
+.case-toggle { font-size: 1.1rem; color: var(--text-muted); transition: transform 0.3s; }
+.case-study.open .case-toggle { transform: rotate(180deg); }
+.case-body { max-height: 0; overflow: hidden; transition: max-height 0.5s cubic-bezier(.4,0,.2,1); }
+.case-study.open .case-body { max-height: 80000px; }
+.case-content { padding: 0 24px 24px; }
+.case-content .tag {
+  display: inline-block; font-size: 0.7rem; font-weight: 700;
+  color: var(--accent); background: var(--bg-chaptertag);
+  padding: 3px 10px; border-radius: 4px; margin-bottom: 12px;
+  font-family: var(--font-heading); letter-spacing: 0.02em;
+}
+.case-content .label {
+  font-family: var(--font-heading); font-weight: 700; font-size: 0.75rem;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--text-muted); margin: 16px 0 6px;
+}
+.case-content .scenario-text, .case-content .question-text, .case-content .answer-text {
+  font-size: 0.9rem; line-height: 1.75; color: var(--text);
+}
+.case-content .answer-box {
+  background: var(--bg-answer); border-left: 4px solid var(--green);
+  padding: 16px 18px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin-top: 8px;
+}
+
+/* ═══ QUIZ SECTIONS ═══ */
+.quiz-controls {
+  display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px;
+  padding: 16px 20px; background: var(--bg-card); border-radius: var(--radius);
+  border: 1px solid var(--border-light); box-shadow: var(--shadow);
+}
+.quiz-btn {
+  font-family: var(--font-heading); font-size: 0.75rem; font-weight: 700;
+  padding: 8px 18px; border-radius: 6px; border: 2px solid var(--border);
+  background: transparent; color: var(--text); cursor: pointer;
+  transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.06em;
+}
+.quiz-btn:hover { border-color: var(--accent); color: var(--accent); }
+.quiz-btn.active { background: var(--accent); color: #FFF; border-color: var(--accent); }
+.quiz-score {
+  margin-left: auto; font-family: var(--font-heading); font-size: 0.8rem;
+  font-weight: 700; color: var(--text-muted); display: flex; align-items: center; gap: 6px;
+}
+.quiz-score .score-val { color: var(--green); font-size: 1rem; }
+
+.question-card {
+  background: var(--bg-card); border-radius: var(--radius); margin-bottom: 16px;
+  border: 1px solid var(--border-light); box-shadow: var(--shadow);
+  overflow: hidden; transition: border-color 0.3s;
+}
+.question-card.answered-correct { border-color: #B8E6C8; }
+.question-card.answered-wrong { border-color: #F5C6C0; }
+
+.q-header {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 18px 22px 12px;
+}
+.q-num {
+  font-family: var(--font-heading); font-weight: 800; font-size: 0.7rem;
+  color: var(--accent); background: var(--bg-chaptertag);
+  padding: 4px 9px; border-radius: 4px; flex-shrink: 0; margin-top: 2px;
+}
+.q-text { font-size: 0.92rem; color: var(--text); font-weight: 600; line-height: 1.55; flex: 1; }
+.q-chapter {
+  font-size: 0.68rem; font-weight: 700; color: var(--accent);
+  padding: 2px 8px; background: var(--bg-chaptertag); border-radius: 3px;
+  font-family: var(--font-heading); white-space: nowrap; margin-top: 2px;
+}
+
+.q-options { padding: 0 22px 6px; }
+.q-option {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 14px; margin-bottom: 6px; border-radius: var(--radius-sm);
+  background: var(--bg-option); cursor: pointer; transition: all 0.15s;
+  border: 2px solid transparent; user-select: none;
+}
+.q-option:hover { background: var(--bg-option-hover); border-color: var(--accent-light); }
+.q-option.selected { border-color: var(--accent); background: var(--bg-option-hover); }
+.q-option.correct { border-color: var(--green); background: var(--green-light); }
+.q-option.wrong { border-color: var(--red); background: var(--red-light); }
+.q-option-letter {
+  font-family: var(--font-heading); font-weight: 800; font-size: 0.72rem;
+  color: var(--text-muted); width: 24px; height: 24px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  border: 2px solid var(--border); transition: all 0.15s; margin-top: 1px;
+}
+.q-option.selected .q-option-letter { border-color: var(--accent); color: var(--accent); }
+.q-option.correct .q-option-letter { border-color: var(--green); color: #FFF; background: var(--green); }
+.q-option.wrong .q-option-letter { border-color: var(--red); color: #FFF; background: var(--red); }
+.q-option-text { font-size: 0.88rem; color: var(--text); line-height: 1.5; }
+
+.q-feedback {
+  padding: 0 22px 18px; display: none;
+}
+.q-feedback.visible { display: block; }
+.q-answer-box {
+  padding: 14px 16px; border-radius: var(--radius-sm); font-size: 0.84rem; line-height: 1.65;
+}
+.q-answer-box.correct-box { background: var(--bg-answer); border-left: 4px solid var(--green); }
+.q-answer-box.wrong-box { background: var(--red-light); border-left: 4px solid var(--red); }
+.q-answer-label {
+  font-family: var(--font-heading); font-weight: 700; font-size: 0.72rem;
+  text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;
+}
+.q-answer-label.correct-label { color: var(--green); }
+.q-answer-label.wrong-label { color: var(--red); }
+.q-explanation { color: var(--text-secondary); margin-top: 6px; font-size: 0.84rem; }
+
+/* ═══ ESSAY QUESTIONS ═══ */
+.essay-card {
+  background: var(--bg-card); border-radius: var(--radius); margin-bottom: 18px;
+  border: 1px solid var(--border-light); box-shadow: var(--shadow); overflow: hidden;
+}
+.essay-header {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 18px 22px; cursor: pointer; user-select: none;
+}
+.essay-header:hover { background: rgba(0,0,0,0.01); }
+.essay-num {
+  font-family: var(--font-heading); font-weight: 800; font-size: 0.72rem;
+  color: #FFF; background: var(--accent-dark);
+  width: 30px; height: 30px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.essay-title { font-size: 0.92rem; color: var(--text); font-weight: 600; line-height: 1.5; flex: 1; }
+.essay-ch {
+  font-size: 0.68rem; font-weight: 700; color: var(--accent);
+  padding: 2px 8px; background: var(--bg-chaptertag); border-radius: 3px;
+  font-family: var(--font-heading); white-space: nowrap;
+}
+.essay-toggle { font-size: 1rem; color: var(--text-muted); transition: transform 0.3s; margin-top: 2px; }
+.essay-card.open .essay-toggle { transform: rotate(180deg); }
+.essay-body { max-height: 0; overflow: hidden; transition: max-height 0.5s cubic-bezier(.4,0,.2,1); }
+.essay-card.open .essay-body { max-height: 40000px; }
+.essay-content { padding: 0 22px 22px; }
+.essay-answer {
+  background: var(--bg-answer); border-left: 4px solid var(--green);
+  padding: 16px 18px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 0.88rem; line-height: 1.8; color: var(--text);
+}
+.essay-answer-label {
+  font-family: var(--font-heading); font-weight: 700; font-size: 0.72rem;
+  text-transform: uppercase; letter-spacing: 0.08em; color: var(--green);
+  margin-bottom: 8px;
+}
+
+/* ═══ BACK TO TOP ═══ */
+.back-to-top {
+  position: fixed; bottom: 28px; right: 28px; z-index: 90;
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--accent); color: #FFF; font-size: 1.2rem;
+  border: none; cursor: pointer; box-shadow: var(--shadow-lg);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transform: translateY(20px);
+  transition: all 0.3s; pointer-events: none;
+}
+.back-to-top.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.back-to-top:hover { background: var(--accent-dark); transform: translateY(-2px); }
+
+/* ═══ FOOTER ═══ */
+.site-footer {
+  text-align: center; padding: 40px 20px;
+  color: var(--text-muted); font-size: 0.82rem;
+  border-top: 1px solid var(--border-light);
+}
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 900px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-toggle { display: flex; }
+  .main { margin-left: 0; }
+  .hero { padding: 70px 24px 50px; }
+  .hero h1 { font-size: 2rem; }
+  .content { padding: 30px 18px 60px; }
+  .hero-stats { gap: 20px; }
+}
+@media (max-width: 600px) {
+  .hero h1 { font-size: 1.6rem; }
+  .hero-sub { font-size: 0.92rem; }
+  .q-header { flex-wrap: wrap; }
+  .q-chapter { margin-top: 4px; }
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR TOGGLE (mobile) -->
+<button class="sidebar-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')" aria-label="Toggle navigation">☰</button>
+
+<!-- ═══ SIDEBAR ═══ -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <h2>Introduction to <span>Computer Security</span></h2>
+  </div>
+  <div class="sidebar-progress">
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
+    <div class="progress-label">Scroll Progress — <span id="progressPct">0</span>%</div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-title">Content Review</div>
+    <a class="nav-link" data-target="ch1"><span class="nav-icon">🔐</span> Intro to Computer Security <span class="nav-num">Ch1</span></a>
+    <a class="nav-link" data-target="ch2"><span class="nav-icon">🛡️</span> Security Models & Policy <span class="nav-num">Ch2</span></a>
+    <a class="nav-link" data-target="ch3"><span class="nav-icon">⚔️</span> Hacking, Detection & Response <span class="nav-num">Ch3</span></a>
+    <a class="nav-link" data-target="ch4"><span class="nav-icon">📡</span> Scanning, Attacks & Vulns <span class="nav-num">Ch4</span></a>
+    <a class="nav-link" data-target="ch5"><span class="nav-icon">💣</span> Cyber Terrorism & Info War <span class="nav-num">Ch5</span></a>
+    <a class="nav-link" data-target="ch6"><span class="nav-icon">🕵️</span> Industrial Espionage <span class="nav-num">Ch6</span></a>
+    <div class="nav-section-title" style="margin-top:10px">Case Studies & Exams</div>
+    <a class="nav-link" data-target="cases"><span class="nav-icon">📋</span> 10 Case Studies <span class="nav-num">10</span></a>
+    <a class="nav-link" data-target="mcq"><span class="nav-icon">✅</span> MCQ Questions <span class="nav-num">45</span></a>
+    <a class="nav-link" data-target="msq"><span class="nav-icon">☑️</span> MSQ Questions <span class="nav-num">35</span></a>
+    <a class="nav-link" data-target="essays"><span class="nav-icon">✍️</span> Essay Questions <span class="nav-num">20</span></a>
+  </div>
+</nav>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main">
+
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">Mid-Term Examination Review — Spring 2026</div>
+    <h1>Comprehensive <em>3-Hour</em><br>Study Guide</h1>
+    <p class="hero-sub">Everything you need to know for the mid-term — content review across all six chapters, ten case studies, and one hundred practice questions with full answers and explanations.</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><span class="hero-stat-num">6</span><span class="hero-stat-label">Chapters</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">10</span><span class="hero-stat-label">Case Studies</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">45</span><span class="hero-stat-label">MCQs</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">35</span><span class="hero-stat-label">MSQs</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">20</span><span class="hero-stat-label">Essays</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CONTENT ═══ -->
+<div class="content">
+
+<!-- PART A -->
+<div class="part-header" id="partA">
+  <div class="part-label">Part A</div>
+  <div class="part-title">Comprehensive Content Review</div>
+  <div class="part-divider"></div>
+</div>
+
+<div id="chapterContainer"></div>
+
+<!-- PART B -->
+<div class="part-header" id="cases">
+  <div class="part-label">Part B</div>
+  <div class="part-title">Case Studies</div>
+  <div class="part-divider"></div>
+</div>
+<p style="text-align:center;color:var(--text-secondary);font-size:0.9rem;margin-bottom:24px;">Click each case to expand the scenario, questions, and suggested answers.</p>
+<div id="caseContainer"></div>
+
+<!-- PART C -->
+<div class="part-header" id="partC">
+  <div class="part-label">Part C</div>
+  <div class="part-title">Examination Practice Questions</div>
+  <div class="part-divider"></div>
+</div>
+
+<!-- MCQ -->
+<h2 id="mcq" style="font-family:var(--font-display);font-size:1.5rem;margin:30px 0 6px;color:var(--text);">Section 1: Multiple Choice Questions</h2>
+<p style="color:var(--text-secondary);font-size:0.88rem;margin-bottom:18px;">Select the <strong>single best answer</strong>. Click an option to check — instant feedback is provided.</p>
+<div class="quiz-controls">
+  <button class="quiz-btn active" onclick="filterQuiz('mcq','all',this)">All (45)</button>
+  <button class="quiz-btn" onclick="filterQuiz('mcq','unanswered',this)">Unanswered</button>
+  <button class="quiz-btn" onclick="filterQuiz('mcq','wrong',this)">Review Wrong</button>
+  <button class="quiz-btn" onclick="resetQuiz('mcq')">↻ Reset</button>
+  <div class="quiz-score">Score: <span class="score-val" id="mcqScore">0</span> / <span id="mcqTotal">45</span></div>
+</div>
+<div id="mcqContainer"></div>
+
+<!-- MSQ -->
+<h2 id="msq" style="font-family:var(--font-display);font-size:1.5rem;margin:40px 0 6px;color:var(--text);">Section 2: Multiple Select Questions</h2>
+<p style="color:var(--text-secondary);font-size:0.88rem;margin-bottom:18px;">Select <strong>all answers that apply</strong>. Click options to toggle, then click <em>Check</em> to verify.</p>
+<div class="quiz-controls">
+  <button class="quiz-btn active" onclick="filterQuiz('msq','all',this)">All (35)</button>
+  <button class="quiz-btn" onclick="filterQuiz('msq','unanswered',this)">Unanswered</button>
+  <button class="quiz-btn" onclick="filterQuiz('msq','wrong',this)">Review Wrong</button>
+  <button class="quiz-btn" onclick="resetQuiz('msq')">↻ Reset</button>
+  <div class="quiz-score">Score: <span class="score-val" id="msqScore">0</span> / <span id="msqTotal">35</span></div>
+</div>
+<div id="msqContainer"></div>
+
+<!-- ESSAYS -->
+<h2 id="essays" style="font-family:var(--font-display);font-size:1.5rem;margin:40px 0 6px;color:var(--text);">Section 3: Short Essay Questions</h2>
+<p style="color:var(--text-secondary);font-size:0.88rem;margin-bottom:18px;">Answer in approximately 150–250 words. Click to reveal the model answer.</p>
+<div id="essayContainer"></div>
+
+</div><!-- /content -->
+
+<footer class="site-footer">
+  <p>Introduction to Computer Security — Mid-Term Review — Spring 2026</p>
+  <p style="margin-top:4px;">Prepared for Educational Use Only</p>
+</footer>
+</div><!-- /main -->
+
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0})" aria-label="Back to top">↑</button>
+
+<script>
+// ═══════════════════════════════════════════════
+// DATA — All content from the DOCX
+// ═══════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════
+// CHAPTER DATA
+// ═══════════════════════════════════════════════
+const chapters = [
+{id:"ch1",num:"1",title:"Introduction to Computer Security",sections:[
+{h:"The CIA Triad (Confidentiality, Integrity, Availability)",p:"Every security decision revolves around three foundational properties. <strong>Confidentiality</strong> ensures that information is accessible only to authorized parties; the main technical safeguard is encryption, such as <strong>AES (Advanced Encryption Standard)</strong>. <strong>Integrity</strong> ensures that data has not been tampered with; key tools include hashing algorithms like <strong>SHA-256 (Secure Hash Algorithm, 256-bit)</strong> and digital signatures. <strong>Availability</strong> ensures that systems and data remain accessible to legitimate users when needed; defences include redundancy, load balancing, and disaster recovery plans."},
+{h:"Core Terminology",p:"A <strong>threat</strong> is any potential event or action that could harm a system. A <strong>vulnerability</strong> is a weakness a threat can exploit. An <strong>exploit</strong> is the specific method or code that takes advantage of a vulnerability. <strong>Risk = Threat × Vulnerability × Impact</strong>. An <strong>asset</strong> is anything of value requiring protection. The <strong>attack surface</strong> is the sum of all points where an attacker could attempt entry. A <strong>patch</strong> is a software update that closes a known vulnerability. A <strong>zero-day</strong> is a vulnerability unknown to the vendor with no patch available."},
+{h:"Threat Actors",p:"Threat actors range from <strong>script kiddies</strong> (low skill, curiosity-driven) to <strong>hacktivists</strong> (political/social agenda), <strong>cybercriminals</strong> (financial gain), <strong>insiders</strong> (legitimate access, varying motives), and <strong>nation-state actors / APTs (Advanced Persistent Threats)</strong> — the most dangerous, with very high skill, resources, and persistence. The <a href='https://attack.mitre.org/' target='_blank'>MITRE ATT&CK Framework</a> catalogues real-world adversary behaviours and is used globally by SOCs (Security Operations Centres)."},
+{h:"Common Attack Vectors",p:"The most common entry points include <strong>phishing and social engineering</strong>, <strong>malware</strong> (viruses, worms, trojans, ransomware, spyware), <strong>unpatched software</strong>, <strong>weak or stolen credentials</strong>, and <strong>insider threats</strong>. The <a href='https://www.cve.org/' target='_blank'>CVE (Common Vulnerabilities and Exposures)</a> database, maintained by <a href='https://www.mitre.org/' target='_blank'>MITRE Corporation</a>, catalogues known vulnerabilities."},
+{h:"Fundamental Security Principles",p:"Five principles guide security design: <strong>Principle of Least Privilege (PoLP)</strong> — minimum necessary access; <strong>Defence in Depth (DiD)</strong> — multiple overlapping security layers; <strong>Fail Securely</strong> — systems default to a secure state on failure; <strong>Separation of Duties (SoD)</strong> — no single person controls an entire critical process; <strong>Security by Design</strong> — security built in from inception."},
+{h:"Authentication and Authorization",p:"<strong>Authentication (AuthN)</strong> verifies identity through three factors: something you <em>know</em> (password), something you <em>have</em> (phone/token), something you <em>are</em> (biometrics). <strong>MFA (Multi-Factor Authentication)</strong> combines two or more factors. <strong>Authorization (AuthZ)</strong> determines what an authenticated user is permitted to do, commonly enforced through <strong>RBAC (Role-Based Access Control)</strong>."},
+{h:"Cryptography Essentials",p:"<strong>Symmetric encryption</strong> uses a single shared key (AES-256). <strong>Asymmetric encryption</strong> uses a public/private key pair (RSA). <strong>Hashing</strong> is a one-way function producing a fixed-size output (SHA-256). The <strong>avalanche effect</strong> means a single-character input change produces a completely different hash."},
+{h:"Security Frameworks",p:"Key frameworks: <a href='https://www.nist.gov/cyberframework' target='_blank'>NIST CSF</a> (Identify, Protect, Detect, Respond, Recover); <a href='https://www.iso.org/' target='_blank'>ISO/IEC 27001</a>; <a href='https://owasp.org/www-project-top-ten/' target='_blank'>OWASP Top 10</a>; <a href='https://www.cisecurity.org/' target='_blank'>CIS Controls</a>; <a href='https://gdpr.eu/' target='_blank'>GDPR</a>."},
+{h:"Landmark Breaches",p:"<strong>Equifax (2017)</strong>: 147 million records exposed; unpatched Apache Struts (CVE-2017-5638). <strong>WannaCry (2017)</strong>: ransomware worm exploiting EternalBlue; 200,000+ systems in 150 countries. <strong>SolarWinds (2020)</strong>: nation-state supply chain attack; trojanized update to ~18,000 organizations including US government agencies."}
+]},
+{id:"ch2",num:"2",title:"Security Models and Policy Issues",sections:[
+{h:"Security Policies",p:"A security policy is a formal rulebook defining who may access which resources, how, and under what conditions, aligned with standards from <a href='https://www.nist.gov/' target='_blank'>NIST</a>, <a href='https://www.iso.org/' target='_blank'>ISO</a>, and <a href='https://www.enisa.europa.eu/' target='_blank'>ENISA</a>. A security model translates policy into a precise mathematical/logical structure."},
+{h:"Bell-LaPadula Model (BLP)",p:"Protects <strong>confidentiality</strong>. Two rules: <strong>Simple Security (No Read Up)</strong> — a subject cannot read data above their clearance; <strong>Star Property (No Write Down)</strong> — a subject cannot write data to a lower classification. Used in military/government. Does not address integrity."},
+{h:"Biba Integrity Model",p:"Mirror of BLP, protects <strong>integrity</strong>. <strong>Simple Integrity Axiom (No Read Down)</strong> — don't read lower-integrity data; <strong>Star Integrity Axiom (No Write Up)</strong> — don't write to higher integrity levels. Does not address confidentiality."},
+{h:"Clark-Wilson Integrity Model",p:"Designed for <strong>commercial environments</strong>. Enforces integrity through well-formed transactions and separation of duties. Key components: <strong>CDIs (Constrained Data Items)</strong>, <strong>UDIs (Unconstrained Data Items)</strong>, <strong>TPs (Transformation Procedures)</strong> — the only way to modify CDIs, and <strong>IVPs (Integrity Verification Procedures)</strong>."},
+{h:"Chinese Wall Model (Brewer-Nash)",p:"Prevents <strong>conflicts of interest</strong>. Once a user accesses data for Company A, they are automatically barred from accessing data for any competing Company B in the same industry class. Restrictions build <em>dynamically</em> based on access history."},
+{h:"Access Control Policies",p:"<strong>DAC (Discretionary Access Control)</strong>: data owner decides access (e.g., Unix file permissions). <strong>MAC (Mandatory Access Control)</strong>: system-enforced via security labels; user cannot override. <strong>RBAC (Role-Based Access Control)</strong>: permissions assigned to roles; most common in modern enterprises."},
+{h:"Real-World Policy Issues",p:"Common challenges: <strong>granularity problem</strong>, <strong>policy conflicts</strong>, <strong>covert channels</strong>, <strong>administrative burden/human error</strong>, and <strong>security vs. usability tension</strong>. The Principle of Least Privilege (PoLP) mitigates many issues."}
+]},
+{id:"ch3",num:"3",title:"Hacking Techniques, Detection, and Response",sections:[
+{h:"Detection",p:"Key tools: <strong>IDS (Intrusion Detection Systems)</strong>; <strong>SIEM (Security Information and Event Management)</strong> platforms like <a href='https://www.splunk.com/' target='_blank'>Splunk</a>; <strong>EDR (Endpoint Detection and Response)</strong> like CrowdStrike Falcon; and <strong>honeypots</strong> (decoy systems)."},
+{h:"Incident Response",p:"The <a href='https://csrc.nist.gov/' target='_blank'>NIST SP 800-61</a> lifecycle: <strong>1) Preparation</strong>, <strong>2) Detection & Analysis</strong>, <strong>3) Containment, Eradication & Recovery</strong>, <strong>4) Post-Incident Activity (Lessons Learned)</strong>."},
+{h:"Reconnaissance",p:"<strong>Passive</strong>: OSINT (Open-Source Intelligence) — search engines, social media, public records. <strong>Active</strong>: directly probing the target (port scanning). <strong>Google dorking</strong>: advanced search operators to find exposed information."},
+{h:"Social Engineering",p:"Techniques: <strong>phishing</strong>, <strong>spear phishing</strong> (targeted), <strong>vishing</strong> (voice), <strong>smishing</strong> (SMS), <strong>pretexting</strong> (fake scenarios), <strong>baiting</strong> (malware USB drives). The 2020 Twitter hack used social engineering against employees."},
+{h:"Exploitation and Malware",p:"<strong>Log4Shell (CVE-2021-44228)</strong>: CVSS 10.0, affected millions of servers. Malware types: <strong>viruses</strong> (need user action), <strong>worms</strong> (self-replicate), <strong>trojans</strong> (disguised), <strong>ransomware</strong> (encrypts + demands payment), <strong>spyware</strong> (silent data collection), <strong>rootkits</strong> (OS-level hiding), <strong>botnets</strong> (DDoS networks)."},
+{h:"MitM and SQL Injection",p:"<strong>MitM (Man-in-the-Middle)</strong>: intercepts communications; defence is HTTPS/TLS. <strong>SQL Injection (SQLi)</strong>: malicious SQL in input fields; defence is parameterized queries and input validation."}
+]},
+{id:"ch4",num:"4",title:"Network Scanning, Attack Classification & Vulnerability Analysis",sections:[
+{h:"Network Scanning",p:"Systematic probing to discover hosts, ports, services, and OS versions. <strong>Ping sweep (ICMP)</strong>: find live hosts. <strong>Port scanning</strong>: up to 65,535 ports; open port = active service = potential entry. Key risky ports: 22 (SSH), 80/443 (HTTP/HTTPS), 3306 (MySQL), 3389 (RDP). <strong>SYN (half-open) scan</strong>: sends SYN, receives SYN-ACK but never completes handshake — stealthier. <strong>OS fingerprinting</strong> and <strong>version detection</strong> identify specific software for CVE cross-referencing."},
+{h:"Scanning Tools & Legal Framework",p:"Industry standard: <a href='https://nmap.org/' target='_blank'>Nmap</a>. Others: Masscan (high-speed), <a href='https://www.wireshark.org/' target='_blank'>Wireshark</a> (packet capture), <a href='https://www.shodan.io/' target='_blank'>Shodan</a> (internet device search). <strong>Scanning without written authorization is criminal</strong> under CFAA (Computer Fraud and Abuse Act, USA) and NIS2 Directive (EU)."},
+{h:"Attack Classification",p:"CIA Triad classification: confidentiality attacks (breaches, eavesdropping), integrity attacks (tampering, MitM), availability attacks (DDoS, ransomware). <strong>Passive</strong> vs. <strong>Active</strong> attacks."},
+{h:"MITRE ATT&CK & Cyber Kill Chain",p:"<a href='https://attack.mitre.org/' target='_blank'>MITRE ATT&CK</a>: 14 tactics from Reconnaissance to Impact. <strong>Cyber Kill Chain</strong> (Lockheed Martin): 7 stages — Reconnaissance → Weaponisation → Delivery → Exploitation → Installation → C2 → Actions on Objectives. Breaking the chain at any stage defeats the attack."},
+{h:"OWASP Top 10",p:"<a href='https://owasp.org/' target='_blank'>OWASP Top 10</a>: most critical web risks including SQLi, XSS (Cross-Site Scripting), CSRF (Cross-Site Request Forgery), and Broken Authentication."},
+{h:"Vulnerability Analysis & CVSS",p:"<strong>CVSS v3.1</strong> (<a href='https://first.org/cvss' target='_blank'>FIRST</a>): 0.0–10.0 scale. Low: 0.1–3.9, Medium: 4.0–6.9, High: 7.0–8.9, <strong>Critical: 9.0–10.0</strong>. Base metrics: exploitability (AV, AC, PR, UI) and impact (C, I, A, Scope). Max score recipe: AV=Network, AC=Low, PR=None, UI=None, all CIA=High."},
+{h:"Zero-Days & Vulnerability Databases",p:"<strong>Zero-day</strong>: unknown to vendor, no patch, zero days to prepare. Black-market value: $500K–$5M. Defences: anomaly monitoring, segmentation, rapid containment. Databases: <a href='https://nvd.nist.gov/' target='_blank'>NVD</a>, <a href='https://www.cve.org/' target='_blank'>CVE.org</a>. Finding methods: automated scanning (Nessus), penetration testing (Metasploit), bug bounties (HackerOne)."}
+]},
+{id:"ch5",num:"5",title:"Cyber Terrorism and Information Warfare",sections:[
+{h:"Definitions",p:"<strong>Cyber terrorism</strong>: premeditated disruptive digital activities intended to cause harm or further ideological/political objectives. Differs from cybercrime (financially motivated). <strong>Information warfare (IW)</strong>: use of ICT to gain competitive advantage; operates in three arenas: offensive, defensive, exploitative."},
+{h:"Critical Infrastructure & SCADA/ICS",p:"Encompasses energy, water, transport, healthcare, finance. <strong>SCADA (Supervisory Control and Data Acquisition)</strong> and <strong>ICS (Industrial Control Systems)</strong> control physical processes. <strong>Stuxnet</strong> (~2010): first malware causing physical destruction — targeted Iranian nuclear centrifuges via Siemens SCADA controllers."},
+{h:"APTs and State Actors",p:"APTs: <strong>advanced</strong> (custom malware, zero-days), <strong>persistent</strong> (months/years undetected), <strong>targeted</strong> (specific high-value orgs). SolarWinds/Sunburst (2020) exemplified APT supply chain tradecraft."},
+{h:"Disinformation & Deepfakes",p:"<strong>Disinformation</strong>: deliberately false content to deceive. <strong>Misinformation</strong>: unintentionally false. <strong>Malinformation</strong>: true info weaponised out of context. Campaigns: create false narratives → amplify via bots → exploit emotions → erode trust. <strong>Deepfakes</strong>: AI-generated realistic but fake audio/video."},
+{h:"Defence Strategies",p:"Defence-in-depth, <a href='https://www.nist.gov/cyberframework' target='_blank'>NIST CSF</a>, <a href='https://www.iso.org/' target='_blank'>ISO/IEC 27001</a>. Incident response lifecycle: Preparation → Detection → Containment → Eradication → Recovery → Lessons Learned."}
+]},
+{id:"ch6",num:"6",title:"Industrial Espionage in Cyberspace",sections:[
+{h:"Definition & Threat Actors",p:"Covert acquisition of trade secrets/IP using digital means. Strategic and long-term, unlike cybercrime. Three actor categories: <strong>nation-state actors</strong>, <strong>corporate competitors</strong>, and <strong>insider threats</strong>."},
+{h:"Attack Techniques",p:"<strong>Spear phishing</strong> (highly personalized), <strong>watering hole attacks</strong> (compromised industry websites), <strong>supply chain attacks</strong> (injecting malicious code into trusted software/hardware), <strong>zero-day exploits</strong>, and <strong>physical/TEMPEST attacks</strong> (intercepting electromagnetic emissions)."},
+{h:"Notable Cases",p:"<strong>Operation Night Dragon (2006–2011)</strong>: targeted oil/energy companies via spear phishing and RATs (Remote Access Trojans). <strong>Titan Rain (2003–2007)</strong>: state-sponsored intrusions targeting US defence contractors. <strong>Stuxnet</strong>: crossed from digital to physical realm."},
+{h:"Defences",p:"<strong>Technical</strong>: network segmentation, DLP (Data Loss Prevention), encryption, access controls, monitoring. <strong>Human/Process</strong>: security awareness training, background checks, NDAs, exit procedures. <strong>Intelligence-led</strong>: threat intelligence from <a href='https://attack.mitre.org/' target='_blank'>MITRE ATT&CK</a>."},
+{h:"Legal Landscape",p:"CFAA, EEA (Economic Espionage Act, 1996), <a href='https://gdpr.eu/' target='_blank'>GDPR</a>, NIS2 Directive. The <strong>attribution problem</strong>: conclusively proving responsibility for cyber espionage is technically and politically extremely difficult."}
+]}
+];
+
+// ═══════════════════════════════════════════════
+// CASE STUDY DATA
+// ═══════════════════════════════════════════════
+const cases=[
+{n:1,t:"The Unpatched Hospital Server",ch:"Ch 1 & 4",sc:"Regional General Hospital runs a patient records system on a server using an outdated web framework. Two months ago, a critical vulnerability (CVSS 9.8) was published along with a patch. The IT department has not applied the patch. An attacker discovers the server through a Shodan search, exploits the vulnerability, and exfiltrates 50,000 patient records.",qq:"Which elements of the CIA Triad were violated? What CVSS severity rating corresponds to 9.8? How could the hospital have prevented this breach?",ans:"The primary CIA violation is Confidentiality. A CVSS score of 9.8 is Critical (9.0–10.0), requiring immediate patching. Prevention: apply the patch promptly, conduct regular vulnerability scans, use network segmentation, and deploy IDS. This mirrors the 2017 Equifax breach."},
+{n:2,t:"The Phishing Campaign Against a University",ch:"Ch 1 & 3",sc:"Attackers send emails impersonating the IT helpdesk to 5,000 staff, warning accounts will be suspended in 24 hours unless they click a verification link on un1vers1ty-mail.com. Within 48 hours, 312 staff submit real credentials.",qq:"What type of attack is this? Identify the social engineering triggers. What defences should be implemented?",ans:"This is a phishing/credential harvesting attack. Triggers: urgency (24-hour deadline), authority (IT helpdesk impersonation), domain spoofing (un1vers1ty-mail.com). Defences: mandatory MFA, email filtering, security awareness training, DMARC/DKIM/SPF protocols, and a clear suspicious-email reporting channel."},
+{n:3,t:"The Disgruntled Database Administrator",ch:"Ch 1 & 2",sc:"A DBA passed over for promotion creates a hidden admin account, copies client financial records to USB, and modifies transaction records. Changes go undetected for three weeks.",qq:"Classify the threat actor. Which CIA properties were violated? Which security principles failed?",ans:"Insider threat (malicious). All three CIA properties violated: Confidentiality (exfiltration), Integrity (modified records), Availability (potential sabotage via hidden account). Failed principles: Separation of Duties, Least Privilege, inadequate auditing. Controls needed: DLP, tamper-proof audit logs, dual-authorization for admin accounts, USB restrictions, access reviews."},
+{n:4,t:"The Bell-LaPadula Violation",ch:"Ch 2",sc:"A Secret-cleared analyst writes a summary of Secret material and saves it to a Confidential-level shared folder so colleagues without Secret clearance can read it.",qq:"Which BLP rule was violated? Was data compromised? How should the system enforce this?",ans:"Violated the Star (*) Property (No Write Down). Yes, Secret information is now accessible to Confidential-level users. The system should enforce MAC (Mandatory Access Control), where the OS prevents writes below the user's level regardless of intent."},
+{n:5,t:"The WannaCry Outbreak at a Manufacturing Plant",ch:"Ch 1 & 4",sc:"A manufacturing plant's Windows control workstations are struck by WannaCry. The worm enters through one internet-exposed workstation and spreads across the flat, unsegmented network. All production systems are encrypted. No recent backups exist.",qq:"Map to the Cyber Kill Chain. Which CIA property was primarily targeted? What defensive failures allowed this?",ans:"Kill Chain: Recon (scanning for EternalBlue) → Delivery (network exploit) → Exploitation (EternalBlue flaw) → Installation (ransomware payload) → Actions (file encryption + ransom). Primary: Availability. Failures: unpatched systems (MS17-010 was available), flat unsegmented network, no offline backups, internet-exposed control workstations, no EDR."},
+{n:6,t:"The RBAC Misconfiguration",ch:"Ch 2",sc:"A startup grants all new developers the 'Admin' role to speed onboarding. Three months later, a junior developer accidentally deletes the production database.",qq:"What went wrong? Which principle was violated? How should RBAC be implemented?",ans:"Violation of Least Privilege (PoLP). The admin role gave excessive access. Proper RBAC: granular roles (Developer, QA, Admin), MFA for destructive operations, automated tested backups, periodic access reviews."},
+{n:7,t:"State-Sponsored Espionage Campaign",ch:"Ch 5 & 6",sc:"A defence contractor discovers an attacker maintained persistent access to R&D servers for 8 months. The attacker used a zero-day, custom malware evading antivirus, and exfiltrated terabytes of classified weapons designs.",qq:"Classify the threat actor. What makes this an APT? What are the legal/attribution challenges?",ans:"Nation-state APT conducting industrial espionage. APT characteristics: advanced (zero-day, custom malware), persistent (8 months), targeted (classified weapons data). Attribution problem: traffic routed through third countries, evidence can be spoofed. Laws: EEA, CFAA, but enforcement against foreign state actors is practically difficult."},
+{n:8,t:"SCADA Compromise at a Water Plant",ch:"Ch 5",sc:"Attackers access a water treatment SCADA system via spear-phished VPN credentials and modify chemical dosage to dangerous levels. An alert operator manually overrides before contaminated water reaches the public.",qq:"Which CIA properties targeted? Why are SCADA systems vulnerable? How does this relate to cyber terrorism?",ans:"Targeted: Integrity (parameters tampered) and Availability (safe operation disrupted). SCADA vulnerable because: designed without cybersecurity, legacy OS, often lack encryption/authentication, increasingly internet-connected. Meets cyber terrorism threshold: intent to cause public harm via critical infrastructure. Defences: MFA for remote access, IT/OT segmentation, anomaly detection, training."},
+{n:9,t:"The Chinese Wall Dilemma",ch:"Ch 2",sc:"A consulting firm assigns Consultant X — who has Bank A's vulnerability data — to also work on competitor Bank B's engagement.",qq:"Which model is violated? What's the risk? How should this be handled?",ans:"Violates the Chinese Wall (Brewer-Nash) Model. Risk: Bank A's vulnerabilities could influence the Bank B assessment. Solution: assign a different consultant with no Bank A access, implement system-level Chinese Wall controls, maintain access logs and conflict registers."},
+{n:10,t:"The Deepfake CEO Fraud",ch:"Ch 3 & 5",sc:"A finance employee receives a deepfake video call from someone appearing and sounding exactly like the CEO, instructing an urgent €2.3M wire transfer. The employee complies.",qq:"What type of attack is this? How do deepfakes escalate social engineering? What controls could prevent this?",ans:"Social engineering enhanced by deepfake technology (BEC/video impersonation). Deepfakes eliminate visual/auditory verification cues, making psychological pressure overwhelming. Controls: dual-authorization for transfers above threshold, callback verification via separately confirmed number, code words shared through different channels, deepfake-specific awareness training, AI detection tools."}
+];
+
+// ═══════════════════════════════════════════════
+// MCQ DATA (all 45)
+// ═══════════════════════════════════════════════
+const mcqs=[
+{q:"What does the 'C' in the CIA Triad stand for?",o:["Compliance","Confidentiality","Cryptography","Continuity"],a:1,ch:"Ch 1",e:"The CIA Triad comprises Confidentiality, Integrity, and Availability."},
+{q:"Which malware self-replicates across networks without user action?",o:["Virus","Trojan","Worm","Spyware"],a:2,ch:"Ch 3–4",e:"Worms propagate autonomously. Viruses require user interaction to spread."},
+{q:"The Bell-LaPadula Model primarily protects which property?",o:["Availability","Integrity","Confidentiality","Non-repudiation"],a:2,ch:"Ch 2",e:"BLP's No Read Up / No Write Down rules prevent unauthorized disclosure."},
+{q:"A CVSS score of 9.5 falls into which severity category?",o:["Low","Medium","High","Critical"],a:3,ch:"Ch 4",e:"CVSS 9.0–10.0 = Critical, requiring immediate patching."},
+{q:"Which technique sends a SYN packet but never completes the TCP handshake?",o:["Ping sweep","Full connect scan","SYN (half-open) scan","UDP scan"],a:2,ch:"Ch 4",e:"SYN scan: SYN → receives SYN-ACK → never sends ACK. Stealthier."},
+{q:"Which framework organizes adversary behaviour into 14 tactics?",o:["OWASP Top 10","NIST CSF","MITRE ATT&CK","ISO 27001"],a:2,ch:"Ch 4",e:"MITRE ATT&CK maps the full attacker journey from Recon to Impact."},
+{q:"What distinguishes cyber terrorism from cybercrime?",o:["Financial gain","Ideological/political goals","Academic curiosity","Personal revenge"],a:1,ch:"Ch 5",e:"Cyber terrorism aims to create fear or advance ideological objectives."},
+{q:"The Biba Star Axiom is commonly stated as:",o:["No Read Up","No Write Down","No Read Down","No Write Up"],a:3,ch:"Ch 2",e:"Biba's Star Axiom (No Write Up) preserves data trustworthiness."},
+{q:"Which access control lets the data owner decide who gets access?",o:["MAC","DAC","RBAC","ABAC"],a:1,ch:"Ch 2",e:"DAC gives resource owners discretion (e.g., Unix chmod)."},
+{q:"Stuxnet was the first malware to:",o:["Demand Bitcoin ransom","Spread via email","Cause physical destruction of industrial equipment","Exploit a browser zero-day"],a:2,ch:"Ch 5–6",e:"Stuxnet caused Iranian nuclear centrifuges to spin at destructive speeds."},
+{q:"In Risk = Threat × Vulnerability × Impact, eliminating which factor removes risk?",o:["Only Threat","Only Vulnerability","Only Impact","Any one of the three"],a:3,ch:"Ch 1",e:"If any single factor is zero, the product is zero."},
+{q:"MFA combines:",o:["Two passwords of different lengths","Two or more different authentication factors","A password with a security question","Two biometric methods"],a:1,ch:"Ch 1",e:"MFA requires factors from different categories (know, have, are)."},
+{q:"Maximum number of ports on a single host?",o:["1,024","16,384","49,151","65,535"],a:3,ch:"Ch 4",e:"TCP/UDP support port numbers 0–65,535."},
+{q:"SCADA stands for:",o:["Secure Control and Data Access","Supervisory Control and Data Acquisition","System Command and Data Architecture","Standard Cyber Attack Defence App"],a:1,ch:"Ch 5",e:"SCADA monitors and controls industrial processes remotely."},
+{q:"Which principle says systems should default to secure on failure?",o:["Defence in Depth","Fail Securely","Separation of Duties","Least Privilege"],a:1,ch:"Ch 1",e:"A crashed login system should lock users out, not let everyone in."},
+{q:"The 'avalanche effect' in hashing means:",o:["Hashes grow with input size","Small input change → drastically different hash","Multiple inputs share a hash","Hashes are reversible"],a:1,ch:"Ch 1",e:"Even one changed character produces a completely different hash output."},
+{q:"Which Cyber Kill Chain stage involves building the payload?",o:["Reconnaissance","Weaponisation","Delivery","Exploitation"],a:1,ch:"Ch 4",e:"Weaponisation (stage 2): attacker crafts the exploit before delivery."},
+{q:"Industrial espionage differs from cybercrime in its:",o:["Technical sophistication","Strategic long-term competitive goal","Use of malware","Targeting individuals"],a:1,ch:"Ch 6",e:"Industrial espionage targets trade secrets for competitive advantage."},
+{q:"In Clark-Wilson, data can only be modified through:",o:["Direct user commands","Any authenticated program","Certified Transformation Procedures (TPs)","Admin override"],a:2,ch:"Ch 2",e:"Clark-Wilson requires all modifications through audited, certified TPs."},
+{q:"Industry-standard network scanning tool?",o:["Wireshark","Nmap","Metasploit","Shodan"],a:1,ch:"Ch 4",e:"Nmap is the most widely used scanner and appears on certification exams."},
+{q:"The SolarWinds attack (2020) is classified as a:",o:["Phishing attack","DDoS attack","Supply chain attack","Brute-force attack"],a:2,ch:"Ch 1–5",e:"Attackers compromised SolarWinds' update mechanism for ~18,000 orgs."},
+{q:"Which NIST CSF function involves monitoring for security events?",o:["Identify","Protect","Detect","Respond"],a:2,ch:"Ch 1",e:"The Detect function covers continuous monitoring and anomaly detection."},
+{q:"An employee who deletes company files is classified as:",o:["External threat","Hacktivist","Insider threat","Script kiddie"],a:2,ch:"Ch 1",e:"Insider threats originate from people with legitimate access."},
+{q:"The Chinese Wall Model prevents:",o:["Unauthorized classified reading","Conflicts of interest","Data corruption","DDoS attacks"],a:1,ch:"Ch 2",e:"It dynamically restricts access to prevent conflict-of-interest scenarios."},
+{q:"Port 3389 is commonly associated with:",o:["SSH","HTTP","RDP (Remote Desktop Protocol)","MySQL"],a:2,ch:"Ch 4",e:"RDP on port 3389 provides full desktop access — a high-value target."},
+{q:"SQL Injection involves inserting malicious code into:",o:["Network packets","Web application input fields","Email headers","USB firmware"],a:1,ch:"Ch 4",e:"SQLi manipulates database queries through unsanitized web form input."},
+{q:"OSINT stands for:",o:["Operational Security Intelligence Network Testing","Open-Source Intelligence","Online Security Intrusion Notification Tool","Outsourced System Integration Testing"],a:1,ch:"Ch 3",e:"OSINT: intelligence from publicly available sources."},
+{q:"'Zero-day' means the vendor has had:",o:["Zero days since release","Zero days to develop a patch","Zero days to execute","Zero affected users"],a:1,ch:"Ch 4",e:"The vendor is unaware of the flaw and has had zero days to fix it."},
+{q:"Asymmetric encryption uses:",o:["A single shared key","A public key and private key pair","No keys","Three keys"],a:1,ch:"Ch 1",e:"Public key encrypts; only the matching private key decrypts."},
+{q:"The Equifax breach (2017) was caused by:",o:["A zero-day exploit","Failure to patch a known vulnerability","A physical break-in","A brute-force attack"],a:1,ch:"Ch 1",e:"Equifax failed to patch CVE-2017-5638 for two months before the breach."},
+{q:"DDoS stands for:",o:["Direct Denial of Service","Distributed Denial of Service","Dynamic Data Overwrite System","Destructive Denial of Software"],a:1,ch:"Ch 4",e:"DDoS floods a target from many distributed sources (often a botnet)."},
+{q:"Which organization maintains the CVE database?",o:["NIST","OWASP","MITRE Corporation","ISO"],a:2,ch:"Ch 4",e:"MITRE manages CVE.org, funded by CISA."},
+{q:"SHA-256 is an example of a:",o:["Symmetric encryption algorithm","Asymmetric encryption algorithm","Hashing algorithm","Compression algorithm"],a:2,ch:"Ch 1",e:"SHA-256 is a one-way hashing function producing a 64-character hex output."},
+{q:"A honeypot's primary goal is to:",o:["Encrypt network traffic","Attract attackers to a decoy for study","Block malware","Speed up networks"],a:1,ch:"Ch 3",e:"Honeypots are intentionally vulnerable decoy systems to study attackers."},
+{q:"In MAC, who controls access permissions?",o:["The data owner","Any authenticated user","The system via security labels","The most senior employee"],a:2,ch:"Ch 2",e:"MAC decisions are enforced by the system based on labels/clearance."},
+{q:"A watering hole attack works by:",o:["Flooding a server","Compromising a frequently visited website","Placing USB drives in parking lots","Sending fake SMS"],a:1,ch:"Ch 6",e:"Watering holes poison trusted websites the target group visits."},
+{q:"Which IR phase restores normal operations?",o:["Preparation","Detection & Analysis","Containment, Eradication & Recovery","Post-Incident Activity"],a:2,ch:"Ch 3",e:"Phase 3 covers containment, eradication, and recovery of operations."},
+{q:"Deepfakes primarily threaten:",o:["Network availability","Data encryption","Trust and integrity of information","Physical access control"],a:2,ch:"Ch 5",e:"Deepfakes erode trust by making authentic/fake content indistinguishable."},
+{q:"RBAC assigns permissions based on:",o:["User's clearance level","User's job role","User's location","Data sensitivity label"],a:1,ch:"Ch 2",e:"RBAC maps permissions to organizational roles (Accountant, Developer, etc.)."},
+{q:"The OWASP Top 10 ranks:",o:["Most expensive breaches","Most critical web app security risks","Best antivirus products","Fastest scanning tools"],a:1,ch:"Ch 4",e:"OWASP Top 10: community-maintained list of critical web vulnerabilities."},
+{q:"Passive reconnaissance uses only:",o:["Active probing","Publicly available information","Exploitation","Lateral movement"],a:1,ch:"Ch 3",e:"Passive recon gathers OSINT without contacting the target directly."},
+{q:"The EEA (1996) addresses:",o:["Online privacy","Theft of trade secrets","Social media regulation","Spam prevention"],a:1,ch:"Ch 6",e:"The EEA criminalizes trade secret theft, especially for foreign benefit."},
+{q:"AES-256 is an example of:",o:["Asymmetric encryption","Symmetric encryption","Hashing","Digital signatures"],a:1,ch:"Ch 1",e:"AES uses a single key for encryption and decryption (symmetric)."},
+{q:"CVSS metric AV=Network means:",o:["Attacker on same LAN","Attacker can exploit remotely over internet","Physical access required","Adjacent network required"],a:1,ch:"Ch 4",e:"AV=Network: exploitable from anywhere on the internet (highest risk)."},
+{q:"'Disinformation' is best described as:",o:["Accidentally incorrect info","True info shared out of context","Deliberately false info to deceive","Encrypted unreadable data"],a:2,ch:"Ch 5",e:"Disinformation is intentionally fabricated to mislead (vs. misinformation = accidental)."},
+];
+
+// ═══════════════════════════════════════════════
+// MSQ DATA (all 35)
+// ═══════════════════════════════════════════════
+const msqs=[
+{q:"Components of the CIA Triad?",o:["Confidentiality","Compliance","Integrity","Availability"],a:[0,2,3],ch:"Ch 1",e:"CIA = Confidentiality, Integrity, Availability. Compliance is separate."},
+{q:"Categories of threat actors?",o:["Script kiddies","Hacktivists","Firewalls","Nation-state actors (APTs)"],a:[0,1,3],ch:"Ch 1",e:"Firewalls are defensive technology, not a threat actor."},
+{q:"Properties of Bell-LaPadula?",o:["No Read Up (Simple Security)","No Write Down (Star Property)","No Read Down","Focuses on Confidentiality"],a:[0,1,3],ch:"Ch 2",e:"No Read Down belongs to Biba (integrity model)."},
+{q:"Authentication factors?",o:["Something you know","Something you have","Something you do","Something you are"],a:[0,1,3],ch:"Ch 1",e:"Three standard factors: knowledge, possession, inherence (biometrics)."},
+{q:"Tools used for network scanning?",o:["Nmap","Wireshark","Shodan","Metasploit"],a:[0,1,2],ch:"Ch 4",e:"Metasploit is primarily an exploitation framework, not a scanner."},
+{q:"Stages of the Cyber Kill Chain?",o:["Reconnaissance","Patch Management","Weaponisation","Exfiltration"],a:[0,2],ch:"Ch 4",e:"CKC has 7 stages. Patch Management and Exfiltration are not among them."},
+{q:"Ransomware violates which CIA properties?",o:["Confidentiality","Integrity","Availability","None"],a:[0,2],ch:"Ch 4",e:"Primarily Availability (encryption) + Confidentiality (data exfiltration in double extortion)."},
+{q:"Characteristics of an APT?",o:["Advanced custom tools & zero-days","Persists months/years","Targets specific orgs","Always financially motivated"],a:[0,1,2],ch:"Ch 5–6",e:"APTs are espionage/sabotage motivated, not financial."},
+{q:"Defences against zero-day vulnerabilities?",o:["Signature-based AV alone","Anomaly-based monitoring","Network segmentation","Rapid containment"],a:[1,2,3],ch:"Ch 4",e:"Zero-days have no known signature, so signature-only AV fails."},
+{q:"Components of Clark-Wilson Model?",o:["Military classified environments","Transformation Procedures (TPs)","Separation of Duties","Commercial business transactions"],a:[1,2,3],ch:"Ch 2",e:"Clark-Wilson = commercial integrity model. Military uses BLP."},
+{q:"Social engineering techniques?",o:["Phishing","Pretexting","Port scanning","Baiting"],a:[0,1,3],ch:"Ch 3–4",e:"Port scanning is technical reconnaissance, not social engineering."},
+{q:"CVSS exploitability metrics include?",o:["Attack Vector (AV)","Attack Complexity (AC)","Confidentiality Impact","Privileges Required (PR)"],a:[0,1,3],ch:"Ch 4",e:"Confidentiality Impact is an impact metric, not exploitability."},
+{q:"Types of malware?",o:["Rootkit","Botnet","Firewall","Trojan"],a:[0,1,3],ch:"Ch 3–4",e:"Firewalls are defensive tools, not malware."},
+{q:"Information warfare arenas?",o:["Offensive","Defensive","Exploitative","Legislative"],a:[0,1,2],ch:"Ch 5",e:"Three IW arenas: offensive, defensive, exploitative."},
+{q:"Vulnerability databases/scoring a professional should know?",o:["NVD","CVE.org","CVSS","OWASP Top 10"],a:[0,1,2,3],ch:"Ch 4",e:"All four are essential references for security professionals."},
+{q:"Attack techniques in industrial espionage?",o:["Spear phishing","Watering hole attacks","Supply chain compromise","Password spraying"],a:[0,1,2],ch:"Ch 6",e:"Password spraying is more associated with credential attacks."},
+{q:"Principles mitigating insider threats?",o:["Least Privilege (PoLP)","Separation of Duties (SoD)","Defence in Depth (DiD)","Security by Obscurity"],a:[0,1,2],ch:"Ch 1–2",e:"Security by Obscurity is not a reliable principle."},
+{q:"NIST CSF functions?",o:["Identify","Authenticate","Detect","Recover"],a:[0,2,3],ch:"Ch 1",e:"Five functions: Identify, Protect, Detect, Respond, Recover."},
+{q:"Factors in the WannaCry attack?",o:["EternalBlue exploitation","Unpatched Windows","Self-replicating worm","Phishing email campaign"],a:[0,1,2],ch:"Ch 1–4",e:"WannaCry did not rely on phishing for primary propagation."},
+{q:"True about SCADA security?",o:["Often run legacy OS","Designed with strong cybersecurity","Control critical physical infrastructure","Attacks can cause physical harm"],a:[0,2,3],ch:"Ch 5",e:"SCADA was NOT designed with cybersecurity in mind."},
+{q:"Effective phishing defences?",o:["MFA","Email filtering & DMARC/DKIM/SPF","Security awareness training","Disk encryption"],a:[0,1,2],ch:"Ch 1–3",e:"Disk encryption protects data at rest, not against credential theft."},
+{q:"MITRE ATT&CK tactics include?",o:["Initial Access","Lateral Movement","Patch Deployment","Exfiltration"],a:[0,1,3],ch:"Ch 4",e:"Patch Deployment is defensive, not an attacker tactic."},
+{q:"Access control models covered in the course?",o:["DAC","MAC","RBAC","NAC (Network Access Control)"],a:[0,1,2],ch:"Ch 2",e:"DAC, MAC, RBAC are the three core models. NAC is a network tool."},
+{q:"The attribution problem involves?",o:["Traffic routed through third countries","Digital evidence can be spoofed","Difficult to prove state sponsorship","Only a problem with insider threats"],a:[0,1,2],ch:"Ch 6",e:"Attribution is a challenge for all cyber operations, not just insiders."},
+{q:"Clark-Wilson components?",o:["CDIs (Constrained Data Items)","IVPs (Integrity Verification Procedures)","Security Labels & Clearance Levels","Transformation Procedures (TPs)"],a:[0,1,3],ch:"Ch 2",e:"Security labels/clearance levels are BLP/MAC concepts."},
+{q:"Defences against industrial espionage?",o:["DLP systems","Network segmentation","Threat intelligence","Publishing all source code"],a:[0,1,2],ch:"Ch 6",e:"Publishing source code would obviously undermine trade secret protection."},
+{q:"NIST SP 800-61 IR lifecycle phases?",o:["Preparation","Detection & Analysis","Containment, Eradication & Recovery","Marketing Communication"],a:[0,1,2],ch:"Ch 3",e:"The four phases. Marketing Communication is not one of them."},
+{q:"Disinformation campaigns employ?",o:["False narratives","Social media bots","Emotional triggers","Peer-reviewed research"],a:[0,1,2],ch:"Ch 5",e:"Disinformation does not go through peer review."},
+{q:"Real-world breaches in the course?",o:["Equifax (2017)","WannaCry (2017)","SolarWinds (2020)","Y2K Bug (2000)"],a:[0,1,2],ch:"Ch 1–5",e:"Y2K was a software problem, not a security breach."},
+{q:"Symmetric encryption properties?",o:["Single shared key","AES-256 is standard","Public/private key pair","Both parties hold same key"],a:[0,1,3],ch:"Ch 1",e:"Public/private key pair = asymmetric encryption."},
+{q:"High-risk target ports?",o:["Port 22 (SSH)","Port 80 (HTTP)","Port 3389 (RDP)","Port 3306 (MySQL)"],a:[0,1,2,3],ch:"Ch 4",e:"All four present security risks and are commonly targeted."},
+{q:"Phishing formula elements?",o:["Urgency","Authority (fake logos)","Spoofed domains","Physical lock picking"],a:[0,1,2],ch:"Ch 4",e:"Physical lock picking is not part of phishing."},
+{q:"Principle of Least Privilege?",o:["Minimum access only","Reduces damage from compromised accounts","Implemented via RBAC","All users get admin access"],a:[0,1,2],ch:"Ch 1–2",e:"Admin access for all is the exact opposite of PoLP."},
+{q:"Vulnerability finding methods?",o:["Automated scanning","Penetration testing","Bug bounties","Social media monitoring"],a:[0,1,2],ch:"Ch 4",e:"Three approaches: scanning, pen testing, bug bounties."},
+{q:"Biba Model rules?",o:["No Read Down","No Write Up","No Read Up","Protects integrity"],a:[0,1,3],ch:"Ch 2",e:"No Read Up is BLP (confidentiality), not Biba."},
+];
+
+// ═══════════════════════════════════════════════
+// ESSAY DATA (all 20)
+// ═══════════════════════════════════════════════
+const essays=[
+{q:"Explain the CIA Triad and provide one real-world example for each property where a breach violated that specific property.",ch:"Ch 1",a:"The CIA Triad represents Confidentiality, Integrity, and Availability. Confidentiality: the 2017 Equifax breach exposed 147 million records (unauthorized data access). Integrity: a MitM attack modifying bank transaction destination accounts compromises data accuracy. Availability: WannaCry ransomware encrypted 200,000+ systems, making them inaccessible and forcing hospitals to turn away patients. Understanding which property is targeted guides defence selection: encryption for confidentiality, hashing/signatures for integrity, redundancy/backups for availability."},
+{q:"Compare and contrast Bell-LaPadula and Biba. Why might an organization need both?",ch:"Ch 2",a:"BLP protects confidentiality (No Read Up, No Write Down). Biba protects integrity (No Read Down, No Write Up). Their rules operate in opposite directions. An organization needs both because real systems must protect both secrecy and trustworthiness simultaneously — a military database must keep information classified (BLP) while ensuring it hasn't been tampered with (Biba)."},
+{q:"Describe the seven Cyber Kill Chain stages. Why is early detection preferable?",ch:"Ch 4",a:"Seven stages: 1) Reconnaissance, 2) Weaponisation, 3) Delivery, 4) Exploitation, 5) Installation, 6) C2, 7) Actions on Objectives. Early detection is preferable because each successive stage increases damage and remediation cost. Blocking at reconnaissance costs almost nothing; reaching Actions on Objectives means data loss, regulatory fines, and expensive incident response. Breaking the chain at any point defeats the attack."},
+{q:"Explain zero-day vulnerabilities: why they're dangerous and what defences exist.",ch:"Ch 4",a:"A zero-day is unknown to the vendor — no patch exists. Dangerous because: signature-based defences are useless, exposure windows can last years, and they command $500K–$5M on the black market. Defences: anomaly-based behavioural monitoring (detects unusual activity without signatures), network segmentation (limits lateral spread), and rapid containment procedures (practised through IR drills)."},
+{q:"How does social engineering exploit human psychology? Give three techniques with defences.",ch:"Ch 3–4",a:"Social engineering targets human cognitive biases rather than technical flaws. 1) Phishing: creates urgency + authority impersonation → defence: MFA + awareness training. 2) Pretexting: fabricated scenarios (fake auditor) → defence: callback verification via separately known contact. 3) Baiting: malware USB drives → defence: disable auto-run, endpoint detection, user training."},
+{q:"What is Defence in Depth? Provide a five-layer example.",ch:"Ch 1",a:"DiD deploys multiple overlapping security layers so no single failure causes compromise. Example: 1) Perimeter firewall, 2) IDS/IPS, 3) Antivirus/EDR on endpoints, 4) Application-level security (input validation, authentication), 5) Encryption (TLS in transit, AES at rest). If each layer stops 70% of attacks, seven layers combined stop over 99.97%."},
+{q:"Compare DAC, MAC, and RBAC. Give a scenario for each.",ch:"Ch 2",a:"DAC: owner decides access (creative agency sharing project files flexibly). MAC: system-enforced via labels (military classified documents — no user override). RBAC: permissions mapped to roles (hospital — Nurse sees vitals, Doctor sees full history, Billing sees finances). RBAC scales best for enterprises."},
+{q:"Explain SCADA/ICS vulnerabilities and Stuxnet's significance.",ch:"Ch 5",a:"SCADA/ICS control physical infrastructure (power, water, manufacturing). Vulnerable because: designed without cybersecurity, legacy OS, often lack encryption/authentication, increasingly internet-connected. Stuxnet (~2010) was the first cyberweapon causing physical destruction — manipulated Iranian nuclear centrifuges via Siemens SCADA. Proved cyberattacks can cross from digital to physical, equivalent to kinetic military action."},
+{q:"Discuss the attribution problem in cyber operations.",ch:"Ch 6",a:"Attribution difficulty stems from: traffic routing through compromised third-country servers, VPNs/anonymization, spoofable digital fingerprints, and deliberate false flags. Implications: traditional deterrence requires knowing the adversary; uncertain attribution risks retaliating against the wrong party. International law frameworks designed for kinetic warfare struggle with digital evidence that is easily manipulated. This creates a grey zone exploited by states conducting operations with plausible deniability."},
+{q:"Explain CVSS and how a security team prioritises patching.",ch:"Ch 4",a:"CVSS v3.1 (FIRST) rates vulnerabilities 0.0–10.0 using exploitability metrics (AV, AC, PR, UI) and impact metrics (C, I, A, Scope). Critical (9.0+): patch immediately. High (7.0–8.9): urgent scheduling. Medium (4.0–6.9): regular cycle. Low (0.1–3.9): as resources permit. Teams scan environments, map vulnerabilities to CVE identifiers, look up CVSS scores in NVD, and patch in severity order."},
+{q:"Describe three industrial espionage methods and their effectiveness.",ch:"Ch 6",a:"1) Spear phishing: highly personalized emails referencing real projects — effective because they bypass generic warning signs. 2) Supply chain attacks: compromise trusted vendors (SolarWinds) — effective because targets willingly install trojanized updates from verified suppliers. 3) Insider recruitment: employees with legitimate access steal data gradually — effective because insiders know where valuable data resides and don't trigger external-attack alerts."},
+{q:"Explain misinformation vs. disinformation vs. malinformation with examples.",ch:"Ch 5",a:"Misinformation: false, shared without malicious intent (employee forwarding a fake security alert). Disinformation: deliberately fabricated to deceive (state-sponsored fake news via social media bots). Malinformation: true information weaponised out of context (leaking genuine internal emails before the company can fix the issue). Each requires different responses: fact-checking, bot detection, and operational security respectively."},
+{q:"Explain the NIST SP 800-61 incident response lifecycle. Why is 'Lessons Learned' critical?",ch:"Ch 3",a:"Four phases: 1) Preparation (build capability), 2) Detection & Analysis (identify/classify incidents), 3) Containment, Eradication & Recovery (isolate, remove threat, restore operations), 4) Post-Incident Activity (Lessons Learned). The Lessons Learned phase transforms incidents into organizational knowledge, feeding improvements back into Preparation. Without it, the same systemic weaknesses persist and similar incidents recur."},
+{q:"Explain the attack surface concept and five ways to reduce it.",ch:"Ch 1–4",a:"The attack surface is every point where an attacker could enter or extract data. Five reductions: 1) Close unnecessary ports/disable unused services, 2) Enforce Least Privilege on all accounts, 3) Keep software patched, 4) Remove default credentials, 5) Implement network segmentation. These reduce entry points, limit blast radius, and restrict lateral movement."},
+{q:"Discuss ethical and legal considerations of network scanning.",ch:"Ch 4",a:"Scanning is legal when authorized: sysadmins inventorying their own networks, security auditors under written contract, pen testers with signed scope of work. It's illegal without authorization under CFAA (USA) and NIS2 (EU). The key principle: written, scoped authorization before any scan. Ethically, security professionals must obtain consent because the purpose is protection, not exploitation."},
+{q:"Describe three malware types and their CIA Triad impacts.",ch:"Ch 3–4",a:"Ransomware: primarily Availability (encryption makes data inaccessible) + Confidentiality (double extortion exfiltrates data). Spyware: primarily Confidentiality (silently captures keystrokes, screenshots, credentials). Rootkits: all three — Confidentiality (accesses all data), Integrity (modifies system files, falsifies logs), Availability (can disable security tools). Different impacts require layered defences addressing all three properties."},
+{q:"Explain the Chinese Wall (Brewer-Nash) Model and how it differs from BLP.",ch:"Ch 2",a:"Chinese Wall prevents conflicts of interest: accessing Company A's data dynamically bars access to competitor Company B. Differs from BLP in that BLP uses static clearance levels (always fixed), while Chinese Wall restrictions are path-dependent (change based on access history). Most commonly applied in consulting, law, accounting, and investment banking firms serving competing clients."},
+{q:"Explain supply chain attacks, why they're hard to defend, and discuss SolarWinds.",ch:"Ch 5–6",a:"Supply chain attacks compromise trusted third-party vendors to reach the ultimate target. Hard to defend because they exploit established trust — targets willingly install updates from verified suppliers. SolarWinds (2020): attackers trojanized Orion's signed update, distributed to ~18,000 organizations including US government agencies, undetected for months. Defences: vendor security assessments, software composition analysis, segmentation, behavioural monitoring, zero-trust architecture."},
+{q:"Explain how the Clark-Wilson Model enforces integrity in commercial systems.",ch:"Ch 2",a:"Clark-Wilson uses well-formed transactions and separation of duties. CDIs (Constrained Data Items) are protected data. TPs (Transformation Procedures) are the only authorized way to modify CDIs. IVPs (Integrity Verification Procedures) verify data consistency. Users never touch data directly — they access it only through certified TPs. This ensures every modification follows auditable, authorized procedures."},
+{q:"Discuss how deepfakes escalate traditional social engineering threats.",ch:"Ch 3–5",a:"Deepfakes use AI to create realistic fake audio/video, eliminating the visual and auditory cues people rely on to verify identity. This escalates social engineering because: impersonation becomes virtually undetectable, authority and urgency triggers are amplified, and verification through 'seeing is believing' collapses. Defences: dual-authorization for critical actions, callback verification via separate channels, code words, deepfake-specific training, and AI detection tools."},
+];
+
+// ═══════════════════════════════════════════════
+// RENDER FUNCTIONS
+// ═══════════════════════════════════════════════
+function renderChapters(){
+  const c=document.getElementById('chapterContainer');
+  c.innerHTML=chapters.map(ch=>`
+    <div class="chapter" id="${ch.id}">
+      <div class="chapter-header" onclick="this.parentElement.classList.toggle('open')">
+        <div class="chapter-num">${ch.num}</div>
+        <div class="chapter-title">${ch.title}</div>
+        <div class="chapter-toggle">▾</div>
+      </div>
+      <div class="chapter-body"><div class="chapter-content">
+        ${ch.sections.map(s=>`<h3>${s.h}</h3><p>${s.p}</p>`).join('')}
+      </div></div>
+    </div>
+  `).join('');
+}
+
+function renderCases(){
+  const c=document.getElementById('caseContainer');
+  c.innerHTML=cases.map(cs=>`
+    <div class="case-study">
+      <div class="case-header" onclick="this.parentElement.classList.toggle('open')">
+        <div class="case-num">${cs.n}</div>
+        <div class="case-title">${cs.t}</div>
+        <div class="case-toggle">▾</div>
+      </div>
+      <div class="case-body"><div class="case-content">
+        <div class="tag">${cs.ch}</div>
+        <div class="label">Scenario</div>
+        <p class="scenario-text">${cs.sc}</p>
+        <div class="label">Questions</div>
+        <p class="question-text">${cs.qq}</p>
+        <div class="label">Suggested Answer</div>
+        <div class="answer-box"><p class="answer-text">${cs.ans}</p></div>
+      </div></div>
+    </div>
+  `).join('');
+}
+
+// MCQ rendering
+let mcqState = mcqs.map(()=>({answered:false,correct:false,selected:-1}));
+function renderMCQs(filter='all'){
+  const c=document.getElementById('mcqContainer');
+  c.innerHTML=mcqs.map((m,i)=>{
+    const s=mcqState[i];
+    if(filter==='unanswered'&&s.answered) return '';
+    if(filter==='wrong'&&(!s.answered||s.correct)) return '';
+    const letters='ABCD';
+    return `<div class="question-card ${s.answered?(s.correct?'answered-correct':'answered-wrong'):''}" id="mcq-${i}">
+      <div class="q-header">
+        <div class="q-num">Q${i+1}</div>
+        <div class="q-text">${m.q}</div>
+        <div class="q-chapter">${m.ch}</div>
+      </div>
+      <div class="q-options">
+        ${m.o.map((opt,j)=>{
+          let cls='q-option';
+          if(s.answered){
+            if(j===m.a) cls+=' correct';
+            else if(j===s.selected) cls+=' wrong';
+          } else if(s.selected===j) cls+=' selected';
+          return `<div class="${cls}" onclick="handleMCQ(${i},${j})">
+            <div class="q-option-letter">${letters[j]}</div>
+            <div class="q-option-text">${opt}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="q-feedback ${s.answered?'visible':''}">
+        <div class="q-answer-box ${s.correct?'correct-box':'wrong-box'}">
+          <div class="q-answer-label ${s.correct?'correct-label':'wrong-label'}">${s.correct?'✓ Correct':'✗ Incorrect — Answer: '+letters[m.a]}</div>
+          <div class="q-explanation">${m.e}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  updateScore('mcq');
+}
+
+function handleMCQ(qi,oi){
+  if(mcqState[qi].answered) return;
+  mcqState[qi].selected=oi;
+  mcqState[qi].answered=true;
+  mcqState[qi].correct=(oi===mcqs[qi].a);
+  renderMCQs(currentFilter.mcq);
+}
+
+// MSQ rendering
+let msqState = msqs.map(()=>({answered:false,correct:false,selected:new Set()}));
+function renderMSQs(filter='all'){
+  const c=document.getElementById('msqContainer');
+  c.innerHTML=msqs.map((m,i)=>{
+    const s=msqState[i];
+    if(filter==='unanswered'&&s.answered) return '';
+    if(filter==='wrong'&&(!s.answered||s.correct)) return '';
+    const letters='ABCD';
+    return `<div class="question-card ${s.answered?(s.correct?'answered-correct':'answered-wrong'):''}" id="msq-${i}">
+      <div class="q-header">
+        <div class="q-num">Q${i+1}</div>
+        <div class="q-text">${m.q}</div>
+        <div class="q-chapter">${m.ch}</div>
+      </div>
+      <div class="q-options">
+        ${m.o.map((opt,j)=>{
+          let cls='q-option';
+          if(s.answered){
+            if(m.a.includes(j)) cls+=' correct';
+            else if(s.selected.has(j)) cls+=' wrong';
+          } else if(s.selected.has(j)) cls+=' selected';
+          return `<div class="${cls}" onclick="handleMSQToggle(${i},${j})">
+            <div class="q-option-letter">${letters[j]}</div>
+            <div class="q-option-text">${opt}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      ${!s.answered?`<div style="padding:0 22px 12px;"><button class="quiz-btn" style="font-size:0.72rem;padding:6px 16px;" onclick="checkMSQ(${i})">Check Answer</button></div>`:''}
+      <div class="q-feedback ${s.answered?'visible':''}">
+        <div class="q-answer-box ${s.correct?'correct-box':'wrong-box'}">
+          <div class="q-answer-label ${s.correct?'correct-label':'wrong-label'}">${s.correct?'✓ Correct':'✗ Incorrect — Answers: '+m.a.map(x=>letters[x]).join(', ')}</div>
+          <div class="q-explanation">${m.e}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  updateScore('msq');
+}
+
+function handleMSQToggle(qi,oi){
+  if(msqState[qi].answered) return;
+  const s=msqState[qi].selected;
+  if(s.has(oi)) s.delete(oi); else s.add(oi);
+  renderMSQs(currentFilter.msq);
+}
+function checkMSQ(qi){
+  const s=msqState[qi];
+  s.answered=true;
+  const correct=msqs[qi].a;
+  s.correct=(s.selected.size===correct.length && correct.every(x=>s.selected.has(x)));
+  renderMSQs(currentFilter.msq);
+}
+
+function renderEssays(){
+  const c=document.getElementById('essayContainer');
+  c.innerHTML=essays.map((e,i)=>`
+    <div class="essay-card">
+      <div class="essay-header" onclick="this.parentElement.classList.toggle('open')">
+        <div class="essay-num">${i+1}</div>
+        <div class="essay-title">${e.q}</div>
+        <div class="essay-ch">${e.ch}</div>
+        <div class="essay-toggle">▾</div>
+      </div>
+      <div class="essay-body"><div class="essay-content">
+        <div class="essay-answer-label">Suggested Answer</div>
+        <div class="essay-answer">${e.a}</div>
+      </div></div>
+    </div>
+  `).join('');
+}
+
+// Score updates
+function updateScore(type){
+  const state = type==='mcq'?mcqState:msqState;
+  const correct = state.filter(s=>s.correct).length;
+  document.getElementById(type+'Score').textContent=correct;
+}
+
+// Filter and reset
+let currentFilter={mcq:'all',msq:'all'};
+function filterQuiz(type,filter,btn){
+  currentFilter[type]=filter;
+  const parent=btn.parentElement;
+  parent.querySelectorAll('.quiz-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(type==='mcq') renderMCQs(filter);
+  else renderMSQs(filter);
+}
+function resetQuiz(type){
+  if(type==='mcq'){
+    mcqState=mcqs.map(()=>({answered:false,correct:false,selected:-1}));
+    currentFilter.mcq='all';
+    renderMCQs('all');
+  } else {
+    msqState=msqs.map(()=>({answered:false,correct:false,selected:new Set()}));
+    currentFilter.msq='all';
+    renderMSQs('all');
+  }
+  // Reset filter button states
+  document.querySelectorAll(`#${type==='mcq'?'mcq':'msq'}Container`).forEach(c=>{
+    const controls=c.previousElementSibling;
+  });
+}
+
+// ═══════════════════════════════════════════════
+// NAVIGATION & PROGRESS
+// ═══════════════════════════════════════════════
+function initNav(){
+  document.querySelectorAll('.nav-link').forEach(link=>{
+    link.addEventListener('click',()=>{
+      const target=link.dataset.target;
+      const el=document.getElementById(target);
+      if(el){
+        el.scrollIntoView({behavior:'smooth',block:'start'});
+        // Open chapter if applicable
+        if(el.classList.contains('chapter')&&!el.classList.contains('open')){
+          el.classList.add('open');
+        }
+      }
+      // Close sidebar on mobile
+      if(window.innerWidth<=900) document.querySelector('.sidebar').classList.remove('open');
+    });
+  });
+}
+
+function updateProgress(){
+  const scrollTop=window.scrollY;
+  const docHeight=document.documentElement.scrollHeight-window.innerHeight;
+  const pct=Math.min(100,Math.round((scrollTop/docHeight)*100));
+  document.getElementById('progressFill').style.width=pct+'%';
+  document.getElementById('progressPct').textContent=pct;
+
+  // Back to top
+  const btn=document.getElementById('backToTop');
+  if(scrollTop>600) btn.classList.add('visible');
+  else btn.classList.remove('visible');
+
+  // Active nav link (simple approach)
+  const sections=['ch1','ch2','ch3','ch4','ch5','ch6','cases','mcq','msq','essays'];
+  let activeId='';
+  for(const id of sections){
+    const el=document.getElementById(id);
+    if(el&&el.getBoundingClientRect().top<200) activeId=id;
+  }
+  document.querySelectorAll('.nav-link').forEach(l=>{
+    l.classList.toggle('active',l.dataset.target===activeId);
+  });
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  renderChapters();
+  renderCases();
+  renderMCQs();
+  renderMSQs();
+  renderEssays();
+  initNav();
+  window.addEventListener('scroll',updateProgress,{passive:true});
+  updateProgress();
+  // Open first chapter by default
+  document.querySelector('.chapter')?.classList.add('open');
+});
+
+</script>
+</body>
+</html>
