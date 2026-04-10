@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 09: Security Domains & Technologies</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #fdfbf7; color: #2d3748; }
+        .chart-container { position: relative; width: 100%; max-width: 400px; margin-left: auto; margin-right: auto; height: 300px; max-height: 350px; }
+        .osi-layer { transition: all 0.3s ease; }
+        .osi-layer:hover { transform: translateX(10px); background-color: #e2e8f0; cursor: pointer; }
+        .nav-active { background-color: #8c6b5d; color: #ffffff; font-weight: 600; }
+        .nav-inactive { color: #4a5568; }
+        .nav-inactive:hover { background-color: #e2e8f0; }
+        .malware-card { transition: all 0.3s ease; }
+        .malware-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #fdfbf7; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="h-screen flex overflow-hidden">
+
+    <!-- Chosen Palette: Warm Neutrals & Slate (Background: #fdfbf7, Text: #2d3748, Primary Accent: #8c6b5d, Secondary/Danger: #b95d5d) -->
+    <!-- Application Structure Plan: A Dashboard/Module approach prioritizing task completion. The syllabus is transformed into an interactive learning portal with a sidebar navigation mapping to the assignment parts (Intro, Part A, Part B, Part C, Checklist). This structure was chosen because educational rubrics and assignment briefs are best consumed in bite-sized, trackable chunks rather than a wall of text. Interactive checklists and visual progress indicators keep the student engaged. -->
+    <!-- Visualization & Content Choices: 1. Grading Weights -> Goal: Inform -> Viz: Donut Chart -> Interaction: Hover tooltips -> Justification: Shows relative workload clearly -> Method: Chart.js. 2. Malware Families -> Goal: Organize -> Viz: Interactive Card Grid -> Interaction: Click to reveal details -> Justification: Makes definitions easily digestible -> Method: HTML/Tailwind/JS. 3. OSI Model -> Goal: Organize/Relationships -> Viz: Vertical Stack Diagram -> Interaction: Click for attack details -> Justification: Reinforces the layered concept of network architecture -> Method: HTML/Tailwind Flexbox. Confirming NO SVG/Mermaid used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col justify-between hidden md:flex z-20 shadow-sm">
+        <div class="p-6">
+            <h1 class="text-xl font-bold tracking-tight text-gray-900 leading-tight mb-2">Security Domains &amp; Tech</h1>
+            <p class="text-xs text-gray-500 font-medium uppercase tracking-wider mb-8">Week 09 &middot; Part III</p>
+            
+            <nav class="space-y-2" id="sidebar-nav">
+                <button data-target="view-intro" class="nav-btn w-full text-left px-4 py-2.5 rounded-lg transition-colors nav-active">
+                    <span class="mr-2">🏠</span> Introduction
+                </button>
+                <button data-target="view-part-a" class="nav-btn w-full text-left px-4 py-2.5 rounded-lg transition-colors nav-inactive">
+                    <span class="mr-2">💻</span> Part A: OS &amp; Malware
+                </button>
+                <button data-target="view-part-b" class="nav-btn w-full text-left px-4 py-2.5 rounded-lg transition-colors nav-inactive">
+                    <span class="mr-2">🌐</span> Part B: Network &amp; Web
+                </button>
+                <button data-target="view-part-c" class="nav-btn w-full text-left px-4 py-2.5 rounded-lg transition-colors nav-inactive">
+                    <span class="mr-2">📝</span> Part C: Synthesis
+                </button>
+                <button data-target="view-checklist" class="nav-btn w-full text-left px-4 py-2.5 rounded-lg transition-colors nav-inactive">
+                    <span class="mr-2">✅</span> Final Checklist
+                </button>
+            </nav>
+        </div>
+        <div class="p-6 border-t border-gray-100 bg-gray-50">
+            <p class="text-xs font-semibold text-gray-600 mb-2">Project Progress</p>
+            <div class="w-full bg-gray-200 rounded-full h-2 mb-1">
+                <div id="progress-bar" class="bg-[#8c6b5d] h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <p class="text-xs text-right text-gray-500"><span id="progress-text">0</span>%</p>
+        </div>
+    </aside>
+
+    <div class="md:hidden bg-white border-b border-gray-200 p-4 flex justify-between items-center fixed top-0 w-full z-30">
+        <h1 class="text-lg font-bold">Week 09 Project</h1>
+        <select id="mobile-nav" class="bg-gray-100 border-none rounded p-2 text-sm">
+            <option value="view-intro">Introduction</option>
+            <option value="view-part-a">Part A: OS & Malware</option>
+            <option value="view-part-b">Part B: Network & Web</option>
+            <option value="view-part-c">Part C: Synthesis</option>
+            <option value="view-checklist">Final Checklist</option>
+        </select>
+    </div>
+
+    <main class="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-12 mt-16 md:mt-0 relative">
+        <div class="max-w-5xl mx-auto">
+
+            <section id="view-intro" class="view-section block animate-fade-in">
+                <div class="mb-10">
+                    <h2 class="text-3xl font-extrabold text-gray-900 mb-4">Course Project Context</h2>
+                    <p class="text-lg text-gray-600 leading-relaxed">This weekly assignment is an instalment of your Continuous Course Project. By the end of the course, collected reports will form a single, cohesive security portfolio for your Final Assessment.</p>
+                </div>
+
+                <div class="bg-[#fef2f2] border-l-4 border-[#b95d5d] p-6 rounded-r-lg mb-10 shadow-sm">
+                    <h3 class="text-[#991b1b] font-bold text-lg mb-2 flex items-center">
+                        <span class="mr-2 text-xl">⚠️</span> Legal &amp; Ethical Disclaimer
+                    </h3>
+                    <p class="text-[#7f1d1d] text-sm leading-relaxed mb-3">
+                        The tools and methods introduced here are for use in a <strong>controlled, legal environment only</strong>. You must only perform these exercises on systems you own outright or hold explicit written authorisation for.
+                    </p>
+                    <p class="text-[#7f1d1d] text-sm leading-relaxed font-semibold">
+                        The instructor and institution bear no responsibility for any misuse.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <h3 class="text-xl font-bold mb-4">Grading Weight Distribution</h3>
+                        <p class="text-sm text-gray-500 mb-6">Allocate your time based on the unit weightings (Total 4 units / ~6 hours).</p>
+                        <div class="chart-container">
+                            <canvas id="gradingChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-center">
+                        <h3 class="text-xl font-bold mb-4">Learning Objectives</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start">
+                                <span class="text-[#8c6b5d] mr-3 mt-1">🎯</span>
+                                <span class="text-sm text-gray-700">Identify common OS attack surfaces and how malware exploits them.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-[#8c6b5d] mr-3 mt-1">🎯</span>
+                                <span class="text-sm text-gray-700">Classify malware families and describe their lifecycle.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-[#8c6b5d] mr-3 mt-1">🎯</span>
+                                <span class="text-sm text-gray-700">Explain layered network/web security architecture.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-[#8c6b5d] mr-3 mt-1">🎯</span>
+                                <span class="text-sm text-gray-700">Perform basic, legal, hands-on recon and vulnerability assessment.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-[#8c6b5d] mr-3 mt-1">🎯</span>
+                                <span class="text-sm text-gray-700">Document findings in a structured, professional report.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-part-a" class="view-section hidden animate-fade-in">
+                <div class="mb-8 border-b border-gray-200 pb-6">
+                    <div class="flex justify-between items-end">
+                        <div>
+                            <h2 class="text-3xl font-extrabold text-gray-900 mb-2">Part A: OS Security &amp; Malware</h2>
+                            <p class="text-gray-500 font-medium">Weight: 1 Unit &middot; Estimated time: ~1.5 hours</p>
+                        </div>
+                        <div class="text-4xl">💻</div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+                    <p class="text-gray-700 leading-relaxed mb-6">
+                        The OS mediates every interaction between user, applications, and hardware, making it the prime target for attackers. <strong>Malware</strong> is any software written with malicious intent, varying by delivery method, persistence, and payload. Explore the families below.
+                    </p>
+
+                    <h3 class="text-lg font-bold mb-4">Key Malware Families Map</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="malware-grid">
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-white rounded-xl shadow-sm border border-l-4 border-l-[#8c6b5d] p-6 relative">
+                        <label class="absolute top-4 right-4 flex items-center cursor-pointer">
+                            <input type="checkbox" class="task-check w-5 h-5 text-[#8c6b5d] rounded border-gray-300 focus:ring-[#8c6b5d]">
+                            <span class="ml-2 text-sm text-gray-500 font-bold uppercase tracking-wide">Mark Done</span>
+                        </label>
+                        <h3 class="text-xl font-bold mb-2">Step A-1: Audit OS Baseline</h3>
+                        <p class="text-sm text-gray-500 mb-4">Understand what "normal" looks like.</p>
+                        <div class="bg-gray-50 p-4 rounded-lg text-sm font-mono text-gray-800 mb-4 overflow-x-auto">
+                            <p class="text-xs text-gray-500 mb-1"># Action items on your local VM/Machine:</p>
+                            <p>1. List processes (ps aux / Get-Process)</p>
+                            <p>2. List autostart services (systemctl / Get-Service)</p>
+                            <p>3. List active network connections (netstat)</p>
+                            <p>4. Check scheduled tasks (crontab / Get-ScheduledTask)</p>
+                        </div>
+                        <div class="bg-[#fdfbf7] border border-[#e2d5c8] p-4 rounded-md">
+                            <h4 class="font-bold text-[#8c6b5d] text-sm mb-1">Deliverable A-1</h4>
+                            <p class="text-sm text-gray-700">Annotated table (≤10 rows) of notable entries. For each, write one sentence explaining its function and potential concern.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border border-l-4 border-l-[#8c6b5d] p-6 relative">
+                        <label class="absolute top-4 right-4 flex items-center cursor-pointer">
+                            <input type="checkbox" class="task-check w-5 h-5 text-[#8c6b5d] rounded border-gray-300 focus:ring-[#8c6b5d]">
+                            <span class="ml-2 text-sm text-gray-500 font-bold uppercase tracking-wide">Mark Done</span>
+                        </label>
+                        <h3 class="text-xl font-bold mb-2">Step A-2: Static Malware Analysis</h3>
+                        <p class="text-sm text-gray-500 mb-4">Examine a safe sample without execution.</p>
+                        <div class="bg-gray-50 p-4 rounded-lg text-sm text-gray-800 mb-4">
+                            <ul class="list-disc pl-5 space-y-2">
+                                <li>Obtain a benign sample from MalwareBazaar or EICAR.</li>
+                                <li>Compute the hash (sha256sum / Get-FileHash).</li>
+                                <li>Submit hash to VirusTotal.</li>
+                                <li>Examine strings for URLs, paths, keys.</li>
+                                <li>Check file headers.</li>
+                            </ul>
+                        </div>
+                        <div class="bg-[#fdfbf7] border border-[#e2d5c8] p-4 rounded-md">
+                            <h4 class="font-bold text-[#8c6b5d] text-sm mb-1">Deliverable A-2</h4>
+                            <p class="text-sm text-gray-700">One paragraph describing hash, VirusTotal score, interesting strings, and inferred behaviour. Attach one VT screenshot.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-part-b" class="view-section hidden animate-fade-in">
+                <div class="mb-8 border-b border-gray-200 pb-6">
+                    <div class="flex justify-between items-end">
+                        <div>
+                            <h2 class="text-3xl font-extrabold text-gray-900 mb-2">Part B: Network &amp; Web Security</h2>
+                            <p class="text-gray-500 font-medium">Weight: 2 Units &middot; Estimated time: ~3 hours</p>
+                        </div>
+                        <div class="text-4xl">🌐</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
+                    <div class="lg:col-span-7 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            Networks are the primary channel for attackers. The <strong>OSI Model</strong> provides a framework for understanding data flow and potential attack vectors at every level.
+                        </p>
+                        <h3 class="text-lg font-bold mb-4">Interactive OSI Model Reference</h3>
+                        <p class="text-xs text-gray-500 mb-4">Click a layer to reveal example attack vectors.</p>
+                        <div id="osi-stack" class="flex flex-col-reverse rounded-lg overflow-hidden border border-gray-200">
+                        </div>
+                    </div>
+                    
+                    <div class="lg:col-span-5">
+                        <div id="osi-detail-panel" class="bg-[#f8fafc] border border-gray-200 rounded-xl p-6 h-full flex flex-col justify-center text-center shadow-inner">
+                            <div class="text-4xl mb-4 text-gray-300">🔍</div>
+                            <h4 class="text-lg font-bold text-gray-800 mb-2">Layer Details</h4>
+                            <p class="text-gray-500 text-sm">Select a layer from the stack to see associated attack examples.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-white rounded-xl shadow-sm border border-l-4 border-l-[#8c6b5d] p-6 relative">
+                        <label class="absolute top-4 right-4 flex items-center cursor-pointer">
+                            <input type="checkbox" class="task-check w-5 h-5 text-[#8c6b5d] rounded border-gray-300 focus:ring-[#8c6b5d]">
+                            <span class="ml-2 text-sm text-gray-500 font-bold uppercase tracking-wide">Mark Done</span>
+                        </label>
+                        <h3 class="text-xl font-bold mb-2">Step B-1: Network Reconnaissance</h3>
+                        <p class="text-sm text-gray-500 mb-4">Run against localhost/isolated VM only.</p>
+                        <div class="bg-gray-50 p-4 rounded-lg text-sm text-gray-800 mb-4">
+                            <p class="font-mono bg-white border border-gray-200 p-2 rounded block mb-2">nmap -sV -O -T4 127.0.0.1</p>
+                            <p class="mb-2">Capture live HTTP traffic with Wireshark (optional/advanced).</p>
+                            <p>Check firewall rules (iptables or netsh).</p>
+                        </div>
+                        <div class="bg-[#fdfbf7] border border-[#e2d5c8] p-4 rounded-md">
+                            <h4 class="font-bold text-[#8c6b5d] text-sm mb-1">Deliverable B-1</h4>
+                            <p class="text-sm text-gray-700">Table of open ports, detected services, versions, and a 1-sentence risk commentary per port. Add Wireshark screenshot if applicable.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border border-l-4 border-l-[#8c6b5d] p-6 relative">
+                        <label class="absolute top-4 right-4 flex items-center cursor-pointer">
+                            <input type="checkbox" class="task-check w-5 h-5 text-[#8c6b5d] rounded border-gray-300 focus:ring-[#8c6b5d]">
+                            <span class="ml-2 text-sm text-gray-500 font-bold uppercase tracking-wide">Mark Done</span>
+                        </label>
+                        <h3 class="text-xl font-bold mb-2">Step B-2: Web App Vulnerability Analysis</h3>
+                        <p class="text-sm text-gray-500 mb-4">Test on DVWA, WebGoat, or Juice Shop only.</p>
+                        <div class="bg-gray-50 p-4 rounded-lg text-sm text-gray-800 mb-4">
+                            <ul class="list-disc pl-5 space-y-2">
+                                <li>Review OWASP Top 10 and pick two categories.</li>
+                                <li>Demonstrate SQL Injection (e.g., <code class="bg-gray-200 px-1 rounded">' OR '1'='1</code>).</li>
+                                <li>Demonstrate Reflected XSS.</li>
+                                <li>Review HTTP Security Headers (CSP, HSTS, X-Frame-Options) via Browser DevTools.</li>
+                            </ul>
+                        </div>
+                        <div class="bg-[#fdfbf7] border border-[#e2d5c8] p-4 rounded-md">
+                            <h4 class="font-bold text-[#8c6b5d] text-sm mb-1">Deliverable B-2</h4>
+                            <p class="text-sm text-gray-700">(a) Paragraph on SQLi payload/result, (b) XSS proof screenshot, (c) Table of HTTP headers present/absent with risk explanation.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border border-l-4 border-l-[#8c6b5d] p-6 relative">
+                        <label class="absolute top-4 right-4 flex items-center cursor-pointer">
+                            <input type="checkbox" class="task-check w-5 h-5 text-[#8c6b5d] rounded border-gray-300 focus:ring-[#8c6b5d]">
+                            <span class="ml-2 text-sm text-gray-500 font-bold uppercase tracking-wide">Mark Done</span>
+                        </label>
+                        <h3 class="text-xl font-bold mb-2">Step B-3: Propose Mitigations</h3>
+                        <div class="bg-[#fdfbf7] border border-[#e2d5c8] p-4 rounded-md mt-4">
+                            <h4 class="font-bold text-[#8c6b5d] text-sm mb-1">Deliverable B-3</h4>
+                            <p class="text-sm text-gray-700">For each vulnerability from B-2, write 4-6 sentences detailing: Root Cause &rarr; Technical Fix &rarr; Supported Standard.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-part-c" class="view-section hidden animate-fade-in">
+                <div class="mb-8 border-b border-gray-200 pb-6">
+                    <div class="flex justify-between items-end">
+                        <div>
+                            <h2 class="text-3xl font-extrabold text-gray-900 mb-2">Part C: Synthesis &amp; Report</h2>
+                            <p class="text-gray-500 font-medium">Weight: 1 Unit &middot; Estimated time: ~1.5 hours</p>
+                        </div>
+                        <div class="text-4xl">📝</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl shadow-sm border border-l-4 border-l-[#8c6b5d] p-6 relative">
+                        <label class="absolute top-4 right-4 flex items-center cursor-pointer">
+                            <input type="checkbox" class="task-check w-5 h-5 text-[#8c6b5d] rounded border-gray-300 focus:ring-[#8c6b5d]">
+                            <span class="ml-2 text-sm text-gray-500 font-bold uppercase tracking-wide">Done</span>
+                        </label>
+                        <h3 class="text-lg font-bold mb-2">Step C-1: The Bigger Picture</h3>
+                        <p class="text-sm text-gray-600 mb-4">Connect this week's findings to previous weeks. How do OS vulnerabilities relate to Part I attacks? What patterns emerge?</p>
+                        <div class="bg-[#fdfbf7] border border-[#e2d5c8] p-4 rounded-md">
+                            <h4 class="font-bold text-[#8c6b5d] text-sm mb-1">Deliverable C-1</h4>
+                            <p class="text-sm text-gray-700">One paragraph (6-8 sentences) answering the synthesis questions.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border border-l-4 border-l-[#8c6b5d] p-6 relative">
+                        <label class="absolute top-4 right-4 flex items-center cursor-pointer">
+                            <input type="checkbox" class="task-check w-5 h-5 text-[#8c6b5d] rounded border-gray-300 focus:ring-[#8c6b5d]">
+                            <span class="ml-2 text-sm text-gray-500 font-bold uppercase tracking-wide">Done</span>
+                        </label>
+                        <h3 class="text-lg font-bold mb-2">Step C-2: Assemble Report</h3>
+                        <p class="text-sm text-gray-600 mb-4">Max 4 A4 pages. Title block, Intro, Parts A/B/C findings, Conclusion, and References. Proofread carefully.</p>
+                    </div>
+                    
+                    <div class="bg-[#f8fafc] rounded-xl shadow-sm border border-dashed border-gray-300 p-6 md:col-span-2">
+                        <h3 class="text-lg font-bold mb-2 text-gray-700">Step C-3: Peer Challenge (Optional Extra Credit)</h3>
+                        <p class="text-sm text-gray-600">Exchange reports. Write a one-paragraph rebuttal or extension arguing mitigations or suggesting new attack vectors. Attach as an appendix.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-checklist" class="view-section hidden animate-fade-in">
+                <div class="mb-8 border-b border-gray-200 pb-6">
+                    <h2 class="text-3xl font-extrabold text-gray-900 mb-2">Submission Checklist</h2>
+                    <p class="text-gray-500 font-medium">Verify all items before submitting your final PDF/DOCX.</p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div class="space-y-4" id="final-checklist">
+                    </div>
+                </div>
+            </section>
+
+        </div>
+        
+        <footer class="mt-20 pt-6 border-t border-gray-200 text-center pb-8">
+            <p class="text-xs text-gray-400">Intro to Computer Security &mdash; Continuous Project &middot; Part III</p>
+        </footer>
+    </main>
+
+    <script>
+        const appState = {
+            currentView: 'view-intro',
+            tasksTotal: 6,
+            tasksCompleted: 0
+        };
+
+        const initNav = () => {
+            const btns = document.querySelectorAll('.nav-btn');
+            const sections = document.querySelectorAll('.view-section');
+            const mobileNav = document.getElementById('mobile-nav');
+
+            const switchView = (targetId) => {
+                sections.forEach(sec => sec.classList.add('hidden'));
+                document.getElementById(targetId).classList.remove('hidden');
+
+                btns.forEach(btn => {
+                    if(btn.dataset.target === targetId) {
+                        btn.classList.replace('nav-inactive', 'nav-active');
+                    } else {
+                        btn.classList.replace('nav-active', 'nav-inactive');
+                    }
+                });
+                
+                if (mobileNav.value !== targetId) {
+                    mobileNav.value = targetId;
+                }
+                
+                appState.currentView = targetId;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            btns.forEach(btn => {
+                btn.addEventListener('click', () => switchView(btn.dataset.target));
+            });
+            
+            mobileNav.addEventListener('change', (e) => switchView(e.target.value));
+        };
+
+        const initChart = () => {
+            const ctx = document.getElementById('gradingChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Part A (OS/Malware)', 'Part B (Network/Web)', 'Part C (Synthesis)'],
+                    datasets: [{
+                        data: [1, 2, 1],
+                        backgroundColor: ['#b95d5d', '#4a5568', '#8c6b5d'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { family: 'Inter' } } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.label}: ${context.raw} Unit(s)`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+        };
+
+        const renderMalwareGrid = () => {
+            const malwareData = [
+                { name: "Virus", desc: "Attaches to a legitimate file; spreads when that file executes.", ex: "80s boot-sector", icon: "🦠" },
+                { name: "Worm", desc: "Self-replicates across networks without needing a host file.", ex: "WannaCry (2017)", icon: "🪱" },
+                { name: "Trojan", desc: "Disguises itself as benign software.", ex: "RATs", icon: "🐴" },
+                { name: "Ransomware", desc: "Encrypts victim data and demands payment for the decryption key.", ex: "LockBit", icon: "🔒" },
+                { name: "Spyware", desc: "Silently records and exfiltrates user activity.", ex: "Keyloggers", icon: "👁️" },
+                { name: "Rootkit", desc: "Conceals itself and other malware at the OS kernel level.", ex: "Necurs", icon: "🥷" },
+                { name: "Botnet Agent", desc: "Turns the infected host into a remotely-controlled 'bot'.", ex: "Mirai", icon: "🤖" }
+            ];
+
+            const grid = document.getElementById('malware-grid');
+            malwareData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "malware-card bg-gray-50 border border-gray-200 rounded-lg p-4 cursor-pointer text-center relative overflow-hidden group";
+                card.innerHTML = `
+                    <div class="text-3xl mb-2 group-hover:scale-110 transition-transform">${item.icon}</div>
+                    <h4 class="font-bold text-gray-800 text-sm">${item.name}</h4>
+                    <div class="absolute inset-0 bg-[#4a5568] text-white p-4 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <p class="text-xs mb-2 leading-tight">${item.desc}</p>
+                        <p class="text-[10px] text-gray-300 font-mono">Ex: ${item.ex}</p>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        };
+
+        const renderOSIStack = () => {
+            const osiData = [
+                { layer: 7, name: "Application", color: "bg-purple-100", border: "border-purple-200", attack: "SQL injection, XSS" },
+                { layer: 6, name: "Presentation", color: "bg-indigo-100", border: "border-indigo-200", attack: "SSL stripping" },
+                { layer: 5, name: "Session", color: "bg-blue-100", border: "border-blue-200", attack: "Session hijacking" },
+                { layer: 4, name: "Transport", color: "bg-cyan-100", border: "border-cyan-200", attack: "SYN flood (DoS)" },
+                { layer: 3, name: "Network", color: "bg-teal-100", border: "border-teal-200", attack: "IP spoofing" },
+                { layer: 2, name: "Data Link", color: "bg-green-100", border: "border-green-200", attack: "ARP poisoning" },
+                { layer: 1, name: "Physical", color: "bg-yellow-100", border: "border-yellow-200", attack: "Cable tap" }
+            ];
+
+            const stack = document.getElementById('osi-stack');
+            const panel = document.getElementById('osi-detail-panel');
+
+            osiData.forEach(layer => {
+                const row = document.createElement('div');
+                row.className = `osi-layer flex items-center p-3 border-b ${layer.border} ${layer.color} last:border-b-0`;
+                row.innerHTML = `
+                    <div class="font-mono font-bold text-gray-600 w-8 text-center">${layer.layer}</div>
+                    <div class="font-bold text-gray-800 flex-1">${layer.name}</div>
+                `;
+                
+                row.addEventListener('click', () => {
+                    panel.innerHTML = `
+                        <div class="text-4xl mb-3 text-gray-800">⚡</div>
+                        <h4 class="text-xl font-bold text-gray-800 mb-1">Layer ${layer.layer}: ${layer.name}</h4>
+                        <div class="bg-white p-3 rounded mt-3 inline-block shadow-sm">
+                            <p class="text-sm font-semibold text-[#b95d5d] uppercase tracking-wider mb-1">Example Attack</p>
+                            <p class="text-lg font-mono text-gray-900">${layer.attack}</p>
+                        </div>
+                    `;
+                });
+                
+                stack.appendChild(row);
+            });
+        };
+
+        const renderChecklist = () => {
+            const checks = [
+                "Report is exactly 1–4 A4 pages (including figures/tables).",
+                "Every tool used is identified by name and URL.",
+                "Vulnerabilities demonstrated only on owned/practice systems.",
+                "Deliverables A-1, A-2, B-1, B-2, B-3, and C-1 clearly labelled.",
+                "At least three external references cited.",
+                "Ethical/legal disclaimer principles respected."
+            ];
+
+            const list = document.getElementById('final-checklist');
+            checks.forEach((text, i) => {
+                const id = `final-check-${i}`;
+                const div = document.createElement('div');
+                div.className = "flex items-start";
+                div.innerHTML = `
+                    <div class="flex items-center h-5">
+                        <input id="${id}" type="checkbox" class="checklist-item w-5 h-5 text-[#8c6b5d] rounded border-gray-300 focus:ring-[#8c6b5d]">
+                    </div>
+                    <div class="ml-3 text-sm">
+                        <label for="${id}" class="font-medium text-gray-700">${text}</label>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        };
+
+        const initProgressTracking = () => {
+            const taskChecks = document.querySelectorAll('.task-check');
+            const finalChecks = document.querySelectorAll('.checklist-item');
+            const allChecks = [...taskChecks, ...finalChecks];
+            const bar = document.getElementById('progress-bar');
+            const text = document.getElementById('progress-text');
+
+            const updateProgress = () => {
+                const total = allChecks.length;
+                const completed = allChecks.filter(c => c.checked).length;
+                const pct = Math.round((completed / total) * 100);
+                bar.style.width = `${pct}%`;
+                text.innerText = pct;
+            };
+
+            allChecks.forEach(chk => {
+                chk.addEventListener('change', updateProgress);
+            });
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initNav();
+            initChart();
+            renderMalwareGrid();
+            renderOSIStack();
+            renderChecklist();
+            initProgressTracking();
+        });
+    </script>
+</body>
+</html>
+
+
+

