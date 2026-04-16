@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Domains Study Module</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Flashcard Flip Animation CSS */
+        .flip-card {
+            background-color: transparent;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+        .flip-card.flipped .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e7e5e4;
+        }
+        .flip-card-front {
+            background-color: #ffffff;
+            color: #1c1917;
+        }
+        .flip-card-back {
+            background-color: #f0fdfa; /* Teal-50 */
+            color: #0f766e; /* Teal-700 */
+            transform: rotateY(180deg);
+            border-color: #ccfbf1;
+        }
+
+        /* Custom Radio Button styling for Quiz */
+        .quiz-radio {
+            accent-color: #0f766e;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800 min-h-screen">
+
+    <div class="max-w-6xl mx-auto p-4 md:p-8">
+        
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-teal-800 mb-2">Security Domains & Technologies</h1>
+            <p class="text-stone-500">Interactive Study Module</p>
+        </header>
+
+        <div class="flex justify-center space-x-2 border-b border-stone-200 mb-8">
+            <button id="tab-btn-flashcards" class="px-6 py-3 font-semibold text-teal-700 border-b-2 border-teal-700 transition-colors" onclick="switchTab('flashcards')">
+                📚 Flashcards (25)
+            </button>
+            <button id="tab-btn-quiz" class="px-6 py-3 font-semibold text-stone-500 border-b-2 border-transparent hover:text-stone-700 transition-colors" onclick="switchTab('quiz')">
+                📝 Practice Quiz (10)
+            </button>
+        </div>
+
+        <div id="tab-flashcards" class="block">
+            <div class="mb-6 flex justify-between items-center bg-white p-4 rounded-lg shadow-sm border border-stone-200">
+                <p class="text-sm text-stone-600">Click on any card to reveal the answer.</p>
+                <button onclick="shuffleFlashcards()" class="text-sm bg-stone-200 hover:bg-stone-300 px-4 py-2 rounded text-stone-800 transition">🔀 Shuffle Cards</button>
+            </div>
+            
+            <div id="flashcards-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[250px]">
+                </div>
+        </div>
+
+        <div id="tab-quiz" class="hidden">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                <div class="mb-6 pb-4 border-b border-stone-100">
+                    <h2 class="text-2xl font-bold text-stone-800">Applied Security Quiz</h2>
+                    <p class="text-stone-500 mt-1">Test your practical understanding of the concepts.</p>
+                </div>
+
+                <div id="quiz-container" class="space-y-10">
+                    </div>
+
+                <div class="mt-10 pt-6 border-t border-stone-200 text-center">
+                    <button id="submit-quiz" onclick="gradeQuiz()" class="bg-teal-700 hover:bg-teal-800 text-white font-bold py-3 px-8 rounded-lg shadow-md transition transform hover:-translate-y-0.5 text-lg">
+                        Submit & Grade Quiz
+                    </button>
+                    <div id="quiz-results" class="mt-6 text-xl font-bold hidden"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- DATA ---
+        const flashcardsData = [
+            { front: "AAA Framework", back: "Authentication, Authorization, and Accounting." },
+            { front: "Identification vs. Authentication", back: "Identification claims an identity (e.g., username), while authentication verifies that claim (e.g., password)." },
+            { front: "Three Authentication Factors", back: "Something you know (password), something you have (phone/token), and something you are (biometrics)." },
+            { front: "Multi-Factor Authentication (MFA)", back: "An authentication method requiring ≥2 distinct factors, blocking over 99% of automated account-takeover attempts." },
+            { front: "Kerberos", back: "A ticket-based authentication protocol involving a Client, Server, and Key Distribution Center (KDC), ensuring passwords never cross the wire." },
+            { front: "Password Salt", back: "Random bytes added to a password before hashing to defeat pre-computed rainbow tables and force individual brute-forcing." },
+            { front: "Constant-Time Comparison", back: "Comparing hashes in a way that takes the exact same processing time regardless of mismatches, preventing side-channel timing attacks." },
+            { front: "Symmetric Cryptography", back: "Encryption using a single shared key for both encryption and decryption; very fast, used for bulk data." },
+            { front: "Asymmetric Cryptography", back: "Encryption using a public key (encrypt/verify) and a private key (decrypt/sign); used for key exchange and signatures." },
+            { front: "CIA Triad", back: "Confidentiality (no one else reads it), Integrity (no undetected alteration), and Authenticity (you know who sent it)." },
+            { front: "AEAD (Authenticated Encryption with Associated Data)", back: "A mode like AES-GCM that delivers confidentiality, integrity, and authenticity in a single operation." },
+            { front: "Cryptographic Nonce Reuse", back: "A catastrophic failure in symmetric encryption (like AES-GCM) where reusing the 'number-used-once' under the same key compromises security." },
+            { front: "Secure Hash Function Properties", back: "Deterministic, pre-image resistant (cannot recover input), and collision resistant (hard to find two inputs with same hash)." },
+            { front: "Broken Hash Functions (Deprecated)", back: "MD5 and SHA-1 are cryptographically broken and should not be used for security." },
+            { front: "Digital Signature Process", back: "Sender hashes a message and encrypts the hash with their private key. Receiver decrypts with sender's public key to verify." },
+            { front: "Non-repudiation", back: "Cryptographic assurance that a sender cannot falsely deny having sent a message, achieved via digital signatures." },
+            { front: "Hardware Security Module (HSM)", back: "A physical, highly tamper-resistant computing device that safely stores and manages cryptographic keys." },
+            { front: "Certificate Authority (CA)", back: "A trusted entity in a PKI that issues digital certificates, binding public keys to specific identities." },
+            { front: "Diffie-Hellman Key Exchange", back: "Method allowing two parties to securely establish a shared secret over an insecure channel (conceptually like mixing paint)." },
+            { front: "Formula for Alice's public value in Diffie-Hellman", back: "$A = g^a \\pmod{p}$, where $g$ is generator, $a$ is Alice's private secret, and $p$ is public prime." },
+            { front: "Perfect Forward Secrecy (PFS)", back: "Ensures that even if a server's long-term private key is compromised later, past encrypted traffic remains safe (uses ephemeral keys)." },
+            { front: "OCSP (Online Certificate Status Protocol)", back: "A protocol used to query a CA in real-time to check if a digital certificate has been revoked." },
+            { front: "Primary cause of cryptographic failures", back: "Implementation errors (reusing nonces, side-channel leaks, hard-coding keys) rather than broken math." },
+            { front: "7-Phase Key Lifecycle", back: "Generation, Distribution, Storage, Use, Rotation, Revocation, and Destruction." },
+            { front: "TLS 1.3 Handshake Components", back: "Authentication (server's certificate), Key Exchange (ephemeral ECDH), and Bulk Encryption (AES-GCM or ChaCha20)." }
+        ];
+
+        const quizData = [
+            {
+                question: "A company implements a new login flow where employees must enter a passphrase and then approve a push notification on their company-issued smartphone. Which authentication factors are being utilized?",
+                hint: "Consider the categories for a memorized secret and a physical device.",
+                options: [
+                    { text: "Knowledge and Possession", isCorrect: true, rationale: "A passphrase is a memorized secret (knowledge), and the smartphone is a physical device (possession)." },
+                    { text: "Knowledge and Inherence", isCorrect: false, rationale: "Inherence refers to biometrics (something you are), which is not used here." },
+                    { text: "Possession and Inherence", isCorrect: false, rationale: "Lacks the 'knowledge' factor represented by the passphrase." },
+                    { text: "Identification and Authorization", isCorrect: false, rationale: "These are distinct stages of AAA, not specific authentication factors." }
+                ]
+            },
+            {
+                question: "During an audit, you notice two users chose the exact same password, but their database hash entries are completely different. What mechanism ensures this?",
+                hint: "Think about what random data is added before mathematical transformation.",
+                options: [
+                    { text: "The system uses an asymmetric encryption algorithm.", isCorrect: false, rationale: "Passwords should be hashed with KDFs, not asymmetrically encrypted." },
+                    { text: "A constant-time comparison algorithm randomized the output.", isCorrect: false, rationale: "Constant-time comparison is used during login verification, not registration." },
+                    { text: "A unique salt is appended to each password before hashing.", isCorrect: true, rationale: "Adding random bytes (salt) before hashing ensures identical passwords result in unique hashes, thwarting rainbow tables." },
+                    { text: "The server applied AES-GCM to encrypt the column.", isCorrect: false, rationale: "The unique values for identical passwords specifically result from salting/hashing, not database-level encryption." }
+                ]
+            },
+            {
+                question: "A developer writes a custom script to compare password hashes, using an operator that stops checking upon finding the first mismatched character. What vulnerability does this introduce?",
+                hint: "If the check stops early, what observable metric changes based on how much is correct?",
+                options: [
+                    { text: "The application becomes susceptible to rainbow table attacks.", isCorrect: false, rationale: "Rainbow tables are mitigated by salts, not by comparison methods." },
+                    { text: "An attacker can measure response time to guess the hash byte by byte.", isCorrect: true, rationale: "Short-circuiting comparison creates a side-channel timing leak." },
+                    { text: "The hash function will inevitably suffer a collision.", isCorrect: false, rationale: "Collisions are a mathematical property of the hash, unrelated to string comparison." },
+                    { text: "The server's RNG will fail to produce a secure salt.", isCorrect: false, rationale: "Equality operators do not influence cryptographic randomness during registration." }
+                ]
+            },
+            {
+                question: "An application needs to securely encrypt a massive 50 GB database backup before transferring it to the cloud. Which approach is most efficient?",
+                hint: "Consider speed constraints for very large bulk data.",
+                options: [
+                    { text: "An asymmetric algorithm like RSA-4096.", isCorrect: false, rationale: "Asymmetric encryption is computationally expensive and slow." },
+                    { text: "An elliptic curve algorithm like Ed25519.", isCorrect: false, rationale: "Ed25519 is used for signatures and key exchange, not bulk encryption." },
+                    { text: "A cryptographic hash function like SHA-256.", isCorrect: false, rationale: "Hash functions are one-way; you cannot decrypt them to retrieve the 50 GB file." },
+                    { text: "A symmetric algorithm like AES-256.", isCorrect: true, rationale: "Symmetric algorithms are highly efficient and fast, standard for bulk data." }
+                ]
+            },
+            {
+                question: "Implementing AES-GCM, a developer suggests hardcoding the initialization vector (nonce) because the secret key is already highly secure. What is the consequence?",
+                hint: "Think about the letter 'N' in the acronym 'nonce'.",
+                options: [
+                    { text: "It leads to catastrophic cryptographic failure, compromising confidentiality.", isCorrect: true, rationale: "Reusing a 'number-used-once' under the same symmetric key in modes like GCM mathematically breaks the encryption." },
+                    { text: "It slightly reduces entropy but is acceptable if rotated daily.", isCorrect: false, rationale: "The failure is binary and catastrophic, not a gradual reduction." },
+                    { text: "It prevents Perfect Forward Secrecy but maintains confidentiality.", isCorrect: false, rationale: "PFS relates to key exchange, while nonce reuse destroys confidentiality." },
+                    { text: "It causes digital signatures to fail validation.", isCorrect: false, rationale: "While GCM provides authentication, the primary failure is the devastating loss of confidentiality." }
+                ]
+            },
+            {
+                question: "To ensure a software update hasn't been tampered with and originated from your organization, you digitally sign it. Which key must be used?",
+                hint: "For non-repudiation, the signing action must be something only the true sender can do.",
+                options: [
+                    { text: "The organization's public key.", isCorrect: false, rationale: "Encrypting with public key provides confidentiality to the receiver, not proof of origin." },
+                    { text: "The end-user's public key.", isCorrect: false, rationale: "Ensures only the user can open it, but offers no guarantee of who sent it." },
+                    { text: "The organization's private key.", isCorrect: true, rationale: "A signature is created by encrypting the hash with the sender's private key, ensuring only the owner could have created it." },
+                    { text: "A newly generated symmetric session key.", isCorrect: false, rationale: "Symmetric keys cannot provide non-repudiation as both parties possess the same key." }
+                ]
+            },
+            {
+                question: "You must securely store the root cryptographic keys for an internal Certificate Authority. Which solution provides the highest tamper-resistant security?",
+                hint: "Consider physical protections designed specifically for guarding crypto material.",
+                options: [
+                    { text: "A private repository in a version control system.", isCorrect: false, rationale: "Keys should never be in version control, which expands the attack surface." },
+                    { text: "A password-protected file on a local machine.", isCorrect: false, rationale: "Local machines are highly susceptible to malware and theft." },
+                    { text: "A dedicated Hardware Security Module (HSM).", isCorrect: true, rationale: "An HSM is a specialized, tamper-evident physical device engineered to protect keys." },
+                    { text: "The application's obfuscated source code.", isCorrect: false, rationale: "Obfuscation is not encryption. Hardcoding keys is highly dangerous." }
+                ]
+            },
+            {
+                question: "Two remote servers must establish a shared encryption key over a monitored network. Which algorithm negotiates this without transmitting the secret?",
+                hint: "Think of the mathematical equivalent of mixing public and private paint colors.",
+                options: [
+                    { text: "Advanced Encryption Standard (AES).", isCorrect: false, rationale: "AES requires a shared key to already be established." },
+                    { text: "Secure Hash Algorithm (SHA-3).", isCorrect: false, rationale: "SHA-3 is for one-way hashing, not establishing a shared key." },
+                    { text: "Time-based One-Time Password (TOTP).", isCorrect: false, rationale: "TOTP is for user login authentication." },
+                    { text: "Diffie-Hellman (DH) Key Exchange.", isCorrect: true, rationale: "DH allows parties to exchange public values that combine with private secrets to yield identical shared keys." }
+                ]
+            },
+            {
+                question: "An attacker recorded all encrypted traffic to your server for years. Today, they compromise your server's private key, yet cannot decrypt the past traffic. Why?",
+                hint: "Look for the property that isolates past communications from future compromises.",
+                options: [
+                    { text: "The attacker lacks the unique password salt for each session.", isCorrect: false, rationale: "Salts protect passwords in databases, not encrypted network traffic." },
+                    { text: "The server's digital certificate was revoked via OCSP.", isCorrect: false, rationale: "Revocation prevents future trust but doesn't mathematically protect past encrypted data." },
+                    { text: "The system utilized Ephemeral Diffie-Hellman for session keys.", isCorrect: true, rationale: "Perfect Forward Secrecy ensures a fresh, temporary key for every session, protecting past data." },
+                    { text: "The traffic was encrypted using AES-GCM.", isCorrect: false, rationale: "If an attacker recovers the specific session key, AES-GCM traffic can be decrypted." }
+                ]
+            },
+            {
+                question: "During a standard TLS 1.3 handshake, which component proves the server's identity to the client's browser?",
+                hint: "How does a browser know a website genuinely owns the domain name?",
+                options: [
+                    { text: "Generation of ephemeral Diffie-Hellman parameters.", isCorrect: false, rationale: "DH creates the confidential key but provides no proof of identity." },
+                    { text: "Encryption of the request using AES-256.", isCorrect: false, rationale: "Encryption provides confidentiality but doesn't verify the receiver's identity." },
+                    { text: "The server's digital certificate, signed by a Root CA.", isCorrect: true, rationale: "The certificate binds the public key to its identity and is authenticated by a trusted CA." },
+                    { text: "Successful verification of a Kerberos ticket.", isCorrect: false, rationale: "Kerberos is for internal networks, not standard public HTTPS web traffic." }
+                ]
+            }
+        ];
+
+        // --- APP LOGIC ---
+
+        // Tab Switching
+        function switchTab(tabId) {
+            document.getElementById('tab-flashcards').classList.add('hidden');
+            document.getElementById('tab-quiz').classList.add('hidden');
+            
+            document.getElementById('tab-btn-flashcards').classList.remove('text-teal-700', 'border-teal-700');
+            document.getElementById('tab-btn-flashcards').classList.add('text-stone-500', 'border-transparent');
+            
+            document.getElementById('tab-btn-quiz').classList.remove('text-teal-700', 'border-teal-700');
+            document.getElementById('tab-btn-quiz').classList.add('text-stone-500', 'border-transparent');
+
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+            document.getElementById('tab-btn-' + tabId).classList.remove('text-stone-500', 'border-transparent');
+            document.getElementById('tab-btn-' + tabId).classList.add('text-teal-700', 'border-teal-700');
+        }
+
+        // Render Flashcards
+        function renderFlashcards(cards) {
+            const container = document.getElementById('flashcards-container');
+            container.innerHTML = ''; // Clear existing
+            
+            cards.forEach((card, index) => {
+                const cardHTML = `
+                    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <span class="text-xs text-stone-400 absolute top-3 left-4">Card ${index + 1}</span>
+                                <h3 class="text-lg font-bold text-center">${card.front}</h3>
+                            </div>
+                            <div class="flip-card-back">
+                                <p class="text-center font-medium">${card.back}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += cardHTML;
+            });
+
+            // Trigger MathJax to render LaTeX in the newly injected HTML
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function shuffleFlashcards() {
+            const shuffled = [...flashcardsData].sort(() => Math.random() - 0.5);
+            renderFlashcards(shuffled);
+        }
+
+        // Render Quiz
+        function renderQuiz() {
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = '';
+            
+            quizData.forEach((q, qIndex) => {
+                let optionsHTML = '';
+                // Shuffle options for each question
+                const shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
+                
+                shuffledOptions.forEach((opt, oIndex) => {
+                    const inputId = `q${qIndex}_o${oIndex}`;
+                    optionsHTML += `
+                        <div class="mb-2 relative">
+                            <label class="flex items-start p-3 border border-stone-200 rounded-lg cursor-pointer hover:bg-stone-50 transition quiz-label" for="${inputId}">
+                                <input type="radio" name="question_${qIndex}" id="${inputId}" value="${opt.isCorrect}" data-rationale="${encodeURIComponent(opt.rationale)}" class="mt-1 mr-3 quiz-radio w-4 h-4">
+                                <span class="text-stone-700">${opt.text}</span>
+                            </label>
+                            <div id="rationale_${inputId}" class="hidden mt-2 p-3 text-sm rounded-lg ml-7"></div>
+                        </div>
+                    `;
+                });
+
+                const questionHTML = `
+                    <div class="quiz-question-block bg-stone-50 p-6 rounded-lg border border-stone-200" id="q-block-${qIndex}">
+                        <div class="flex items-start mb-4">
+                            <span class="bg-teal-700 text-white w-8 h-8 flex items-center justify-center rounded-full font-bold mr-4 shrink-0">${qIndex + 1}</span>
+                            <div>
+                                <h3 class="text-lg font-semibold text-stone-900">${q.question}</h3>
+                                <button onclick="toggleHint('hint_${qIndex}')" class="text-xs text-teal-600 font-semibold mt-2 hover:underline">💡 Show Hint</button>
+                                <p id="hint_${qIndex}" class="hidden text-sm text-stone-500 italic mt-1">${q.hint}</p>
+                            </div>
+                        </div>
+                        <div class="ml-12">
+                            ${optionsHTML}
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += questionHTML;
+            });
+        }
+
+        function toggleHint(hintId) {
+            const hintEl = document.getElementById(hintId);
+            hintEl.classList.toggle('hidden');
+        }
+
+        // Grade Quiz
+        function gradeQuiz() {
+            let score = 0;
+            const total = quizData.length;
+            
+            quizData.forEach((q, qIndex) => {
+                const inputs = document.getElementsByName(`question_${qIndex}`);
+                let answered = false;
+
+                inputs.forEach(input => {
+                    input.disabled = true; // Disable inputs after grading
+                    const rationaleDiv = document.getElementById(`rationale_${input.id}`);
+                    const label = input.closest('label');
+                    
+                    if (input.checked) {
+                        answered = true;
+                        rationaleDiv.classList.remove('hidden');
+                        rationaleDiv.textContent = decodeURIComponent(input.getAttribute('data-rationale'));
+
+                        if (input.value === "true") {
+                            score++;
+                            label.classList.add('bg-green-50', 'border-green-400');
+                            rationaleDiv.classList.add('bg-green-100', 'text-green-800', 'border', 'border-green-200');
+                        } else {
+                            label.classList.add('bg-red-50', 'border-red-400');
+                            rationaleDiv.classList.add('bg-red-100', 'text-red-800', 'border', 'border-red-200');
+                            
+                            // Highlight correct answer if they got it wrong
+                            inputs.forEach(innerInput => {
+                                if (innerInput.value === "true") {
+                                    const correctLabel = innerInput.closest('label');
+                                    correctLabel.classList.add('border-green-400', 'border-2');
+                                    const correctRationaleDiv = document.getElementById(`rationale_${innerInput.id}`);
+                                    correctRationaleDiv.classList.remove('hidden');
+                                    correctRationaleDiv.classList.add('bg-green-50', 'text-green-800');
+                                    correctRationaleDiv.innerHTML = "<strong>Correct Answer:</strong> " + decodeURIComponent(innerInput.getAttribute('data-rationale'));
+                                }
+                            });
+                        }
+                    }
+                });
+
+                // If not answered, highlight block
+                if (!answered) {
+                    document.getElementById(`q-block-${qIndex}`).classList.add('border-orange-400');
+                }
+            });
+
+            // Show Results
+            const resultsDiv = document.getElementById('quiz-results');
+            resultsDiv.classList.remove('hidden');
+            const percentage = (score / total) * 100;
+            
+            if (percentage >= 80) {
+                resultsDiv.classList.add('text-green-700');
+                resultsDiv.innerHTML = `Great job! You scored ${score} out of ${total} (${percentage}%).`;
+            } else {
+                resultsDiv.classList.add('text-orange-600');
+                resultsDiv.innerHTML = `You scored ${score} out of ${total} (${percentage}%). Review the rationales above and try the flashcards again!`;
+            }
+            
+            // Disable submit button
+            document.getElementById('submit-quiz').disabled = true;
+            document.getElementById('submit-quiz').classList.add('opacity-50', 'cursor-not-allowed');
+            document.getElementById('submit-quiz').innerText = "Quiz Graded";
+        }
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            renderFlashcards(flashcardsData);
+            renderQuiz();
+        });
+
+    </script>
+</body>
+</html>
+
+
+
+

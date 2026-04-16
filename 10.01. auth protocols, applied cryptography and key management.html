@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 10: Security Domains & Technologies</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals (Stone/Teal/Rust) for a calm, academic, and accessible experience. -->
+    <!-- Application Structure Plan: A dashboard-style learning module with a persistent navigation sidebar. This allows users to non-linearly explore the three pillars of security (Authentication, Cryptography, Key Management) and their convergence. Interactive simulators replace static slides to demonstrate abstract concepts actively, prioritizing user exploration and task-oriented learning over linear reading. -->
+    <!-- Visualization & Content Choices: 1. Auth Stats -> Bar Chart (Compare MFA effectiveness) -> Chart.js. 2. Algo Status -> Doughnut Chart (Organize safe/broken) -> Chart.js. 3. Password Salting -> HTML/JS interactive visualizer (Demonstrate change) -> Vanilla JS. 4. Diffie-Hellman -> HTML color mixing simulator (Demonstrate relationship) -> Vanilla JS. NO SVG/Mermaid used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container { height: 350px; }
+        }
+        .hide { display: none; }
+        .nav-btn.active {
+            background-color: #0f766e;
+            color: white;
+        }
+        .nav-btn:hover:not(.active) {
+            background-color: #d6d3d1;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800 min-h-screen flex flex-col md:flex-row">
+
+    <nav class="w-full md:w-64 bg-stone-200 border-r border-stone-300 flex flex-col p-4 shrink-0">
+        <div class="mb-8 mt-2">
+            <h1 class="text-xl font-bold text-teal-800">🎓 Cyber.SoHo Hub</h1>
+            <p class="text-xs text-stone-500 uppercase font-semibold mt-1">Week 10 · Interactive Module</p>
+        </div>
+        <div class="flex flex-col space-y-2">
+            <button class="nav-btn active text-left px-4 py-3 rounded-lg font-medium transition-colors" data-target="home">
+                🏠 Introduction
+            </button>
+            <button class="nav-btn text-left px-4 py-3 rounded-lg font-medium transition-colors" data-target="auth">
+                🔐 1. Authentication
+            </button>
+            <button class="nav-btn text-left px-4 py-3 rounded-lg font-medium transition-colors" data-target="crypto">
+                🔏 2. Cryptography
+            </button>
+            <button class="nav-btn text-left px-4 py-3 rounded-lg font-medium transition-colors" data-target="keys">
+                🔑 3. Key Management
+            </button>
+            <button class="nav-btn text-left px-4 py-3 rounded-lg font-medium transition-colors" data-target="convergence">
+                🌐 Convergence (TLS)
+            </button>
+        </div>
+        <div class="mt-auto pt-8">
+            <p class="text-xs text-stone-500">From the Industry to the Classroom.</p>
+        </div>
+    </nav>
+
+    <main class="flex-1 p-6 md:p-10 overflow-y-auto">
+        <section id="home" class="content-section">
+            <header class="mb-10">
+                <h2 class="text-4xl font-bold text-stone-900 mb-4">Security Domains & Technologies</h2>
+                <p class="text-lg text-stone-600">Introduction to Computer Security · Part III</p>
+            </header>
+
+            <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-8 mb-8">
+                <h3 class="text-2xl font-semibold mb-6 text-teal-700">The Security Triangle: Three questions every device asks</h3>
+                <p class="mb-6 text-stone-600">Welcome to Week 10. This interactive module explores the foundation of network security. Lose the answer to any ONE of these questions, and the entire security model collapses.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-stone-50 p-6 rounded-lg border border-stone-200 cursor-pointer hover:shadow-md transition" onclick="document.querySelector('[data-target=\'auth\']').click()">
+                        <div class="text-4xl mb-4">🔐</div>
+                        <h4 class="font-bold text-lg mb-2">"Who are you?"</h4>
+                        <p class="text-sm text-stone-600">Authentication Protocols. Proving identity over a network without exposing secrets.</p>
+                    </div>
+                    <div class="bg-stone-50 p-6 rounded-lg border border-stone-200 cursor-pointer hover:shadow-md transition" onclick="document.querySelector('[data-target=\'crypto\']').click()">
+                        <div class="text-4xl mb-4">🔏</div>
+                        <h4 class="font-bold text-lg mb-2">"Is anyone listening?"</h4>
+                        <p class="text-sm text-stone-600">Applied Cryptography. Hiding data in plain sight to ensure confidentiality and integrity.</p>
+                    </div>
+                    <div class="bg-stone-50 p-6 rounded-lg border border-stone-200 cursor-pointer hover:shadow-md transition" onclick="document.querySelector('[data-target=\'keys\']').click()">
+                        <div class="text-4xl mb-4">🔑</div>
+                        <h4 class="font-bold text-lg mb-2">"Where did keys come from?"</h4>
+                        <p class="text-sm text-stone-600">Key Management. The lifecycle, distribution, and destruction of cryptographic material.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-teal-50 border-l-4 border-teal-600 p-6 rounded-r-lg">
+                <p class="font-medium text-teal-900">🎯 Overarching Takeaway</p>
+                <p class="text-teal-800 mt-2">Security is a triangle, not a line. Authentication proves <strong>who</strong>. Cryptography protects <strong>what</strong>. Key Management <strong>sustains both</strong> over time.</p>
+            </div>
+        </section>
+
+        <section id="auth" class="content-section hide">
+            <header class="mb-8">
+                <h2 class="text-3xl font-bold text-stone-900 mb-2">Lesson 1: Authentication Protocols</h2>
+                <p class="text-stone-600">How do we prove identity over a network?</p>
+            </header>
+
+            <p class="mb-8 text-lg">This section breaks down how systems verify user identities. You will explore the critical differences between Identification, Authentication, and Authorization (AAA), understand Multi-Factor Authentication (MFA), and interact with a password hashing simulator to see how databases secure secrets.</p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
+                    <h3 class="text-xl font-semibold mb-4 border-b pb-2">The AAA Framework</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <span class="bg-stone-200 text-stone-800 px-2 py-1 rounded text-xs font-bold mr-3 mt-1">1</span>
+                            <div>
+                                <strong class="block text-stone-800">Identification</strong>
+                                <span class="text-sm text-stone-600">"Here is my username." (Claiming an identity)</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="bg-teal-100 text-teal-800 px-2 py-1 rounded text-xs font-bold mr-3 mt-1">2</span>
+                            <div>
+                                <strong class="block text-teal-800">Authentication ⬅ Focus</strong>
+                                <span class="text-sm text-stone-600">"Prove it." (Verifying the claim)</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="bg-stone-200 text-stone-800 px-2 py-1 rounded text-xs font-bold mr-3 mt-1">3</span>
+                            <div>
+                                <strong class="block text-stone-800">Authorization</strong>
+                                <span class="text-sm text-stone-600">"What are you allowed to do?" (Access control)</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
+                    <h3 class="text-xl font-semibold mb-4 border-b pb-2">The Power of MFA</h3>
+                    <p class="text-sm text-stone-600 mb-4">Multi-Factor Authentication combines ≥2 factors: Something you <strong>KNOW</strong> (password), <strong>HAVE</strong> (phone/YubiKey), or <strong>ARE</strong> (fingerprint).</p>
+                    <div class="chart-container">
+                        <canvas id="mfaChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-8 mb-8">
+                <h3 class="text-xl font-semibold mb-4 text-teal-700">Interactive: How Password Storage Actually Works</h3>
+                <p class="text-sm text-stone-600 mb-6">Servers NEVER store your real password. They generate a random "salt" and combine it with your password using a slow Key Derivation Function (KDF) like bcrypt or Argon2 to output a hash. Try it below to see why identical passwords yield different database entries.</p>
+                
+                <div class="flex flex-col md:flex-row gap-6 items-center">
+                    <div class="flex-1 w-full bg-stone-50 p-6 rounded-lg border border-stone-200">
+                        <label class="block text-sm font-medium text-stone-700 mb-2">Enter a simulated password:</label>
+                        <input type="text" id="simPassword" class="w-full border-stone-300 rounded-md shadow-sm p-2 mb-4 border focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="e.g., Rabbit!2026">
+                        <button id="hashBtn" class="w-full bg-teal-700 text-white font-medium py-2 rounded hover:bg-teal-800 transition">Register User (Simulate Hash)</button>
+                    </div>
+                    <div class="text-3xl text-stone-400">➡</div>
+                    <div class="flex-1 w-full bg-slate-900 text-green-400 p-6 rounded-lg font-mono text-sm overflow-hidden break-all shadow-inner">
+                        <div class="mb-2"><span class="text-slate-400">Database Entry:</span></div>
+                        <div class="mb-2">Username: <span class="text-white">user_101</span></div>
+                        <div class="mb-2">Salt: <span id="simSalt" class="text-yellow-400">[Pending...]</span></div>
+                        <div>Hash: <span id="simHash" class="text-white">[Pending...]</span></div>
+                    </div>
+                </div>
+                <div class="mt-4 text-sm text-stone-500 border-l-2 border-stone-300 pl-4">
+                    <strong>Why it matters:</strong> A salt defeats pre-computed rainbow tables and forces attackers to brute-force each user individually. Comparing these hashes must also be done in <strong>constant-time</strong> to prevent side-channel timing attacks.
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white p-4 rounded shadow-sm border border-stone-200 text-center"><span class="block font-bold">Kerberos</span><span class="text-xs text-stone-500">Ticket-based, AD</span></div>
+                <div class="bg-white p-4 rounded shadow-sm border border-stone-200 text-center"><span class="block font-bold">OAuth 2.0</span><span class="text-xs text-stone-500">"Log in with..."</span></div>
+                <div class="bg-white p-4 rounded shadow-sm border border-stone-200 text-center"><span class="block font-bold">FIDO2</span><span class="text-xs text-stone-500">Passkeys</span></div>
+                <div class="bg-white p-4 rounded shadow-sm border border-stone-200 text-center"><span class="block font-bold">SAML 2.0</span><span class="text-xs text-stone-500">Enterprise SSO</span></div>
+            </div>
+        </section>
+
+        <section id="crypto" class="content-section hide">
+            <header class="mb-8">
+                <h2 class="text-3xl font-bold text-stone-900 mb-2">Lesson 2: Applied Cryptography</h2>
+                <p class="text-stone-600">How do we hide data in plain sight?</p>
+            </header>
+
+            <p class="mb-8 text-lg">Cryptography is the mathematical engine of security. Here, you will explore the CIA Triad, compare Symmetric and Asymmetric encryption techniques, and review the current industry standards for cryptographic algorithms to understand what is safe to use in 2026.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="col-span-1 md:col-span-3 bg-white rounded-xl shadow-sm border border-stone-200 p-6 flex flex-col md:flex-row items-center justify-between">
+                    <div class="mb-4 md:mb-0 md:w-1/2 pr-4">
+                        <h3 class="text-2xl font-bold text-stone-800 mb-2">The CIA Triad</h3>
+                        <p class="text-stone-600 text-sm">Every secure communication aims for these three goals. Modern AEAD modes (like AES-GCM) deliver all three in a single operation.</p>
+                    </div>
+                    <div class="flex space-x-4 w-full md:w-1/2 justify-end">
+                        <div class="bg-teal-50 border border-teal-200 p-4 rounded flex-1 text-center">
+                            <strong class="block text-teal-800">Confidentiality</strong>
+                            <span class="text-xs text-stone-500">No one else reads it</span>
+                        </div>
+                        <div class="bg-teal-50 border border-teal-200 p-4 rounded flex-1 text-center">
+                            <strong class="block text-teal-800">Integrity</strong>
+                            <span class="text-xs text-stone-500">No altering undetected</span>
+                        </div>
+                        <div class="bg-teal-50 border border-teal-200 p-4 rounded flex-1 text-center">
+                            <strong class="block text-teal-800">Authenticity</strong>
+                            <span class="text-xs text-stone-500">You know who sent it</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">
+                    <div class="bg-stone-100 p-4 border-b border-stone-200">
+                        <h3 class="font-semibold text-lg text-stone-800">The Two Families</h3>
+                    </div>
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-stone-50 text-stone-600 text-sm">
+                                <th class="p-4 border-b border-stone-200">Feature</th>
+                                <th class="p-4 border-b border-stone-200">Symmetric</th>
+                                <th class="p-4 border-b border-stone-200">Asymmetric</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-sm">
+                            <tr>
+                                <td class="p-4 border-b border-stone-100 font-medium">Keys</td>
+                                <td class="p-4 border-b border-stone-100">1 shared secret</td>
+                                <td class="p-4 border-b border-stone-100">2 (Public + Private)</td>
+                            </tr>
+                            <tr>
+                                <td class="p-4 border-b border-stone-100 font-medium">Examples</td>
+                                <td class="p-4 border-b border-stone-100">AES, ChaCha20</td>
+                                <td class="p-4 border-b border-stone-100">RSA, ECDSA, Ed25519</td>
+                            </tr>
+                            <tr>
+                                <td class="p-4 border-b border-stone-100 font-medium">Speed</td>
+                                <td class="p-4 border-b border-stone-100 text-green-600 font-bold">Very Fast</td>
+                                <td class="p-4 border-b border-stone-100 text-orange-600 font-bold">100-1000x Slower</td>
+                            </tr>
+                            <tr>
+                                <td class="p-4 border-b border-stone-100 font-medium">Use Case</td>
+                                <td class="p-4 border-b border-stone-100">Bulk data encryption</td>
+                                <td class="p-4 border-b border-stone-100">Key exchange, signatures</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="p-4 bg-stone-50 text-xs text-stone-600">
+                        *Every real system is a <strong>hybrid</strong>: asymmetric negotiates the key, symmetric protects the bulk data.
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
+                    <h3 class="text-xl font-semibold mb-2">Algorithm Status · 2026</h3>
+                    <p class="text-sm text-stone-600 mb-4">Never roll your own crypto. Use audited libraries and approved algorithms.</p>
+                    <div class="chart-container">
+                        <canvas id="algoChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-[#fdf2f8] border border-[#fbcfe8] rounded-lg p-6">
+                <h4 class="text-pink-800 font-bold mb-2">⚠️ Why Implementation Matters</h4>
+                <p class="text-sm text-pink-900 mb-2">Historic failures like WEP Wi-Fi, Sony PS3 ECDSA breach, Heartbleed, and ROCA all share one trait: <strong>the underlying math was fine; the implementation was flawed.</strong></p>
+                <p class="text-sm text-pink-900 font-medium">Golden Rule: Reusing a nonce under the same symmetric key leads to catastrophic failure.</p>
+            </div>
+        </section>
+
+        <section id="keys" class="content-section hide">
+            <header class="mb-8">
+                <h2 class="text-3xl font-bold text-stone-900 mb-2">Lesson 3: Key Management</h2>
+                <p class="text-stone-600">Where do the keys come from, and how do we handle them?</p>
+            </header>
+
+            <p class="mb-8 text-lg">As Bruce Schneier notes, algorithms are rarely broken; keys are mishandled. This section outlines the lifecycle of a cryptographic key, secure storage mechanisms, and utilizes an interactive paint-mixing model to explain the elegance of Diffie-Hellman Key Exchange.</p>
+
+            <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6 mb-8">
+                <h3 class="text-xl font-semibold mb-4 text-stone-800">The 7-Phase Key Lifecycle</h3>
+                <div class="flex flex-wrap gap-2 text-sm justify-between bg-stone-50 p-4 rounded-lg border border-stone-200">
+                    <div class="text-center"><span class="block text-xl">🎲</span> Generation<br><span class="text-xs text-stone-500">CSPRNG</span></div>
+                    <div class="text-stone-300 self-center">→</div>
+                    <div class="text-center"><span class="block text-xl">🚚</span> Distribution<br><span class="text-xs text-stone-500">KMS/DH</span></div>
+                    <div class="text-stone-300 self-center">→</div>
+                    <div class="text-center"><span class="block text-xl">🏦</span> Storage<br><span class="text-xs text-stone-500">HSM/TPM</span></div>
+                    <div class="text-stone-300 self-center">→</div>
+                    <div class="text-center"><span class="block text-xl">⚙️</span> Use<br><span class="text-xs text-stone-500">Encrypt/Sign</span></div>
+                    <div class="text-stone-300 self-center">→</div>
+                    <div class="text-center"><span class="block text-xl">🔄</span> Rotation<br><span class="text-xs text-stone-500">Replace</span></div>
+                    <div class="text-stone-300 self-center">→</div>
+                    <div class="text-center"><span class="block text-xl">🚫</span> Revoke<br><span class="text-xs text-stone-500">CRL/OCSP</span></div>
+                    <div class="text-stone-300 self-center">→</div>
+                    <div class="text-center"><span class="block text-xl">💥</span> Destroy<br><span class="text-xs text-stone-500">Erasure</span></div>
+                </div>
+            </div>
+
+            <div class="bg-stone-900 rounded-xl shadow-lg border border-stone-700 p-8 mb-8 text-white">
+                <h3 class="text-2xl font-semibold mb-2 text-teal-400">Diffie-Hellman Paint Analogy</h3>
+                <p class="text-sm text-stone-300 mb-6">Diffie-Hellman allows two strangers to share a secret in public. To understand the Discrete Logarithm Problem, simulate the process by mixing public and private colors. <em>(Colors approximate mathematical combination)</em>.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center items-end">
+                    
+                    <div>
+                        <h4 class="font-bold mb-4">Alice's Environment</h4>
+                        <div class="flex justify-center space-x-2 mb-2">
+                            <div class="w-12 h-12 rounded-full border-2 border-white bg-yellow-400" title="Public Base (g, p)"></div>
+                            <div class="text-2xl mt-2">+</div>
+                            <div class="w-12 h-12 rounded-full border-2 border-stone-500 border-dashed bg-red-500 opacity-50" id="alicePriv" title="Alice Private (a)"></div>
+                        </div>
+                        <p class="text-xs text-stone-400 mb-4">Base + Private Secret</p>
+                        <div class="w-24 h-24 mx-auto rounded bg-stone-800 transition-colors duration-500 flex items-center justify-center text-xs border border-stone-600" id="aliceMixOut">Mix A</div>
+                    </div>
+
+                    <div class="flex flex-col justify-center items-center h-full">
+                        <button id="dhSimBtn" class="bg-teal-600 hover:bg-teal-500 text-white px-6 py-3 rounded-full font-bold shadow-lg transition transform hover:scale-105">Execute DH Exchange</button>
+                        <p class="text-xs text-stone-400 mt-4 text-center max-w-xs">Eve sees the mixes cross the wire, but cannot "unmix" the colors to find the private secrets.</p>
+                        <div class="mt-4 flex space-x-4 opacity-0 transition-opacity duration-1000" id="wireData">
+                            <div class="w-10 h-10 rounded bg-stone-800 transition-colors" id="wireA"></div>
+                            <div class="text-xl">↔</div>
+                            <div class="w-10 h-10 rounded bg-stone-800 transition-colors" id="wireB"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold mb-4">Bob's Environment</h4>
+                        <div class="flex justify-center space-x-2 mb-2">
+                            <div class="w-12 h-12 rounded-full border-2 border-stone-500 border-dashed bg-blue-500 opacity-50" id="bobPriv" title="Bob Private (b)"></div>
+                            <div class="text-2xl mt-2">+</div>
+                            <div class="w-12 h-12 rounded-full border-2 border-white bg-yellow-400" title="Public Base (g, p)"></div>
+                        </div>
+                        <p class="text-xs text-stone-400 mb-4">Private Secret + Base</p>
+                        <div class="w-24 h-24 mx-auto rounded bg-stone-800 transition-colors duration-500 flex items-center justify-center text-xs border border-stone-600" id="bobMixOut">Mix B</div>
+                    </div>
+                </div>
+
+                <div class="mt-8 pt-8 border-t border-stone-700 text-center opacity-0 transition-opacity duration-1000" id="finalSecretBox">
+                    <h4 class="font-bold text-teal-400 mb-2">The Shared Secret Negotiated!</h4>
+                    <p class="text-sm text-stone-300 mb-4">Alice added her secret to Bob's mix. Bob added his secret to Alice's mix.</p>
+                    <div class="flex justify-center items-center space-x-6">
+                        <div class="w-16 h-16 rounded-full border-4 border-teal-500 transition-colors" id="aliceFinal"></div>
+                        <div class="text-3xl font-bold">===</div>
+                        <div class="w-16 h-16 rounded-full border-4 border-teal-500 transition-colors" id="bobFinal"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-stone-50 p-6 rounded border border-stone-200">
+                <h4 class="font-bold text-stone-800 mb-2">Perfect Forward Secrecy (PFS)</h4>
+                <p class="text-sm text-stone-600">Using Ephemeral DH (ECDHE), a new key is generated per session. If an attacker records traffic today and steals the server's private key five years from now, they <strong>cannot</strong> decrypt the old traffic because the session keys were never stored.</p>
+            </div>
+        </section>
+
+        <section id="convergence" class="content-section hide">
+            <header class="mb-8">
+                <h2 class="text-3xl font-bold text-stone-900 mb-2">Convergence: The TLS 1.3 Handshake</h2>
+                <p class="text-stone-600">How the three lessons fit together in under 100 milliseconds.</p>
+            </header>
+
+            <p class="mb-8 text-lg">Every time you open an HTTPS website, an intricate choreography occurs. This final section demonstrates how Authentication, Cryptography, and Key Management combine to form a secure channel, executed ~5 billion times per second worldwide.</p>
+
+            <div class="relative bg-white rounded-xl shadow border border-stone-200 p-8 overflow-hidden">
+                <div class="absolute top-0 left-0 w-2 h-full bg-teal-600"></div>
+                <h3 class="text-2xl font-bold mb-6 text-stone-800">The End-to-End Encrypted Channel</h3>
+                
+                <div class="space-y-6">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center text-teal-800 font-bold border border-teal-200">1</div>
+                        <div class="ml-4">
+                            <h4 class="text-lg font-bold text-stone-800">Authentication</h4>
+                            <p class="text-sm text-stone-600">The server presents its Certificate (signed by a trusted Root CA). Your browser verifies the digital signature (Lesson 1 & 2) to prove the server's identity.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center text-stone-800 font-bold border border-stone-300">2</div>
+                        <div class="ml-4">
+                            <h4 class="text-lg font-bold text-stone-800">Key Exchange</h4>
+                            <p class="text-sm text-stone-600">Client and server use ephemeral Elliptic-Curve Diffie-Hellman (ECDHE) to derive a shared session key without ever sending it across the wire (Lesson 3).</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center text-teal-800 font-bold border border-teal-200">3</div>
+                        <div class="ml-4">
+                            <h4 class="text-lg font-bold text-stone-800">Bulk Encryption</h4>
+                            <p class="text-sm text-stone-600">The agreed-upon session key is fed into a symmetric AEAD algorithm like AES-GCM or ChaCha20-Poly1305. All subsequent application data is encrypted and authenticated (Lesson 2).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                <div class="bg-stone-50 p-4 rounded border border-stone-200">
+                    <div class="text-3xl font-bold text-stone-800">5B+</div>
+                    <div class="text-xs text-stone-500 uppercase mt-1">Handshakes / Second</div>
+                </div>
+                <div class="bg-stone-50 p-4 rounded border border-stone-200">
+                    <div class="text-3xl font-bold text-stone-800">150</div>
+                    <div class="text-xs text-stone-500 uppercase mt-1">Root CAs Trusted</div>
+                </div>
+                <div class="bg-stone-50 p-4 rounded border border-stone-200">
+                    <div class="text-3xl font-bold text-stone-800">256-bit</div>
+                    <div class="text-xs text-stone-500 uppercase mt-1">Symmetric Standard</div>
+                </div>
+                <div class="bg-red-50 p-4 rounded border border-red-200">
+                    <div class="text-3xl font-bold text-red-800">0</div>
+                    <div class="text-xs text-red-600 uppercase mt-1">Keys in Git Repos</div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const navBtns = document.querySelectorAll('.nav-btn');
+            const sections = document.querySelectorAll('.content-section');
+
+            navBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    navBtns.forEach(b => b.classList.remove('active'));
+                    e.currentTarget.classList.add('active');
+                    
+                    const targetId = e.currentTarget.getAttribute('data-target');
+                    sections.forEach(sec => {
+                        sec.classList.add('hide');
+                        if(sec.id === targetId) sec.classList.remove('hide');
+                    });
+                });
+            });
+
+            const ctxMFA = document.getElementById('mfaChart').getContext('2d');
+            new Chart(ctxMFA, {
+                type: 'bar',
+                data: {
+                    labels: ['No MFA (Passwords Only)', 'MFA Enabled'],
+                    datasets: [{
+                        label: '% Account Takeover Blocked',
+                        data: [5, 99.9],
+                        backgroundColor: ['#ef4444', '#0d9488'],
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: { display: true, text: 'Effectiveness (%)' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: (ctx) => ctx.raw + '% Blocked' } }
+                    }
+                }
+            });
+
+            const ctxAlgo = document.getElementById('algoChart').getContext('2d');
+            new Chart(ctxAlgo, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Recommended (AES, Ed25519, SHA-3)', 'Acceptable (RSA-2048)', 'Broken (DES, MD5, SHA-1)'],
+                    datasets: [{
+                        data: [60, 20, 20],
+                        backgroundColor: ['#0f766e', '#f59e0b', '#dc2626'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+
+            const simPassword = document.getElementById('simPassword');
+            const hashBtn = document.getElementById('hashBtn');
+            const simSalt = document.getElementById('simSalt');
+            const simHash = document.getElementById('simHash');
+
+            hashBtn.addEventListener('click', () => {
+                const pass = simPassword.value || 'password';
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                let generatedSalt = '';
+                for(let i=0; i<16; i++) generatedSalt += chars.charAt(Math.floor(Math.random() * chars.length));
+                
+                simSalt.textContent = generatedSalt;
+                simSalt.classList.remove('text-yellow-400');
+                simSalt.classList.add('text-green-300');
+                
+                let fakeHash = '';
+                const hashChars = 'abcdef0123456789';
+                for(let i=0; i<64; i++) fakeHash += hashChars.charAt(Math.floor(Math.random() * hashChars.length));
+                
+                simHash.textContent = fakeHash;
+            });
+
+            const dhSimBtn = document.getElementById('dhSimBtn');
+            const aliceMixOut = document.getElementById('aliceMixOut');
+            const bobMixOut = document.getElementById('bobMixOut');
+            const wireData = document.getElementById('wireData');
+            const wireA = document.getElementById('wireA');
+            const wireB = document.getElementById('wireB');
+            const finalSecretBox = document.getElementById('finalSecretBox');
+            const aliceFinal = document.getElementById('aliceFinal');
+            const bobFinal = document.getElementById('bobFinal');
+            
+            dhSimBtn.addEventListener('click', () => {
+                document.getElementById('alicePriv').classList.remove('opacity-50', 'border-dashed');
+                document.getElementById('bobPriv').classList.remove('opacity-50', 'border-dashed');
+                
+                aliceMixOut.style.backgroundColor = '#f59e0b';
+                bobMixOut.style.backgroundColor = '#10b981';
+                aliceMixOut.textContent = "Orange (g^a)";
+                bobMixOut.textContent = "Green (g^b)";
+                
+                setTimeout(() => {
+                    wireData.classList.remove('opacity-0');
+                    wireA.style.backgroundColor = '#f59e0b';
+                    wireB.style.backgroundColor = '#10b981';
+                    
+                    setTimeout(() => {
+                        finalSecretBox.classList.remove('opacity-0');
+                        const finalBrown = '#78350f'; 
+                        aliceFinal.style.backgroundColor = finalBrown;
+                        bobFinal.style.backgroundColor = finalBrown;
+                        
+                        dhSimBtn.textContent = "Secret Shared!";
+                        dhSimBtn.classList.replace('bg-teal-600', 'bg-stone-600');
+                        dhSimBtn.disabled = true;
+                    }, 1200);
+                }, 800);
+            });
+        });
+    </script>
+</body>
+</html>
+
+
+
