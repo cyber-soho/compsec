@@ -289,8 +289,8 @@
             });
 
             // Trigger MathJax to render LaTeX in the newly injected HTML
-            if (window.MathJax) {
-                MathJax.typesetPromise();
+            if (typeof MathJax !== 'undefined' && typeof MathJax.typesetPromise === 'function') {
+                MathJax.typesetPromise().catch(err => console.error('MathJax error:', err));
             }
         }
 
@@ -422,7 +422,3 @@
     </script>
 </body>
 </html>
-
-
-
-
