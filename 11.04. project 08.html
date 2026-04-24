@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 11 · Computer Security Software — Cyber_Soho · Schiller International University</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1612;
+    --ink-soft: #3d3530;
+    --ink-muted: #7a6f68;
+    --paper: #faf8f5;
+    --paper-warm: #f3efe8;
+    --paper-card: #ffffff;
+    --rule: #e4ddd4;
+    --accent: #c0392b;
+    --accent-light: #fdf0ee;
+    --accent-dark: #96291e;
+    --gold: #b07d2e;
+    --gold-light: #fdf6e3;
+    --blue: #1e4f8c;
+    --blue-light: #e8f0fb;
+    --green: #1a6b3a;
+    --green-light: #e6f4ec;
+    --nav-h: 64px;
+    --radius: 8px;
+    --shadow: 0 2px 12px rgba(26,22,18,0.08);
+    --shadow-lg: 0 8px 32px rgba(26,22,18,0.12);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; font-size: 16px; }
+
+  body {
+    font-family: 'Source Serif 4', Georgia, serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.75;
+    padding-top: var(--nav-h);
+  }
+
+  /* ─── STICKY NAV ─── */
+  nav#main-nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: var(--nav-h);
+    background: rgba(250,248,245,0.96);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--rule);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 0;
+    box-shadow: 0 1px 16px rgba(26,22,18,0.06);
+  }
+
+  .nav-brand {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    color: var(--ink);
+    text-decoration: none;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .nav-brand span.week-tag {
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 2px 7px;
+    border-radius: 20px;
+    font-family: 'Syne', sans-serif;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: 24px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-links::-webkit-scrollbar { display: none; }
+
+  .nav-links a {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--ink-muted);
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: background 0.18s, color 0.18s;
+    white-space: nowrap;
+    letter-spacing: 0.01em;
+  }
+  .nav-links a:hover { background: var(--paper-warm); color: var(--ink); }
+  .nav-links a.active { background: var(--accent-light); color: var(--accent); }
+
+  .nav-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .progress-pill {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--green);
+    background: var(--green-light);
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid #b6ddc5;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .progress-pill:hover { background: #d0eeda; }
+
+  /* ─── HERO ─── */
+  .hero {
+    background: linear-gradient(135deg, #1a1612 0%, #2d2520 60%, #1e3a5f 100%);
+    color: #fff;
+    padding: 80px 24px 64px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+  .hero-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .hero-eyebrow {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 32px;
+    height: 1px;
+    background: var(--accent);
+  }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    margin-bottom: 20px;
+  }
+  .hero h1 em {
+    font-style: normal;
+    color: #e87c6f;
+  }
+  .hero-sub {
+    font-size: 1.05rem;
+    color: rgba(255,255,255,0.65);
+    max-width: 600px;
+    line-height: 1.65;
+    margin-bottom: 36px;
+    font-weight: 300;
+  }
+  .hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .meta-chip {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    padding: 6px 14px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.75);
+    background: rgba(255,255,255,0.06);
+    letter-spacing: 0.04em;
+  }
+  .meta-chip.highlight {
+    border-color: var(--accent);
+    color: #e87c6f;
+    background: rgba(192,57,43,0.12);
+  }
+
+  /* ─── LAYOUT ─── */
+  .page-wrap {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* ─── SECTIONS ─── */
+  section.content-section {
+    margin-top: 56px;
+    scroll-margin-top: calc(var(--nav-h) + 16px);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--rule);
+  }
+  .section-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-transform: uppercase;
+    white-space: nowrap;
+    background: var(--accent-light);
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+  .section-header h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+
+  .weight-badge {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+  .weight-1 { background: var(--blue-light); color: var(--blue); border: 1px solid #b8cfe8; }
+  .weight-2 { background: var(--gold-light); color: var(--gold); border: 1px solid #ddc580; }
+  .weight-r { background: var(--green-light); color: var(--green); border: 1px solid #b0d9bf; }
+
+  /* ─── DISCLAIMER BOX ─── */
+  .disclaimer {
+    background: linear-gradient(135deg, #fff8f7 0%, #fdecea 100%);
+    border: 1px solid #f0b8b2;
+    border-left: 4px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin: 32px 0;
+    position: relative;
+  }
+  .disclaimer-icon {
+    font-size: 1.3rem;
+    margin-right: 8px;
+  }
+  .disclaimer strong {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-dark);
+    display: block;
+    margin-bottom: 8px;
+  }
+  .disclaimer p { font-size: 0.92rem; color: #6b2018; line-height: 1.65; }
+
+  /* ─── INFO / NOTE BOXES ─── */
+  .note-box {
+    border-radius: var(--radius);
+    padding: 18px 22px;
+    margin: 24px 0;
+    font-size: 0.93rem;
+  }
+  .note-box.blue { background: var(--blue-light); border-left: 4px solid var(--blue); }
+  .note-box.gold { background: var(--gold-light); border-left: 4px solid var(--gold); }
+  .note-box.green { background: var(--green-light); border-left: 4px solid var(--green); }
+  .note-box strong { font-family: 'Syne', sans-serif; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; display: block; margin-bottom: 6px; }
+  .note-box.blue strong { color: var(--blue); }
+  .note-box.gold strong { color: var(--gold); }
+  .note-box.green strong { color: var(--green); }
+
+  /* ─── PROSE ─── */
+  .prose h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.18rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    margin: 32px 0 12px;
+  }
+  .prose h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+    margin: 22px 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .prose h4::before {
+    content: '';
+    display: inline-block;
+    width: 12px;
+    height: 2px;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+  .prose p { margin-bottom: 14px; color: var(--ink-soft); }
+  .prose a {
+    color: var(--blue);
+    text-decoration: underline;
+    text-decoration-color: #b0cae8;
+    text-underline-offset: 3px;
+    font-weight: 600;
+    transition: color 0.15s;
+  }
+  .prose a:hover { color: var(--accent); text-decoration-color: var(--accent); }
+  .prose ul, .prose ol { padding-left: 22px; margin-bottom: 14px; color: var(--ink-soft); }
+  .prose li { margin-bottom: 6px; }
+
+  /* ─── CATEGORY CARDS ─── */
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin: 28px 0;
+  }
+  .cat-card {
+    background: var(--paper-card);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: default;
+  }
+  .cat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+  }
+  .cat-card-icon {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+    display: block;
+  }
+  .cat-card-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--ink-muted);
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+  }
+  .cat-card h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .cat-card p {
+    font-size: 0.83rem;
+    color: var(--ink-muted);
+    line-height: 1.55;
+    margin: 0;
+  }
+  .cat-card-abbr {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    background: var(--paper-warm);
+    color: var(--ink-soft);
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-top: 10px;
+    display: inline-block;
+  }
+
+  /* ─── EXERCISES ─── */
+  .exercise-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: -1px;
+    position: relative;
+    z-index: 1;
+  }
+  .tab-btn {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 10px 22px;
+    border: 1px solid var(--rule);
+    border-bottom: none;
+    background: var(--paper-warm);
+    color: var(--ink-muted);
+    cursor: pointer;
+    border-radius: 8px 8px 0 0;
+    transition: all 0.18s;
+    letter-spacing: 0.02em;
+  }
+  .tab-btn.active {
+    background: var(--paper-card);
+    color: var(--ink);
+    border-color: var(--rule);
+    border-bottom-color: var(--paper-card);
+  }
+  .tab-btn:hover:not(.active) { background: var(--rule); }
+
+  .exercise-panel {
+    display: none;
+    background: var(--paper-card);
+    border: 1px solid var(--rule);
+    border-radius: 0 8px 8px 8px;
+    padding: 32px;
+    box-shadow: var(--shadow);
+  }
+  .exercise-panel.active { display: block; }
+
+  .exercise-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .exercise-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+    background: var(--paper-warm);
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    border: 1px solid var(--rule);
+  }
+  .exercise-meta h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--ink);
+    margin: 0 0 4px;
+  }
+  .exercise-meta .ex-sub {
+    font-size: 0.82rem;
+    color: var(--ink-muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .step-list { list-style: none; padding: 0; }
+  .step-list li {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    margin-bottom: 18px;
+    padding: 16px;
+    background: var(--paper);
+    border-radius: 6px;
+    border: 1px solid var(--rule);
+    transition: border-color 0.2s;
+  }
+  .step-list li:hover { border-color: #c8bdb4; }
+  .step-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    background: var(--accent);
+    color: #fff;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .step-content { font-size: 0.9rem; color: var(--ink-soft); line-height: 1.65; flex: 1; }
+  .step-content strong { color: var(--ink); font-weight: 600; }
+
+  /* ─── CODE ─── */
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.83em;
+    background: #2d2520;
+    color: #e8d9c0;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+  pre {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.84rem;
+    background: #1e1a16;
+    color: #e0ceb0;
+    border-radius: 8px;
+    padding: 20px 24px;
+    overflow-x: auto;
+    margin: 16px 0;
+    border: 1px solid #3d3428;
+    line-height: 1.7;
+    position: relative;
+  }
+  pre .comment { color: #7a6f58; }
+  pre .cmd { color: #91c98a; }
+  pre .flag { color: #6ab0de; }
+  pre .arg { color: #e8a86e; }
+
+  /* ─── TABLES ─── */
+  .table-wrap { overflow-x: auto; margin: 20px 0; border-radius: var(--radius); box-shadow: var(--shadow); }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--paper-card);
+    font-size: 0.88rem;
+  }
+  thead tr { background: var(--ink); color: #fff; }
+  thead th {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 12px 16px;
+    text-align: left;
+  }
+  tbody tr:nth-child(even) { background: var(--paper-warm); }
+  tbody tr:hover { background: var(--blue-light); }
+  tbody td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--rule);
+    color: var(--ink-soft);
+    vertical-align: top;
+  }
+  tbody td strong { color: var(--ink); font-weight: 600; }
+  .week-current td { background: rgba(192,57,43,0.06) !important; }
+  .week-current td:first-child { border-left: 3px solid var(--accent); }
+
+  /* ─── REPORT STRUCTURE ─── */
+  .report-pages {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+    margin: 24px 0;
+  }
+  .report-page-card {
+    background: var(--paper-card);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    padding: 18px;
+    box-shadow: var(--shadow);
+  }
+  .page-num-badge {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #fff;
+    background: var(--accent);
+    padding: 3px 9px;
+    border-radius: 3px;
+    margin-bottom: 10px;
+    display: inline-block;
+  }
+  .report-page-card h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .report-page-card p {
+    font-size: 0.78rem;
+    color: var(--ink-muted);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* ─── GRADING TABLE ─── */
+  .grading-bar {
+    margin: 24px 0;
+  }
+  .grade-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+  .grade-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    width: 200px;
+    flex-shrink: 0;
+    color: var(--ink-soft);
+  }
+  .grade-track {
+    flex: 1;
+    height: 10px;
+    background: var(--rule);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .grade-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 1.2s cubic-bezier(0.34,1.26,0.64,1);
+  }
+  .fill-blue { background: var(--blue); }
+  .fill-gold { background: var(--gold); }
+  .fill-green { background: var(--green); }
+  .grade-pct {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--ink-muted);
+    width: 32px;
+    text-align: right;
+  }
+
+  /* ─── TOC COURSE OVERVIEW ─── */
+  .course-map {
+    background: var(--paper-card);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin: 24px 0;
+  }
+  .course-part {
+    border-bottom: 1px solid var(--rule);
+  }
+  .course-part:last-child { border-bottom: none; }
+  .course-part-header {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 14px 20px;
+    background: var(--paper-warm);
+    color: var(--ink-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    user-select: none;
+    transition: background 0.15s;
+  }
+  .course-part-header:hover { background: var(--rule); }
+  .course-part-header .chevron {
+    margin-left: auto;
+    transition: transform 0.25s;
+    font-size: 0.7rem;
+  }
+  .course-part.open .chevron { transform: rotate(180deg); }
+  .course-part-items {
+    display: none;
+    padding: 0;
+  }
+  .course-part.open .course-part-items { display: block; }
+  .course-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 10px 20px 10px 36px;
+    font-size: 0.87rem;
+    color: var(--ink-soft);
+    border-bottom: 1px solid var(--paper-warm);
+    transition: background 0.15s;
+  }
+  .course-item:last-child { border-bottom: none; }
+  .course-item:hover { background: var(--paper-warm); }
+  .course-item.current {
+    background: var(--accent-light);
+    color: var(--accent-dark);
+    font-weight: 600;
+    border-left: 3px solid var(--accent);
+    padding-left: 33px;
+  }
+  .course-item .week-dot {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--ink-muted);
+    background: var(--paper-warm);
+    padding: 2px 6px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .course-item.current .week-dot {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  /* ─── CHECKLIST ─── */
+  .checklist {
+    list-style: none;
+    padding: 0;
+  }
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--rule);
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: color 0.15s;
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li.checked { color: var(--ink-muted); text-decoration: line-through; }
+  .check-box {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--rule);
+    border-radius: 4px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.18s;
+    margin-top: 2px;
+  }
+  .checklist li.checked .check-box {
+    background: var(--green);
+    border-color: var(--green);
+    color: #fff;
+  }
+
+  /* ─── LINK CHIP ─── */
+  .link-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.76rem;
+    color: var(--blue);
+    background: var(--blue-light);
+    border: 1px solid #c0d8f0;
+    padding: 3px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: all 0.15s;
+    margin: 2px;
+  }
+  .link-chip:hover {
+    background: var(--blue);
+    color: #fff;
+    border-color: var(--blue);
+  }
+  .link-chip::before { content: '↗'; font-family: sans-serif; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: #1a1612;
+    color: #7a6f68;
+    padding: 24px;
+    margin-top: 0;
+  }
+  footer .footer-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    text-align: center;
+    font-size: 0.85rem;
+  }
+  footer img { height: 32px; vertical-align: middle; }
+  footer p {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    color: #7a6f68;
+  }
+
+  /* ─── SCROLL PROGRESS ─── */
+  #scroll-bar {
+    position: fixed;
+    top: var(--nav-h);
+    left: 0;
+    height: 3px;
+    background: var(--accent);
+    z-index: 999;
+    width: 0%;
+    transition: width 0.1s linear;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 700px) {
+    .nav-links { display: none; }
+    .hero { padding: 48px 16px 40px; }
+    .page-wrap { padding: 0 16px 60px; }
+    .exercise-panel { padding: 20px; }
+    .category-grid { grid-template-columns: 1fr; }
+    .report-pages { grid-template-columns: 1fr 1fr; }
+    .grade-label { width: 130px; font-size: 0.72rem; }
+  }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-in { animation: fadeUp 0.5s ease-out forwards; }
+  .animate-in:nth-child(2) { animation-delay: 0.08s; }
+  .animate-in:nth-child(3) { animation-delay: 0.16s; }
+  .animate-in:nth-child(4) { animation-delay: 0.24s; }
+
+  /* ─── TOOLTIP ─── */
+  abbr[title] {
+    text-decoration: underline dotted var(--ink-muted);
+    cursor: help;
+  }
+
+  /* ─── PRINT ─── */
+  @media print {
+    nav#main-nav, #scroll-bar { display: none; }
+    body { padding-top: 0; }
+    .exercise-panel { display: block !important; }
+    .course-part-items { display: block !important; }
+  }
+</style>
+</head>
+<body>
+
+<div id="scroll-bar"></div>
+
+<!-- ═══ STICKY NAVIGATION ═══ -->
+<nav id="main-nav">
+  <a class="nav-brand" href="#top">
+    Cyber_Soho
+    <span class="week-tag">WK 11</span>
+  </a>
+  <div class="nav-links">
+    <a href="#overview">Overview</a>
+    <a href="#theory">Theory</a>
+    <a href="#categories">Categories</a>
+    <a href="#labs">Lab Exercises</a>
+    <a href="#report">Report</a>
+    <a href="#grading">Grading</a>
+    <a href="#course-map">Course Map</a>
+    <a href="#checklist">Checklist</a>
+  </div>
+  <div class="nav-right">
+    <button class="progress-pill" onclick="document.getElementById('checklist').scrollIntoView({behavior:'smooth'})">
+      ✓ <span id="check-count">0</span>/10 done
+    </button>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section id="top" class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow animate-in">Part III · Security Domains &amp; Technologies</div>
+    <h1 class="animate-in">Computer<br><em>Security Software</em></h1>
+    <p class="hero-sub animate-in">
+      The practical layer that operationalises everything you have studied so far —
+      from endpoint agents to SIEM platforms, evaluated with the rigour of a professional analyst.
+    </p>
+    <div class="hero-meta animate-in">
+      <span class="meta-chip highlight">Week 11</span>
+      <span class="meta-chip">Ponderation 1 · 2 · 1</span>
+      <span class="meta-chip">≥ 5 hours</span>
+      <span class="meta-chip">4-page A4 Report</span>
+      <span class="meta-chip">Schiller International University</span>
+    </div>
+  </div>
+</section>
+
+<div class="page-wrap">
+
+<!-- ═══ OVERVIEW ═══ -->
+<section id="overview" class="content-section">
+  <div class="section-header">
+    <span class="section-num">00</span>
+    <h2>Before You Begin</h2>
+  </div>
+
+  <div class="disclaimer">
+    <strong><span class="disclaimer-icon">⚠️</span> Instructor's Disclaimer — Please Read First</strong>
+    <p>
+      The tools, techniques, and methodologies referenced throughout this project are used strictly for <strong>educational purposes</strong>
+      in a controlled academic environment. The instructor bears no responsibility for any misuse of the knowledge or tools presented here.
+      Every tool mentioned is either open-source, freely available, or representative of a category —
+      <strong>students are strongly encouraged to research alternatives</strong>, replace suggested tools with others they find suitable,
+      and above all, to be inventive. A home-grown script that achieves the learning objective is valued at least as highly as
+      any polished third-party tool. Curiosity and creativity are core competencies being assessed here.
+    </p>
+  </div>
+
+  <div class="prose">
+    <h3>Where We Are in the Course</h3>
+    <p>
+      By Week 11 you have already explored Operating Systems Security &amp; Malware, Network and Web Security,
+      Authentication Protocols &amp; Key Management, and Applied Cryptography. This final topic of Part III ties
+      all of those threads together: <strong>Computer Security Software</strong> is the practical layer that
+      organisations deploy to <em>operationalise</em> everything you have studied so far.
+    </p>
+    <p>
+      Think of it this way — encryption knowledge without a correctly configured
+      <abbr title="Virtual Private Network">VPN</abbr> client is just theory. A firewall ruleset
+      misunderstood by its operator is a false sense of protection. This week you will move from understanding
+      <em>what</em> security mechanisms exist to evaluating <em>how</em> software implements them,
+      <em>why</em> some implementations fail, and <em>what</em> you would recommend to a hypothetical
+      small business or university department.
+    </p>
+
+    <h3>Learning Objectives</h3>
+    <p>After completing this week's activities you should be able to:</p>
+    <ol>
+      <li>Categorise the major families of computer security software and articulate the problem each one solves.</li>
+      <li>Evaluate a specific tool against criteria drawn from a recognised framework.</li>
+      <li>Demonstrate, through hands-on exercise, how a given tool behaves against a simulated threat scenario.</li>
+      <li>Produce a concise, professionally worded advisory report that a non-technical manager could act upon.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ═══ THEORY ═══ -->
+<section id="theory" class="content-section">
+  <div class="section-header">
+    <span class="section-num">Part 1</span>
+    <h2>Theory — The Landscape</h2>
+    <span class="weight-badge weight-1">WEIGHT × 1</span>
+  </div>
+
+  <div class="prose">
+    <h3>1.1 Why Software Alone Is Never Enough</h3>
+    <p>
+      A common mistake among newcomers to cybersecurity is imagining that installing the right software solves
+      the problem. It does not. Security software is one layer of what practitioners call
+      <strong>defence in depth</strong> — the principle that no single control, no matter how good,
+      should be the last line of defence.
+    </p>
+    <p>
+      The <a href="https://www.nist.gov" target="_blank" rel="noopener">NIST (National Institute of Standards and Technology)</a>
+      Cybersecurity Framework organises controls into <em>Identify</em>, <em>Protect</em>, <em>Detect</em>,
+      <em>Respond</em>, and <em>Recover</em> — software tools appear in every one of those categories,
+      working alongside policy, people, and physical controls.
+    </p>
+    <p>
+      With that caution stated, computer security software matters enormously. A well-configured, properly
+      monitored suite of tools raises the cost of an attack — in time, skill, and resources — to the point
+      where many opportunistic attackers simply move on to an easier target.
+    </p>
+  </div>
+</section>
+
+<!-- ═══ CATEGORIES ═══ -->
+<section id="categories" class="content-section">
+  <div class="section-header">
+    <span class="section-num">1.2</span>
+    <h2>The Eight Major Categories</h2>
+  </div>
+
+  <div class="category-grid">
+
+    <div class="cat-card">
+      <span class="cat-card-icon">🛡️</span>
+      <div class="cat-card-num">01 / ENDPOINT PROTECTION</div>
+      <h4>EPP &amp; EDR</h4>
+      <p>Run directly on individual machines. Traditional AV uses signature-based detection; modern EPP adds heuristics and sandboxing. EDR continuously records endpoint activity for threat hunting.</p>
+      <span class="cat-card-abbr">EPP · EDR · AV</span>
+    </div>
+
+    <div class="cat-card">
+      <span class="cat-card-icon">🔥</span>
+      <div class="cat-card-num">02 / NETWORK CONTROL</div>
+      <h4>Firewalls &amp; WAF</h4>
+      <p>Packet-filtering → Stateful → NGFW (Next-Generation Firewall) → WAF (Web Application Firewall). Each generation understands more context about what is passing through it.</p>
+      <span class="cat-card-abbr">NGFW · WAF · HTTPS</span>
+    </div>
+
+    <div class="cat-card">
+      <span class="cat-card-icon">🔍</span>
+      <div class="cat-card-num">03 / DETECTION &amp; PREVENTION</div>
+      <h4>IDS &amp; IPS</h4>
+      <p>IDS (Intrusion Detection System) alerts; IPS (Intrusion Prevention System) acts inline. Signature-based detection finds known attacks; anomaly-based detects novel ones but with more false positives.</p>
+      <span class="cat-card-abbr">IDS · IPS · NSE</span>
+    </div>
+
+    <div class="cat-card">
+      <span class="cat-card-icon">🔐</span>
+      <div class="cat-card-num">04 / SECURE TRANSPORT</div>
+      <h4>VPN Software</h4>
+      <p>Creates encrypted tunnels across untrusted networks. IPsec (Internet Protocol Security) operates at network layer; TLS-based VPNs at transport layer. OpenVPN and WireGuard are widely deployed open-source implementations.</p>
+      <span class="cat-card-abbr">VPN · IPsec · TLS/SSL</span>
+    </div>
+
+    <div class="cat-card">
+      <span class="cat-card-icon">📊</span>
+      <div class="cat-card-num">05 / LOG CORRELATION</div>
+      <h4>SIEM Platforms</h4>
+      <p>SIEM (Security Information and Event Management) aggregates logs from across infrastructure and correlates them. Central to any SOC (Security Operations Centre). Turns individual events into patterns.</p>
+      <span class="cat-card-abbr">SIEM · SOC</span>
+    </div>
+
+    <div class="cat-card">
+      <span class="cat-card-icon">🎯</span>
+      <div class="cat-card-num">06 / OFFENSIVE ASSESSMENT</div>
+      <h4>Vulnerability Scanners</h4>
+      <p>Discover weaknesses before attackers do. Produce CVE (Common Vulnerabilities and Exposures) identifiers and CVSS (Common Vulnerability Scoring System) severity scores. Penetration frameworks verify exploitability.</p>
+      <span class="cat-card-abbr">CVE · CVSS · NVD</span>
+    </div>
+
+    <div class="cat-card">
+      <span class="cat-card-icon">🔑</span>
+      <div class="cat-card-num">07 / CREDENTIAL HYGIENE</div>
+      <h4>Password Managers</h4>
+      <p>Reduce the most common source of account compromise. Well-designed managers derive keys using PBKDF2 (Password-Based Key Derivation Function 2) or Argon2 — never storing the master password directly.</p>
+      <span class="cat-card-abbr">PBKDF2 · Argon2</span>
+    </div>
+
+    <div class="cat-card">
+      <span class="cat-card-icon">📤</span>
+      <div class="cat-card-num">08 / DATA PROTECTION</div>
+      <h4>DLP Software</h4>
+      <p>DLP (Data Loss Prevention) monitors data in motion, at rest, and in use to detect or block exfiltration. Uses pattern matching, document fingerprinting, and increasingly machine-learning classification.</p>
+      <span class="cat-card-abbr">DLP · ML</span>
+    </div>
+
+  </div>
+
+  <div class="prose">
+    <h3>1.3 How Professionals Evaluate Security Software</h3>
+    <p>
+      When confronted with a purchasing or deployment decision, professionals rarely rely on vendor marketing.
+      Two widely cited evaluation approaches:
+    </p>
+    <ul>
+      <li>
+        <strong>Common Criteria (CC)</strong> — international standard
+        <a href="https://www.iso.org/standard/50341.html" target="_blank" rel="noopener">ISO/IEC 15408</a>
+        defining a framework for certifying products meet security requirements.
+        Products receive an <abbr title="Evaluation Assurance Level">EAL</abbr> rating from 1 to 7.
+      </li>
+      <li>
+        <strong>Independent testing organisations</strong> such as
+        <a href="https://www.av-test.org" target="_blank" rel="noopener">AV-TEST</a> and
+        <a href="https://www.av-comparatives.org" target="_blank" rel="noopener">AV-Comparatives</a>
+        run standardised benchmarks — detection rates, false positive rates, performance impact.
+        Learn to read the <em>methodology</em>, not just the headline score.
+      </li>
+    </ul>
+
+    <h3>Key External References</h3>
+    <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;">
+      <a class="link-chip" href="https://attack.mitre.org" target="_blank" rel="noopener">MITRE ATT&amp;CK Framework</a>
+      <a class="link-chip" href="https://owasp.org" target="_blank" rel="noopener">OWASP Foundation</a>
+      <a class="link-chip" href="https://nvd.nist.gov" target="_blank" rel="noopener">NVD — NIST</a>
+      <a class="link-chip" href="https://cve.mitre.org" target="_blank" rel="noopener">CVE Database — MITRE</a>
+      <a class="link-chip" href="https://www.nist.gov" target="_blank" rel="noopener">NIST.gov</a>
+      <a class="link-chip" href="https://www.av-test.org" target="_blank" rel="noopener">AV-TEST</a>
+      <a class="link-chip" href="https://www.av-comparatives.org" target="_blank" rel="noopener">AV-Comparatives</a>
+      <a class="link-chip" href="https://www.iso.org/standard/50341.html" target="_blank" rel="noopener">ISO/IEC 15408</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ LAB EXERCISES ═══ -->
+<section id="labs" class="content-section">
+  <div class="section-header">
+    <span class="section-num">Part 2</span>
+    <h2>Lab Exercises — Hands-On</h2>
+    <span class="weight-badge weight-2">WEIGHT × 2</span>
+  </div>
+
+  <div class="disclaimer">
+    <strong><span class="disclaimer-icon">⚠️</span> Before You Touch Any Tool</strong>
+    <p>
+      Work only on virtual machines you own or the designated university lab environment. All tools listed below are
+      open-source and freely available — you are <strong>explicitly invited</strong> to replace any of them with an
+      alternative you discover through your own research. If you cannot install a tool, a well-reasoned written analysis
+      citing sources earns partial credit. Students with programming experience are encouraged to
+      <strong>write their own scripts</strong> — a home-grown script achieving the learning objective is valued at
+      least as highly as any polished third-party tool.
+    </p>
+  </div>
+
+  <div class="exercise-tabs">
+    <button class="tab-btn active" onclick="switchTab(0)">Exercise A — Inventory</button>
+    <button class="tab-btn" onclick="switchTab(1)">Exercise B — Vuln Scan</button>
+    <button class="tab-btn" onclick="switchTab(2)">Exercise C — Evaluation</button>
+  </div>
+
+  <!-- EXERCISE A -->
+  <div class="exercise-panel active" id="tab-0">
+    <div class="exercise-header">
+      <div class="exercise-icon">🗂️</div>
+      <div class="exercise-meta">
+        <h3>Exercise A — Mapping the Software Ecosystem on a Live System</h3>
+        <span class="ex-sub">Objective · Gap analysis · Firewall inspection · Est. 90 min</span>
+      </div>
+    </div>
+
+    <div class="prose">
+      <p><strong>Objective:</strong> Develop a clear picture of what security software is already present — or absent — on a system you control, and identify gaps relative to the eight-category baseline from Part 1.</p>
+    </div>
+
+    <ul class="step-list">
+      <li>
+        <span class="step-num">1</span>
+        <div class="step-content">
+          <strong>Inventory running processes.</strong> Identify which, if any, relate to security functions (antivirus agents, firewall daemons, VPN clients, logging agents). Build a table: <em>Process name / Purpose / Category / Running (Y/N)</em>.
+          <pre><span class="comment"># Linux — process list</span>
+<span class="cmd">ps</span> <span class="flag">aux</span>
+<span class="cmd">systemctl</span> <span class="flag">list-units</span> --type=service
+<span class="cmd">ss</span> <span class="flag">-tulnp</span>
+
+<span class="comment"># Windows PowerShell</span>
+<span class="cmd">Get-Service</span>
+<span class="cmd">netstat</span> <span class="flag">-ano</span></pre>
+        </div>
+      </li>
+      <li>
+        <span class="step-num">2</span>
+        <div class="step-content">
+          <strong>Gap analysis.</strong> Compare your inventory against the eight categories in §1.2. For every category with no software representative, briefly explain what threat surface is left unaddressed. This feeds directly into your Page 3 report section.
+        </div>
+      </li>
+      <li>
+        <span class="step-num">3</span>
+        <div class="step-content">
+          <strong>Firewall rule inspection.</strong> Examine current firewall configuration. Identify (a) one rule that makes sense and explain why, and (b) one rule or gap you would improve and how.
+          <pre><span class="comment"># Linux — view iptables rules</span>
+<span class="cmd">sudo</span> <span class="flag">iptables</span> <span class="arg">-L -v -n</span>
+<span class="comment"># or nftables</span>
+<span class="cmd">sudo</span> <span class="flag">nft</span> <span class="arg">list ruleset</span>
+
+<span class="comment"># Windows</span>
+<span class="cmd">netsh</span> <span class="flag">advfirewall</span> <span class="arg">show allprofiles</span></pre>
+        </div>
+      </li>
+    </ul>
+
+    <div class="note-box green">
+      <strong>🚀 Going Further</strong>
+      Set up a minimal <code>ufw</code> (Uncomplicated Firewall) ruleset on a Linux VM and demonstrate, by attempting a connection from the host machine, that your rules behave as intended. Screenshot and describe the result.
+    </div>
+  </div>
+
+  <!-- EXERCISE B -->
+  <div class="exercise-panel" id="tab-1">
+    <div class="exercise-header">
+      <div class="exercise-icon">🔎</div>
+      <div class="exercise-meta">
+        <h3>Exercise B — Vulnerability Scanning on a Controlled Target</h3>
+        <span class="ex-sub">Objective · Tool selection · CVE lookup · CVSS scoring · Est. 90 min</span>
+      </div>
+    </div>
+
+    <div class="prose">
+      <p><strong>Objective:</strong> Run a vulnerability scan against a system you own or a purpose-built vulnerable VM, interpret the output, and match findings to CVE (Common Vulnerabilities and Exposures) records.</p>
+      <h4>Choose Your Target (one only)</h4>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Target</th><th>Type</th><th>Where to get it</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Metasploitable 2/3</strong></td>
+            <td>Deliberately vulnerable Linux VM</td>
+            <td><a href="https://github.com/rapid7/metasploitable3" target="_blank" rel="noopener">github.com/rapid7/metasploitable3</a></td>
+          </tr>
+          <tr>
+            <td><strong>DVWA</strong></td>
+            <td>Damn Vulnerable Web Application — Docker</td>
+            <td><a href="https://github.com/digininja/DVWA" target="_blank" rel="noopener">github.com/digininja/DVWA</a></td>
+          </tr>
+          <tr>
+            <td><strong>Your own VM</strong></td>
+            <td>Service you installed &amp; understand</td>
+            <td>Your own lab environment</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ul class="step-list">
+      <li>
+        <span class="step-num">1</span>
+        <div class="step-content">
+          <strong>Research and justify your scanning tool</strong> — spend 20 minutes exploring your options before running anything. Document <em>why</em> you chose the tool: ease of setup, scope of detection, documentation quality, community support.
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;">
+            <a class="link-chip" href="https://nmap.org" target="_blank" rel="noopener">Nmap + NSE Scripts</a>
+            <a class="link-chip" href="https://www.greenbone.net/en/community-edition/" target="_blank" rel="noopener">OpenVAS / Greenbone</a>
+          </div>
+        </div>
+      </li>
+      <li>
+        <span class="step-num">2</span>
+        <div class="step-content">
+          <strong>Run the scan.</strong> Read what each flag does before running — do not scan blindly.
+          <pre><span class="comment"># Nmap with vulnerability scripts — read the manual first!</span>
+<span class="cmd">nmap</span> <span class="flag">-sV</span> <span class="flag">--script</span> <span class="arg">vuln &lt;target-IP&gt;</span></pre>
+          Capture the full output. You will quote from it in your report.
+        </div>
+      </li>
+      <li>
+        <span class="step-num">3</span>
+        <div class="step-content">
+          <strong>Select THREE findings and for each one:</strong>
+          <ul>
+            <li>State the finding as the tool reports it.</li>
+            <li>Look up the CVE ID on the <a href="https://nvd.nist.gov" target="_blank" rel="noopener">NVD (National Vulnerability Database)</a>.</li>
+            <li>Record the CVSS (Common Vulnerability Scoring System) score and what it tells you about severity.</li>
+            <li>Describe — in your own words — what class of harm this vulnerability could enable.</li>
+            <li>Suggest a remediation step.</li>
+          </ul>
+        </div>
+      </li>
+    </ul>
+
+    <div class="note-box gold">
+      <strong>🚀 Going Further</strong>
+      Look up whether a patch or configuration change addressing one of your findings is documented in the vendor's security advisory. Link to it. Compare whether the vendor's described impact matches the NVD record.
+    </div>
+  </div>
+
+  <!-- EXERCISE C -->
+  <div class="exercise-panel" id="tab-2">
+    <div class="exercise-header">
+      <div class="exercise-icon">📋</div>
+      <div class="exercise-meta">
+        <h3>Exercise C — Evaluating an Endpoint Protection Solution</h3>
+        <span class="ex-sub">Objective · Criteria definition · Evidence gathering · Weighted scoring · Est. 60 min</span>
+      </div>
+    </div>
+
+    <div class="prose">
+      <p><strong>Objective:</strong> Apply a structured evaluation methodology to a real tool, as a professional analyst would before recommending a purchase or deployment.</p>
+    </div>
+
+    <ul class="step-list">
+      <li>
+        <span class="step-num">1</span>
+        <div class="step-content">
+          <strong>Select one tool to evaluate.</strong> Examples below — or find your own. Justify your selection.
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;">
+            <a class="link-chip" href="https://www.clamav.net" target="_blank" rel="noopener">ClamAV (open-source AV)</a>
+            <a class="link-chip" href="https://wazuh.com" target="_blank" rel="noopener">Wazuh (SIEM / EDR)</a>
+            <a class="link-chip" href="https://www.av-test.org" target="_blank" rel="noopener">AV-TEST published results</a>
+            <a class="link-chip" href="https://www.av-comparatives.org" target="_blank" rel="noopener">AV-Comparatives</a>
+          </div>
+        </div>
+      </li>
+      <li>
+        <span class="step-num">2</span>
+        <div class="step-content">
+          <strong>Write down your five evaluation criteria first</strong> — before looking at any results. Possible criteria: detection rate, false positive rate, performance overhead, ease of deployment, update frequency, logging/reporting, platform coverage, community support.
+        </div>
+      </li>
+      <li>
+        <span class="step-num">3</span>
+        <div class="step-content">
+          <strong>Gather evidence</strong> for each criterion — a published test result, a piece of documentation, a community post, or your own measurement. Record the source for every data point.
+        </div>
+      </li>
+      <li>
+        <span class="step-num">4</span>
+        <div class="step-content">
+          <strong>Score and recommend.</strong> Assign each criterion a weight (they need not be equal). Score the tool 1–5 per criterion. Compute a weighted score. Write a two-paragraph recommendation: would you deploy this tool in a small organisation? What are the caveats?
+        </div>
+      </li>
+    </ul>
+
+    <div class="note-box blue">
+      <strong>💡 Evaluation Template</strong>
+      A simple approach: create a 5-row table (one row per criterion) with columns for Criterion, Weight (%), Score (1–5), Weighted Score, and Evidence Source. Sum the weighted scores for your final rating.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ REPORT ═══ -->
+<section id="report" class="content-section">
+  <div class="section-header">
+    <span class="section-num">Part 1b</span>
+    <h2>Reflection &amp; Report</h2>
+    <span class="weight-badge weight-r">WEIGHT × 1</span>
+  </div>
+
+  <div class="prose">
+    <p>
+      Your written deliverable is a <strong>maximum 4-page A4 report</strong> addressed to a hypothetical IT manager
+      at a university department that currently has no formal security software stack. Written in clear, professional
+      English (or French, if your programme permits) — it must not read as a product advertisement.
+    </p>
+  </div>
+
+  <div class="report-pages">
+    <div class="report-page-card">
+      <span class="page-num-badge">Page 1</span>
+      <h4>Executive Summary &amp; Context</h4>
+      <p>Context paragraph (what the department runs, what data it holds, threat surface assumptions) + one-paragraph overall recommendation.</p>
+    </div>
+    <div class="report-page-card">
+      <span class="page-num-badge">Page 2</span>
+      <h4>Lab Findings</h4>
+      <p>Key results from Exercises A, B, C — synthesised, not raw output. Use a table where appropriate. Interpret everything.</p>
+    </div>
+    <div class="report-page-card">
+      <span class="page-num-badge">Page 3</span>
+      <h4>Recommended Software Stack</h4>
+      <p>One tool (or class of tool) per category from §1.2 + one-sentence justification. At least 2 must be tools researched fresh this week.</p>
+    </div>
+    <div class="report-page-card">
+      <span class="page-num-badge">Page 4</span>
+      <h4>Limitations &amp; Surprises</h4>
+      <p>Three limitations of your stack; non-software controls that fill the gaps; one paragraph on what surprised you most.</p>
+    </div>
+  </div>
+
+  <div class="note-box gold">
+    <strong>⚡ Academic Integrity</strong>
+    Two students scanning the same VM will see identical Nmap output. Their reports must differ substantially in interpretation, finding selection, and recommendations. Identical or near-identical reports, regardless of shared lab environment, will be reviewed under the university's academic integrity policy.
+  </div>
+</section>
+
+<!-- ═══ GRADING ═══ -->
+<section id="grading" class="content-section">
+  <div class="section-header">
+    <span class="section-num">04</span>
+    <h2>Grading Breakdown</h2>
+  </div>
+
+  <div class="grading-bar">
+    <div class="grade-row">
+      <span class="grade-label">Theory — Part 1</span>
+      <div class="grade-track">
+        <div class="grade-fill fill-blue" data-width="25" style="width:0%"></div>
+      </div>
+      <span class="grade-pct">25%</span>
+    </div>
+    <div class="grade-row">
+      <span class="grade-label">Lab Practice — Part 2</span>
+      <div class="grade-track">
+        <div class="grade-fill fill-gold" data-width="50" style="width:0%"></div>
+      </div>
+      <span class="grade-pct">50%</span>
+    </div>
+    <div class="grade-row">
+      <span class="grade-label">Report — Reflection</span>
+      <div class="grade-track">
+        <div class="grade-fill fill-green" data-width="25" style="width:0%"></div>
+      </div>
+      <span class="grade-pct">25%</span>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Component</th><th>Weight</th><th>What Is Assessed</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Theory engagement (Part 1)</strong></td>
+          <td>× 1</td>
+          <td>Accuracy, depth, and integration of concepts in written work</td>
+        </tr>
+        <tr>
+          <td><strong>Lab practice (Part 2)</strong></td>
+          <td>× 2</td>
+          <td>Evidence of hands-on work, quality of analysis, creativity in tool choice</td>
+        </tr>
+        <tr>
+          <td><strong>Report — Reflection</strong></td>
+          <td>× 1</td>
+          <td>Clarity, professional tone, synthesis, originality of recommendations</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══ COURSE MAP ═══ -->
+<section id="course-map" class="content-section">
+  <div class="section-header">
+    <span class="section-num">05</span>
+    <h2>Full Course Project Map</h2>
+  </div>
+
+  <div class="prose">
+    <p>
+      Your Week 11 report is one section of the <strong>cumulative course project</strong> that spans all four parts of the syllabus.
+      By the Final Assessment, you will have contributed written work covering the topics below.
+      Keep your reports — you will need them for the integrated final advisory.
+    </p>
+  </div>
+
+  <div class="course-map">
+
+    <div class="course-part open">
+      <div class="course-part-header" onclick="togglePart(this)">
+        Part I · Foundations of Computer Security
+        <span class="chevron">▾</span>
+      </div>
+      <div class="course-part-items">
+        <div class="course-item">
+          <span class="week-dot">W1–2</span> Introduction to Computer Security
+        </div>
+        <div class="course-item">
+          <span class="week-dot">W1–2</span> Security Models and Policy Issues
+        </div>
+      </div>
+    </div>
+
+    <div class="course-part open">
+      <div class="course-part-header" onclick="togglePart(this)">
+        Part II · Threats, Attacks &amp; Defenses
+        <span class="chevron">▾</span>
+      </div>
+      <div class="course-part-items">
+        <div class="course-item">
+          <span class="week-dot">W3–7</span> Detection, Containment, and Response/Recovery
+        </div>
+        <div class="course-item">
+          <span class="week-dot">W3–7</span> Techniques Used by Hackers
+        </div>
+        <div class="course-item">
+          <span class="week-dot">W3–7</span> Network Scanning, Attack Classification, and Vulnerability Analysis
+        </div>
+        <div class="course-item">
+          <span class="week-dot">W3–7</span> Cyber Terrorism and Information Warfare
+        </div>
+        <div class="course-item">
+          <span class="week-dot">W3–7</span> Industrial Espionage in Cyberspace
+        </div>
+        <div class="course-item" style="background: var(--paper-warm); font-style:italic; color:var(--ink-muted);">
+          <span class="week-dot" style="background:#888;color:#fff;">MID</span> Midterm Assessment — Comprehensive Exam
+        </div>
+      </div>
+    </div>
+
+    <div class="course-part open">
+      <div class="course-part-header" onclick="togglePart(this)" style="color:var(--ink);">
+        Part III · Security Domains &amp; Technologies ← You Are Here
+        <span class="chevron">▾</span>
+      </div>
+      <div class="course-part-items">
+        <div class="course-item">
+          <span class="week-dot">W8</span> Operating Systems Security and Malware
+        </div>
+        <div class="course-item">
+          <span class="week-dot">W9</span> Network and Web Security
+        </div>
+        <div class="course-item">
+          <span class="week-dot">W10</span> Authentication Protocols and Key Management
+        </div>
+        <div class="course-item">
+          <span class="week-dot">W10</span> Applied Cryptography
+        </div>
+        <div class="course-item current">
+          <span class="week-dot">W11</span> Computer Security Software ← This Week
+        </div>
+      </div>
+    </div>
+
+    <div class="course-part open">
+      <div class="course-part-header" onclick="togglePart(this)">
+        Part IV · Emerging Topics
+        <span class="chevron">▾</span>
+      </div>
+      <div class="course-part-items">
+        <div class="course-item">
+          <span class="week-dot">W12</span> Blockchain and Decentralized Applications
+        </div>
+        <div class="course-item">
+          <span class="week-dot">W13</span> E-commerce Issues
+        </div>
+        <div class="course-item" style="background: var(--paper-warm); font-style:italic; color:var(--ink-muted);">
+          <span class="week-dot" style="background:#888;color:#fff;">FIN</span> Final Assessment and Overall Course Feedback
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ CHECKLIST ═══ -->
+<section id="checklist" class="content-section">
+  <div class="section-header">
+    <span class="section-num">06</span>
+    <h2>Submission Checklist</h2>
+  </div>
+
+  <div class="prose"><p>Tap each item to mark it complete. Progress is tracked in the navigation bar.</p></div>
+
+  <ul class="checklist" id="main-checklist">
+    <li onclick="toggleCheck(this)">
+      <div class="check-box">✓</div>
+      VM (Virtual Machine) is set up and I am working only on systems I own.
+    </li>
+    <li onclick="toggleCheck(this)">
+      <div class="check-box">✓</div>
+      Exercise A completed: process inventory table built and gap analysis written.
+    </li>
+    <li onclick="toggleCheck(this)">
+      <div class="check-box">✓</div>
+      Exercise A completed: firewall rules examined, one rule explained, one improvement identified.
+    </li>
+    <li onclick="toggleCheck(this)">
+      <div class="check-box">✓</div>
+      Exercise B completed: scanning tool researched and choice justified in writing.
+    </li>
+    <li onclick="toggleCheck(this)">
+      <div class="check-box">✓</div>
+      Exercise B completed: three findings documented with CVE IDs, CVSS scores, harm description, and remediation.
+    </li>
+    <li onclick="toggleCheck(this)">
+      <div class="check-box">✓</div>
+      Exercise C completed: five evaluation criteria defined before looking at results.
+    </li>
+    <li onclick="toggleCheck(this)">
+      <div class="check-box">✓</div>
+      Exercise C completed: tool scored with weighted criteria and recommendation written.
+    </li>
+    <li onclick="toggleCheck(this)">
+      <div class="check-box">✓</div>
+      Report is 4 pages A4 or fewer and follows the four-page structure.
+    </li>
+    <li onclick="toggleCheck(this)">
+      <div class="check-box">✓</div>
+      At least 2 recommended tools on Page 3 are ones I researched fresh this week.
+    </li>
+    <li onclick="toggleCheck(this)">
+      <div class="check-box">✓</div>
+      Name, student ID, and week number appear on Page 1. All abbreviations are expanded on first use.
+    </li>
+  </ul>
+</section>
+
+</div><!-- /.page-wrap -->
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="bg-stone-900 text-stone-400 py-6 mt-8">
+  <div class="footer-inner container mx-auto text-center text-sm">
+    <p style="display:flex; justify-content:center; align-items:center; gap:8px; margin:0;">
+      <img src="cyber_soho.png" alt="Cyber Soho" style="height:32px; filter: invert(1) brightness(0.7);">
+      <span>Educational Hub &copy; 2026 | Schiller International University</span>
+    </p>
+  </div>
+</footer>
+
+<script>
+  // ─── Tab switching
+  function switchTab(idx) {
+    document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
+    document.querySelectorAll('.exercise-panel').forEach((p,i) => p.classList.toggle('active', i===idx));
+  }
+
+  // ─── Course map accordion
+  function togglePart(header) {
+    const part = header.closest('.course-part');
+    part.classList.toggle('open');
+  }
+
+  // ─── Checklist interaction
+  function toggleCheck(li) {
+    li.classList.toggle('checked');
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const total = document.querySelectorAll('#main-checklist li').length;
+    const done = document.querySelectorAll('#main-checklist li.checked').length;
+    document.getElementById('check-count').textContent = done;
+  }
+
+  // ─── Scroll progress bar
+  window.addEventListener('scroll', () => {
+    const scroll = window.scrollY;
+    const total = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = total > 0 ? (scroll / total) * 100 : 0;
+    document.getElementById('scroll-bar').style.width = pct + '%';
+  });
+
+  // ─── Active nav link on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navLinks.forEach(a => {
+          a.classList.toggle('active', a.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+
+  // ─── Animate grading bars on scroll
+  const bars = document.querySelectorAll('.grade-fill[data-width]');
+  const barObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        el.style.width = el.dataset.width + '%';
+        barObserver.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+  bars.forEach(b => barObserver.observe(b));
+
+  // ─── Animate sections on scroll
+  const contentSections = document.querySelectorAll('.content-section');
+  const sectionObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+        sectionObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.07 });
+
+  contentSections.forEach(s => {
+    s.style.opacity = '0';
+    s.style.transform = 'translateY(24px)';
+    s.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    sectionObserver.observe(s);
+  });
+</script>
+
+</body>
+</html>
