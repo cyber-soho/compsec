@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Security Software - Study Material</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; color: #1f2937; }
+        
+        /* Tab Styles */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+        .tab-btn.active { border-bottom: 2px solid #2563eb; color: #2563eb; font-weight: 600; }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Flashcard Flip Styles */
+        .flashcard {
+            perspective: 1000px;
+            cursor: pointer;
+            height: 200px;
+        }
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e5e7eb;
+        }
+        .flashcard-front { background-color: white; color: #111827; font-weight: 600; font-size: 1.125rem; }
+        .flashcard-back { background-color: #1f2937; color: white; transform: rotateY(180deg); font-size: 0.95rem; }
+
+        /* Quiz Option Styles */
+        .quiz-option { transition: all 0.2s; cursor: pointer; }
+        .quiz-option:hover:not(.disabled) { background-color: #f3f4f6; }
+        .quiz-option.disabled { cursor: default; opacity: 0.8; }
+        .quiz-option.correct { background-color: #dcfce7; border-color: #22c55e; }
+        .quiz-option.incorrect { background-color: #fee2e2; border-color: #ef4444; }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+        
+        <div class="border-b border-gray-200">
+            <div class="p-6 pb-0">
+                <h1 class="text-2xl font-bold text-gray-900 mb-4">Computer Security Software Review</h1>
+                <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                    <button class="tab-btn active whitespace-nowrap py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300" data-target="flashcards">
+                        Flashcards (25)
+                    </button>
+                    <button class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300" data-target="quiz">
+                        Practice Quiz (10)
+                    </button>
+                </nav>
+            </div>
+        </div>
+
+        <div id="flashcards" class="tab-content active p-6">
+            <p class="text-gray-600 mb-6">Click on any card to flip it and reveal the definition or answer.</p>
+            <div id="flashcard-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                </div>
+        </div>
+
+        <div id="quiz" class="tab-content p-6">
+            <p class="text-gray-600 mb-6">Test your practical application of security concepts. Select an answer to see the rationale.</p>
+            <div id="quiz-container" class="space-y-8">
+                </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Data Payloads
+        const flashcardData = [
+            { front: "Computer Security Software", back: "Any program whose purpose is to prevent, detect, or respond to unauthorised use of a computer system." },
+            { front: "Defense in Depth", back: "The security principle of stacking multiple, overlapping layers of protection because any single layer can fail." },
+            { front: "Five common layers targeted by cyber attacks", back: "Hardware, Operating system, Network, Application, and Human." },
+            { front: "Core principle of security software architecture", back: "Security is composition, not shopping; each layer exists because the other layers inevitably fail." },
+            { front: "Signature-based detection", back: "Computing a cryptographic fingerprint of a file and looking it up in a database of known-bad fingerprints." },
+            { front: "Reason for the shift from 'Antivirus' to 'Anti-malware'", back: "'Virus' refers to a 1980s self-replicator, whereas modern threats include ransomware, stealers, miners, and wipers." },
+            { front: "Behaviour-based detection", back: "Catching unknown threats by watching what a program actually does when it runs, though it produces more false positives." },
+            { front: "EICAR Test String", back: "A harmless text string used to safely test that antivirus software is installed and active without needing real malware." },
+            { front: "VirusTotal", back: "A free multi-engine scanner that aggregates verdicts from 70+ antiviruses for uploaded files or URLs." },
+            { front: "Host-Based Firewall", back: "A program running on an endpoint that inspects every packet entering or leaving the machine and allows or drops it based on rules." },
+            { front: "Five core fields of a firewall rule", back: "Direction, Protocol, Source, Destination, and Action." },
+            { front: "Three Windows Firewall Profiles", back: "Domain (enterprise network), Private (home/trusted network), and Public (café/airport)." },
+            { front: "Intrusion Detection System (IDS)", back: "A passive system that watches mirrored network traffic and alerts analysts when it detects suspicious activity." },
+            { front: "Intrusion Prevention System (IPS)", back: "An active system that sits inline in the traffic path and blocks suspicious activity." },
+            { front: "Typical enterprise deployment path for IDS/IPS", back: "Deploy IDS first to tune rules, then upgrade to IPS only when the rules are trustworthy enough to block traffic without false positives." },
+            { front: "Endpoint Detection & Response (EDR)", back: "A system that records continuous endpoint telemetry and ships it to the cloud to hunt for malicious behaviour patterns." },
+            { front: "Key difference between AV and EDR detection methods", back: "AV looks at individual files for signatures, while EDR correlates sequences of behaviour chains across multiple events." },
+            { front: "Extended Detection & Response (XDR)", back: "A single correlation layer that merges telemetry from endpoints, networks, email, and identity to reduce alert fatigue." },
+            { front: "Shared cryptographic primitive of disk encryption and password managers", back: "Symmetric authenticated encryption, typically AES combined with a Message Authentication Code (MAC)." },
+            { front: "Key Derivation Function (KDF)", back: "An algorithm that turns a human password into a cryptographic key by running a deliberately slow hash many times." },
+            { front: "Zero-Knowledge Sync in password managers", back: "The vault is encrypted locally on the device, and the provider's server only receives and stores the undecryptable ciphertext." },
+            { front: "Virtual Private Network (VPN)", back: "A tool that encrypts a device's packets and wraps them in outer packets addressed to a server, changing the apparent source IP." },
+            { front: "Primary limitation of VPN anonymity", back: "A VPN only shifts trust from the local ISP to the VPN provider; the provider can still see the traffic's real destination." },
+            { front: "Vulnerability Scanners", back: "Tools that enumerate open ports, fingerprint software versions, and cross-reference them against a CVE database to produce a prioritised report." },
+            { front: "Ethical and legal requirement for vulnerability scanning", back: "You must only scan hosts you own (like localhost or a home lab) or have documented written permission to test." }
+        ];
+
+        const quizData = [
+            {
+                question: "A small business invests heavily in a top-tier network firewall, believing their network is now completely secure. However, an employee accidentally plugs in a malware-infected USB drive they found in the parking lot, compromising the network. What fundamental security principle did the business fail to implement?",
+                hint: "Consider the castle analogy and why relying solely on a moat leaves the inner keep vulnerable.",
+                options: [
+                    { text: "Defense in Depth", rationale: "Relying on multiple, overlapping layers of protection ensures that if one layer (the network firewall) is bypassed by a different vector (a local USB), other layers can still stop the threat.", isCorrect: true },
+                    { text: "Zero-Knowledge Synchronization", rationale: "This relates to how password managers store encrypted blobs in the cloud, not physical endpoint security or overall network architecture.", isCorrect: false },
+                    { text: "Intrusion Prevention System configuration", rationale: "While an IPS might monitor network traffic, it would not inherently stop a local physical attack vector like a USB drive executing code on an endpoint.", isCorrect: false },
+                    { text: "Cryptographic Fingerprinting", rationale: "This is a specific technique used by traditional antivirus to identify known files, rather than the overarching architectural principle of layered security.", isCorrect: false }
+                ]
+            },
+            {
+                question: "A completely new, never-before-seen ransomware variant enters a corporate network. The company relies entirely on a traditional, signature-based antivirus solution. Why is the antivirus highly likely to fail in stopping this attack?",
+                hint: "Consider how traditional tools identify threats compared to how modern tools watch what a program actually does.",
+                options: [
+                    { text: "The malware's unique hash is not yet documented in the vendor's known-bad database.", rationale: "Traditional AV requires prior knowledge of a file's exact cryptographic footprint to flag it, making it blind to zero-day or heavily modified threats.", isCorrect: true },
+                    { text: "The AV engine has not been tested recently using the standard EICAR string.", rationale: "The EICAR string is simply a harmless tool to verify if the AV software is turned on and functioning; it does not update the system's ability to catch new malware.", isCorrect: false },
+                    { text: "The ransomware was designed to bypass the operating system's built-in behavioral rules.", rationale: "The scenario specifies the company relies entirely on signature-based detection, meaning no behavioral rules are active to be bypassed in the first place.", isCorrect: false },
+                    { text: "The network's host-based firewall was accidentally left on the Public profile.", rationale: "A stricter firewall profile might actually help prevent network propagation, but it does not explain why the local AV engine failed to detect the malicious file itself.", isCorrect: false }
+                ]
+            },
+            {
+                question: "Alice frequently works remotely. She heads to a local coffee shop, connects to the public Wi-Fi, but forgets to change her Windows Firewall profile from 'Private' to 'Public'. What is the most immediate risk to her machine?",
+                hint: "Think about how the 'Private' profile balances security rules for trusted home environments compared to the strictest rules needed elsewhere.",
+                options: [
+                    { text: "Her laptop's local file sharing and discovery services may be exposed to strangers on the café network.", rationale: "The Private profile assumes a trusted network and often permits inbound connections for things like printer sharing or media streaming, which are dangerous to expose on public Wi-Fi.", isCorrect: true },
+                    { text: "Her password manager will automatically upload plaintext credentials to the cloud provider.", rationale: "Password managers utilize zero-knowledge synchronization and encrypt data locally regardless of the active firewall profile.", isCorrect: false },
+                    { text: "Her Endpoint Detection and Response telemetry will be blocked from reaching the cloud console.", rationale: "Firewall profiles primarily manage inbound traffic rules and local network discovery; outbound telemetry to cloud consoles is generally permitted across all standard profiles.", isCorrect: false },
+                    { text: "Her Virtual Private Network connection will automatically sever to prevent traffic interception.", rationale: "A firewall profile dictates packet filtering rules, but it does not inherently monitor or control the operational state of a separate VPN application.", isCorrect: false }
+                ]
+            },
+            {
+                question: "A security team immediately deploys a new Intrusion Prevention System (IPS) in their data center and activates strict out-of-the-box blocking rules without spending time tuning the system. What is the most likely negative consequence?",
+                hint: "Contrast the action of a 'sprinkler system' against a 'smoke alarm' when it reacts to a slightly burnt piece of toast instead of a real fire.",
+                options: [
+                    { text: "Legitimate business traffic gets dropped, causing unpredictable application outages.", rationale: "Because an IPS sits inline and actively blocks traffic based on rules, untuned default rules will inevitably flag normal but complex business traffic as suspicious, breaking connectivity.", isCorrect: true },
+                    { text: "Security analysts waste their mornings investigating thousands of harmless alert notifications.", rationale: "While untuned rules generate false positives, the primary pain point of an IPS is that it actively blocks the traffic; mere alerts are the defining characteristic of an IDS.", isCorrect: false },
+                    { text: "The system fails to compute the complex PBKDF2 hashes of incoming network traffic.", rationale: "PBKDF2 is a key derivation function used in cryptography for passwords, not a network traffic analysis protocol used by an IPS.", isCorrect: false },
+                    { text: "The VPN provider gains unauthorized access to the company's internal decryption keys.", rationale: "An IPS inspects traffic for malicious patterns; it has no mechanism or relationship that would hand over internal encryption keys to a third-party VPN vendor.", isCorrect: false }
+                ]
+            },
+            {
+                question: "An analyst reviews an alert: Microsoft Word opened a document, spawned PowerShell, which then used `certutil` to download an unsigned `.exe` file that modified the registry. Why would an EDR system easily catch this while standard AV might silently let it happen?",
+                hint: "Think about the difference between looking at a single snapshot versus watching a movie unfold over time.",
+                options: [
+                    { text: "EDR correlates the sequence of these connected actions to identify a malicious pattern, rather than checking individual files against a list.", rationale: "Programs like Word and PowerShell are legitimate tools; standard AV ignores them. EDR recognizes that the specific sequence of these tools being used together constitutes an attack chain.", isCorrect: true },
+                    { text: "EDR uses symmetric authenticated encryption to decrypt the PowerShell commands before they can execute.", rationale: "EDR systems monitor and log system activity; they do not perform cryptographic decryption of native operating system command shells to halt execution.", isCorrect: false },
+                    { text: "Standard AV cannot inspect the outbound network traffic initiated by the `certutil` command.", rationale: "While AV may not inspect network traffic deeply, the primary reason it fails here is that `certutil` is a trusted, built-in Windows binary, so its signature is not flagged as malicious.", isCorrect: false },
+                    { text: "EDR runs entirely inline on the network gateway and blocks the macro before Word can even open.", rationale: "EDR relies on telemetry gathered directly from the host endpoint's operating system, not by sitting inline at the network gateway like an IPS.", isCorrect: false }
+                ]
+            },
+            {
+                question: "A security engineer configures the company's password manager vault to use the PBKDF2 algorithm with 600,000 iterations. What specific attack methodology does this configuration make economically unfeasible?",
+                hint: "Consider what happens when you make a mathematical operation take a fraction of a second longer, and how that impacts someone trying billions of combinations.",
+                options: [
+                    { text: "An attacker attempting to brute-force the master password offline.", rationale: "A Key Derivation Function introduces intentional computational delay; a delay of 0.2 seconds is unnoticeable to a user logging in once, but devastating to an attacker trying millions of guesses per second.", isCorrect: true },
+                    { text: "A user accidentally exposing their zero-knowledge synchronization blob to the public internet.", rationale: "While the blob is exposed, the iterations secure the key that unlocks it. The iterations themselves don't prevent the accidental exposure of the encrypted file.", isCorrect: false },
+                    { text: "An attacker intercepting the plaintext master password over a public Wi-Fi network.", rationale: "If an attacker intercepts the password in plaintext (e.g., via a keylogger or unencrypted connection), the KDF iterations are irrelevant because the attacker already has the human secret.", isCorrect: false },
+                    { text: "A state-sponsored wiper malware attempting to delete the local password vault file.", rationale: "KDF iterations deal entirely with the cryptographic transformation of a password into a key; they offer no protection against a program simply deleting the encrypted file from a hard drive.", isCorrect: false }
+                ]
+            },
+            {
+                question: "A student connects to a commercial VPN provider, assuming this will protect their laptop from getting infected while downloading a cracked software installer from a suspicious forum. Why is the student's assumption dangerous?",
+                hint: "Recall the distinction between securing the tunnel your data travels through versus inspecting the contents of the data itself.",
+                options: [
+                    { text: "The VPN only encrypts the transit of the packets; it does not inspect or block malicious payloads that execute locally.", rationale: "A VPN secures the connection between the user and the VPN server, preventing local network snooping, but it happily delivers malware if the user intentionally downloads and executes it.", isCorrect: true },
+                    { text: "The VPN automatically bypasses the host-based firewall's 'Public' profile, disabling local defenses.", rationale: "A VPN adds a virtual network adapter and routes traffic, but it does not inherently disable the operating system's local host-based firewall rules.", isCorrect: false },
+                    { text: "The VPN provider is legally required to insert tracking cookies into all software downloads.", rationale: "While some unscrupulous free VPNs might inject ads, standard commercial VPNs do not systematically modify binary downloads to insert tracking cookies.", isCorrect: false },
+                    { text: "The cracked software will automatically detect the WireGuard protocol and disable the antivirus.", rationale: "Malware might attempt to disable an antivirus, but this has nothing to do with whether the traffic arrived via WireGuard or a standard unencrypted connection.", isCorrect: false }
+                ]
+            },
+            {
+                question: "After learning about a new critical vulnerability in class, an eager IT student decides to use `nmap` and `OpenVAS` to scan a local hospital's web servers to see if they are vulnerable, intending to kindly warn them. What core principle has the student violated?",
+                hint: "Review the legal and ethical boundaries discussed regarding the use of tools that enumerate open ports on the internet.",
+                options: [
+                    { text: "They are performing unauthorized scanning on a host they do not own or have written permission to test.", rationale: "Vulnerability scanning against third-party targets without explicit, documented authorization is illegal under various international cyber laws, regardless of the scanner's good intentions.", isCorrect: true },
+                    { text: "They are using an open-source tool instead of a commercial enterprise scanner like Nessus or Qualys.", rationale: "The legality of the action depends entirely on authorization and ownership, not on whether the software tool used was free or commercially licensed.", isCorrect: false },
+                    { text: "They forgot to deploy a local Intrusion Detection System before initiating the external vulnerability scan.", rationale: "An IDS is a defensive tool used to monitor one's own network; its absence does not make an offensive scan against a third party illegal or unethical.", isCorrect: false },
+                    { text: "They are attempting to shift trust to a VPN provider illegally to hide their source IP address.", rationale: "While attackers often use VPNs to hide their tracks, the core violation here is the unauthorized probing of the target's attack surface, not the network routing method.", isCorrect: false }
+                ]
+            },
+            {
+                question: "The central servers of a major cloud password manager are compromised in a massive data breach. The attackers manage to download the entire database of user data blobs. Why are the users' actual passwords still safe?",
+                hint: "Consider where the encryption process actually happens and who holds the master key in this specific architecture.",
+                options: [
+                    { text: "The vaults are encrypted locally on the users' devices, meaning the provider's servers only store undecryptable ciphertext.", rationale: "Zero-knowledge sync ensures that the master password is never sent to the server; the provider only holds encrypted data, making a server breach useless to attackers without the individual master keys.", isCorrect: true },
+                    { text: "The provider uses an active Intrusion Prevention System to block the attackers from reading the contents of the files.", rationale: "If the attackers have already successfully downloaded the database (as stated in the scenario), an IPS has already failed and cannot stop them from analyzing the files offline.", isCorrect: false },
+                    { text: "The passwords are automatically rotated to new 256-bit keys the moment a server breach is detected.", rationale: "Cryptographic keys cannot be automatically rotated or re-encrypted without the user's master password, which the server does not possess.", isCorrect: false },
+                    { text: "The attackers would need to successfully bypass the EICAR test string to unlock the databases.", rationale: "The EICAR string is a safe text file used exclusively for testing antivirus software functionality; it has no cryptographic role in securing password manager vaults.", isCorrect: false }
+                ]
+            },
+            {
+                question: "A Security Operations Center is overwhelmed. Their analysts receive hundreds of alerts daily from laptop antivirus, network firewalls, and email gateways, but struggle to see how the alerts relate to one another. What technological upgrade is specifically designed to solve this problem?",
+                hint: "Look for the technology category designed to merge and correlate telemetry across multiple, disparate domains.",
+                options: [
+                    { text: "Upgrading from siloed tools to an Extended Detection & Response (XDR) platform.", rationale: "XDR merges data from endpoints, networks, email, and identity into a single correlation layer, turning dozens of disconnected alerts into a single, unified incident timeline.", isCorrect: true },
+                    { text: "Deploying an active Intrusion Prevention System (IPS) on all public-facing network interfaces.", rationale: "While an IPS might block more traffic, it does not correlate existing alerts from endpoints or email gateways; it simply adds another source of network-specific alerts.", isCorrect: false },
+                    { text: "Switching their password manager's hashing algorithm from standard PBKDF2 to Argon2.", rationale: "Changing a Key Derivation Function improves cryptographic resistance against brute-force attacks on credentials, but it does nothing to help analysts correlate security alerts.", isCorrect: false },
+                    { text: "Upgrading their host-based firewalls from native Windows Defender to the Linux UFW standard.", rationale: "Swapping one host-based firewall for another does not provide cross-domain alert correlation; it merely changes the packet filtering tool on the endpoint.", isCorrect: false }
+                ]
+            }
+        ];
+
+        // Shuffle utility
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Initialize Tabs
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active', 'border-blue-500', 'text-blue-600'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                btn.classList.add('active', 'border-blue-500', 'text-blue-600');
+                document.getElementById(btn.getAttribute('data-target')).classList.add('active');
+            });
+        });
+
+        // Render Flashcards
+        const flashcardContainer = document.getElementById('flashcard-grid');
+        flashcardData.forEach((card, index) => {
+            const cardHTML = `
+                <div class="flashcard" onclick="this.classList.toggle('flipped')">
+                    <div class="flashcard-inner">
+                        <div class="flashcard-front">
+                            <div>
+                                <span class="block text-xs text-gray-400 mb-2 uppercase tracking-wide">Card ${index + 1} / 25</span>
+                                ${card.front}
+                            </div>
+                        </div>
+                        <div class="flashcard-back">
+                            <p>${card.back}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            flashcardContainer.innerHTML += cardHTML;
+        });
+
+        // Render Quiz
+        const quizContainer = document.getElementById('quiz-container');
+        quizData.forEach((q, qIndex) => {
+            const shuffledOptions = shuffleArray([...q.options]);
+            
+            let optionsHTML = '';
+            shuffledOptions.forEach((opt, oIndex) => {
+                optionsHTML += `
+                    <div class="quiz-option border border-gray-300 rounded-lg p-4 mb-3" data-correct="${opt.isCorrect}" data-rationale="${opt.rationale.replace(/"/g, '&quot;')}">
+                        <span class="text-gray-800">${opt.text}</span>
+                    </div>
+                `;
+            });
+
+            const questionHTML = `
+                <div class="bg-white border border-gray-200 p-6 rounded-xl shadow-sm question-block" id="q-${qIndex}">
+                    <h3 class="text-lg font-bold text-gray-900 mb-2"><span class="text-blue-600 mr-2">Q${qIndex + 1}.</span> ${q.question}</h3>
+                    <p class="text-sm text-gray-500 italic mb-4">Hint: ${q.hint}</p>
+                    <div class="options-container">
+                        ${optionsHTML}
+                    </div>
+                    <div class="rationale-container hidden mt-4 p-4 rounded-lg text-sm bg-gray-50 border border-gray-200">
+                        <p class="font-semibold text-gray-900 mb-1">Rationale:</p>
+                        <p class="rationale-text text-gray-700"></p>
+                    </div>
+                </div>
+            `;
+            quizContainer.innerHTML += questionHTML;
+        });
+
+        // Quiz Logic
+        document.querySelectorAll('.question-block').forEach(block => {
+            const options = block.querySelectorAll('.quiz-option');
+            const rationaleContainer = block.querySelector('.rationale-container');
+            const rationaleText = block.querySelector('.rationale-text');
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Prevent clicking multiple times
+                    if (block.classList.contains('answered')) return;
+                    block.classList.add('answered');
+
+                    const isCorrect = this.getAttribute('data-correct') === 'true';
+                    const rationale = this.getAttribute('data-rationale');
+
+                    // Style selected option and reveal correctness
+                    options.forEach(opt => {
+                        opt.classList.add('disabled');
+                        if (opt.getAttribute('data-correct') === 'true') {
+                            opt.classList.add('correct');
+                        } else if (opt === this && !isCorrect) {
+                            opt.classList.add('incorrect');
+                        }
+                    });
+
+                    // Show rationale
+                    rationaleText.innerHTML = rationale;
+                    rationaleContainer.classList.remove('hidden');
+                });
+            });
+        });
+
+    </script>
+</body>
+</html>
+
+
+

@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 11: Computer Security Software</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fcfbf9;
+            color: #292524;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 30vh;
+            max-height: 350px;
+            min-height: 250px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 40vh;
+            }
+        }
+
+        .nav-active {
+            background-color: #e7e5e4;
+            font-weight: 600;
+            border-left: 4px solid #44403c;
+        }
+
+        .layer-box {
+            transition: all 0.3s ease;
+        }
+        
+        .layer-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row min-h-screen">
+
+    <!-- Chosen Palette: Warm Neutrals & Slate (Stone 50 bg, Stone 800 text, Stone 200/300 accents, dark grey/slate interactive highlights) -->
+    <!-- Application Structure Plan: The SPA is structured as an interactive learning dashboard. The left sidebar serves as the curriculum navigation (the 7 lessons). The main content area acts as a dynamic stage. Instead of reading linear slides, students click through the "Defense in Depth" layers. Each section utilizes custom interactive widgets (e.g., a clickable attack chain for EDR, a firewall profile simulator, and a malware distribution chart) to demonstrate the specific security concepts actively. This structure was chosen because cybersecurity is fundamentally about interacting with overlapping systems; a dashboard mimics the tools a security analyst actually uses, making the learning experience more authentic and engaging. -->
+    <!-- Visualization & Content Choices: 
+         - Defense in Depth: Goal -> Introduce core concept. Viz -> Interactive stacked concentric layout. Justification -> Visually reinforces the 'castle' analogy. Method -> HTML/CSS Grid.
+         - Antivirus: Goal -> Explain modern threats. Viz -> Doughnut Chart. Justification -> Shows variety of malware types beyond just 'viruses'. Method -> Chart.js.
+         - Firewall: Goal -> Explain profiles. Viz -> Interactive Profile Simulator. Justification -> Forces user to see how context (cafe vs home) changes rules. Method -> Vanilla JS + HTML toggles.
+         - IDS/IPS: Goal -> Compare active vs passive. Viz -> Side-by-side comparison matrix. Justification -> Clear contrast of features. Method -> HTML/Tailwind.
+         - EDR: Goal -> Explain behaviour chains. Viz -> Step-by-step reveal timeline. Justification -> Demonstrates correlation of seemingly benign events. Method -> Vanilla JS + HTML progression.
+         - Encryption: Goal -> Explain Key Derivation. Viz -> Interactive hashing simulator text. Justification -> Makes abstract cryptographic concepts tangible. Method -> Vanilla JS string manipulation.
+         - VPN/Scanners: Goal -> Clarify misconceptions. Viz -> Fact vs Fiction toggle cards. Justification -> Directly addresses common misunderstandings. Method -> HTML/JS. 
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <nav class="w-full md:w-64 bg-stone-100 border-r border-stone-200 flex-shrink-0 flex flex-col h-auto md:h-screen sticky top-0 overflow-y-auto">
+        <div class="p-6 border-b border-stone-200">
+            <h1 class="text-xl font-bold tracking-tight text-stone-800">Cyber.SoHo Edu Hub</h1>
+            <p class="text-xs text-stone-500 mt-1 uppercase tracking-wider font-semibold">Intro to Computer Security</p>
+            <p class="text-sm mt-2 font-medium">Part III: Security Domains</p>
+        </div>
+        <div class="flex-grow py-4" id="nav-menu">
+            <button data-target="intro" class="w-full text-left px-6 py-3 text-sm text-stone-600 hover:bg-stone-200 transition-colors nav-active">1. Defense in Depth</button>
+            <button data-target="av" class="w-full text-left px-6 py-3 text-sm text-stone-600 hover:bg-stone-200 transition-colors">2. Antivirus & Anti-Malware</button>
+            <button data-target="firewall" class="w-full text-left px-6 py-3 text-sm text-stone-600 hover:bg-stone-200 transition-colors">3. Host-Based Firewalls</button>
+            <button data-target="ids" class="w-full text-left px-6 py-3 text-sm text-stone-600 hover:bg-stone-200 transition-colors">4. IDS / IPS</button>
+            <button data-target="edr" class="w-full text-left px-6 py-3 text-sm text-stone-600 hover:bg-stone-200 transition-colors">5. EDR</button>
+            <button data-target="encryption" class="w-full text-left px-6 py-3 text-sm text-stone-600 hover:bg-stone-200 transition-colors">6. Encryption & Passwords</button>
+            <button data-target="vpn" class="w-full text-left px-6 py-3 text-sm text-stone-600 hover:bg-stone-200 transition-colors">7. VPN & Scanners</button>
+        </div>
+        <div class="p-4 border-t border-stone-200 text-xs text-stone-400">
+            Week 11 Module &copy; 2026
+        </div>
+    </nav>
+
+    <main class="flex-grow p-6 md:p-12 overflow-y-auto w-full max-w-6xl mx-auto">
+        
+        <section id="intro" class="content-section fade-in block">
+            <header class="mb-8 border-b border-stone-200 pb-4">
+                <h2 class="text-3xl font-bold text-stone-800">The Core Principle: Defense in Depth</h2>
+                <p class="text-stone-600 mt-2 text-lg">The foundation behind the entire security software stack. Security is composition, not shopping.</p>
+            </header>
+            
+            <p class="mb-6 text-stone-700 leading-relaxed">
+                This introductory section explains why a single security tool is never enough. Just like a medieval castle didn't rely on a single wall, modern computer systems require multiple, overlapping layers of protection. Any single layer can and will fail. The goal is to ensure attackers rarely defeat all of them at once. Explore the layers below.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center mb-8">
+                <div class="bg-white p-6 rounded-lg border border-stone-200 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4 border-b pb-2">The Castle Analogy</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-center"><span class="text-xl mr-3">&#127754;</span> <strong>Moat:</strong> Network Firewalls</li>
+                        <li class="flex items-center"><span class="text-xl mr-3">&#129681;</span> <strong>Outer Wall:</strong> Host Firewalls & IDS</li>
+                        <li class="flex items-center"><span class="text-xl mr-3">&#127984;</span> <strong>Inner Wall:</strong> Antivirus / Anti-Malware</li>
+                        <li class="flex items-center"><span class="text-xl mr-3">&#9876;&#65039;</span> <strong>Archers/Guards:</strong> EDR (Endpoint Detection)</li>
+                        <li class="flex items-center"><span class="text-xl mr-3">&#128274;</span> <strong>The Keep/Vault:</strong> Encryption & Passwords</li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">Why Multiple Layers?</h3>
+                    <p class="text-stone-600 mb-4">Attacks target different layers (Hardware, OS, Network, Application, Human). Each layer needs its own eyes:</p>
+                    <div class="space-y-2 text-sm">
+                        <div class="bg-stone-100 p-3 rounded border border-stone-200">&#10060; Firewall &ne; protection against malicious e-mail attachment</div>
+                        <div class="bg-stone-100 p-3 rounded border border-stone-200">&#10060; Antivirus &ne; protection against laptop theft</div>
+                        <div class="bg-stone-100 p-3 rounded border border-stone-200">&#10060; Disk encryption &ne; protection if password = admin1234</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-stone-800 text-stone-50 p-6 rounded-lg shadow-md border-l-4 border-stone-500">
+                <h4 class="font-bold text-lg mb-2">&#128161; Key Takeaway</h4>
+                <p>Security is <strong>composition</strong>, not shopping. Each layer exists because the other layers fail. Frameworks like NIST, ENISA, and ISO 27001 explicitly mandate this approach.</p>
+            </div>
+        </section>
+
+        <section id="av" class="content-section fade-in hidden">
+            <header class="mb-8 border-b border-stone-200 pb-4">
+                <h2 class="text-3xl font-bold text-stone-800">Antivirus & Anti-Malware</h2>
+                <p class="text-stone-600 mt-2 text-lg">The oldest category still in active use, evolving to meet modern threats.</p>
+            </header>
+
+            <p class="mb-6 text-stone-700 leading-relaxed">
+                This section details the evolution of Antivirus software. The term "virus" (a 1980s self-replicator) is outdated; today we fight complex malware. Here, you'll understand the difference between traditional signature-based detection and modern behavioural analysis, and visualize the diverse threats these tools must intercept.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div class="bg-white p-6 rounded-lg border border-stone-200 shadow-sm flex flex-col justify-center">
+                    <h3 class="text-xl font-semibold mb-4 text-center">Modern Threat Landscape</h3>
+                    <div class="chart-container">
+                        <canvas id="malwareChart"></canvas>
+                    </div>
+                    <p class="text-xs text-center text-stone-500 mt-4">Representative distribution of modern threats AV systems must handle daily.</p>
+                </div>
+
+                <div class="flex flex-col justify-center space-y-6">
+                    <div class="layer-box bg-stone-100 p-5 rounded border border-stone-200">
+                        <h4 class="font-bold text-lg mb-2 text-stone-800">&#128269; Signature-Based Detection</h4>
+                        <ul class="list-disc pl-5 text-sm text-stone-700 space-y-1">
+                            <li>Computes cryptographic fingerprint of a file.</li>
+                            <li>Looks it up in a database of known-bad fingerprints.</li>
+                            <li><strong>Pros:</strong> Fast, exact, low false-positive rate.</li>
+                            <li><strong>Cons:</strong> Blind to new threats; misses malware if even a single byte is changed.</li>
+                        </ul>
+                    </div>
+
+                    <div class="layer-box bg-stone-200 p-5 rounded border border-stone-300">
+                        <h4 class="font-bold text-lg mb-2 text-stone-800">&#128065;&#65039; Behaviour-Based Detection</h4>
+                        <ul class="list-disc pl-5 text-sm text-stone-700 space-y-1">
+                            <li>Watches what a program <strong>does</strong> when it runs.</li>
+                            <li><strong>Pros:</strong> Catches entirely unknown (zero-day) threats based on malicious actions.</li>
+                            <li><strong>Cons:</strong> Produces more false positives, requires more system resources.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                <div class="bg-white p-4 border border-stone-200 rounded">
+                    <h4 class="font-bold mb-1">EICAR Test String</h4>
+                    <p class="text-sm text-stone-600">A harmless text string used safely test AV functionality. The "Hello World" of antivirus testing. No real malware needed.</p>
+                </div>
+                <div class="bg-white p-4 border border-stone-200 rounded">
+                    <h4 class="font-bold mb-1">VirusTotal</h4>
+                    <p class="text-sm text-stone-600">Free multi-engine scanner (70+ AVs). Upload a file or URL for an aggregated verdict. Rule: verify external links before clicking.</p>
+                </div>
+            </div>
+
+            <div class="bg-stone-800 text-stone-50 p-6 rounded-lg shadow-md border-l-4 border-stone-500">
+                <h4 class="font-bold text-lg mb-2">&#128161; Key Takeaway</h4>
+                <p>Signatures catch what you have seen before. Everything new needs <strong>behavioural</strong> detection. Modern products must use both.</p>
+            </div>
+        </section>
+
+        <section id="firewall" class="content-section fade-in hidden">
+            <header class="mb-8 border-b border-stone-200 pb-4">
+                <h2 class="text-3xl font-bold text-stone-800">Host-Based Firewalls</h2>
+                <p class="text-stone-600 mt-2 text-lg">The traffic filter on your own machine. Inspects every packet entering or leaving.</p>
+            </header>
+
+            <p class="mb-6 text-stone-700 leading-relaxed">
+                Firewalls act as border control for your network traffic. This section explores how host-based firewalls use rule sets (Direction, Protocol, Source, Destination, Action) to allow or drop packets. Below, interact with the Profile Simulator to understand why contextual awareness (knowing if you are at home vs. a public cafe) is critical for endpoint security.
+            </p>
+
+            <div class="bg-white rounded-lg border border-stone-200 shadow-sm p-6 mb-8">
+                <h3 class="text-xl font-semibold mb-6 text-center">Interactive Windows Firewall Profile Simulator</h3>
+                
+                <div class="flex flex-wrap justify-center gap-4 mb-8">
+                    <button id="btn-domain" class="px-6 py-2 rounded border-2 border-stone-300 text-stone-600 hover:bg-stone-100 font-semibold transition-colors">Domain (Enterprise)</button>
+                    <button id="btn-private" class="px-6 py-2 rounded border-2 border-stone-300 text-stone-600 hover:bg-stone-100 font-semibold transition-colors">Private (Home)</button>
+                    <button id="btn-public" class="px-6 py-2 rounded border-2 border-stone-300 text-stone-600 hover:bg-stone-100 font-semibold transition-colors">Public (Café/Airport)</button>
+                </div>
+
+                <div id="fw-display" class="bg-stone-100 p-6 rounded-lg text-center border-2 border-dashed border-stone-300 min-h-[200px] flex flex-col justify-center items-center">
+                    <div class="text-4xl mb-4">&#128072;</div>
+                    <p class="text-stone-500 font-medium text-lg">Select a network profile above to see how traffic rules change.</p>
+                </div>
+                
+                <div class="mt-6 text-sm text-stone-600 bg-stone-50 p-4 rounded border border-stone-200">
+                    <strong>The Common Mistake:</strong> Someone disables "Public" for one Zoom call, forgets to re-enable it, and their laptop is now exposed on every hotel Wi-Fi thereafter.
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div>
+                    <h4 class="font-bold border-b pb-1 mb-3">Rule Anatomy (5 Fields)</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><strong>1. Direction:</strong> Inbound / Outbound</li>
+                        <li><strong>2. Protocol:</strong> TCP / UDP / ICMP</li>
+                        <li><strong>3. Source:</strong> IP + port</li>
+                        <li><strong>4. Destination:</strong> IP + port</li>
+                        <li><strong>5. Action:</strong> Allow / Deny / Reject</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold border-b pb-1 mb-3">Common Tools</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><strong>Windows:</strong> Windows Defender Firewall</li>
+                        <li><strong>Linux:</strong> UFW, firewalld, nftables</li>
+                        <li><strong>Network/Appliance:</strong> pfSense, Cisco ASA, Palo Alto</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="bg-stone-800 text-stone-50 p-6 rounded-lg shadow-md border-l-4 border-stone-500">
+                <h4 class="font-bold text-lg mb-2">&#128161; Key Takeaway</h4>
+                <p>A laptop on café Wi-Fi is not a laptop at home. The firewall must know the difference — and you must check which profile is active.</p>
+            </div>
+        </section>
+
+        <section id="ids" class="content-section fade-in hidden">
+            <header class="mb-8 border-b border-stone-200 pb-4">
+                <h2 class="text-3xl font-bold text-stone-800">Intrusion Detection & Prevention (IDS/IPS)</h2>
+                <p class="text-stone-600 mt-2 text-lg">Detection versus prevention on the network level.</p>
+            </header>
+
+            <p class="mb-6 text-stone-700 leading-relaxed">
+                This section clarifies the crucial distinction between observing malicious activity and actively stopping it. We compare IDS (passive alerting) with IPS (active blocking) and explore the business trade-offs of false positives. Organizations typically deploy IDS first to tune rules before trusting the system enough to enable IPS blocking.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 text-center">
+                <div class="bg-white p-8 rounded-lg border border-stone-200 shadow-sm layer-box">
+                    <div class="text-5xl mb-4">&#128680;</div>
+                    <h3 class="text-2xl font-bold mb-2">IDS</h3>
+                    <p class="text-sm font-semibold text-stone-500 uppercase tracking-widest mb-4">Intrusion Detection System</p>
+                    <ul class="text-left text-sm space-y-3 mb-6 bg-stone-50 p-4 rounded">
+                        <li><strong>Nature:</strong> Passive (watches mirrored traffic)</li>
+                        <li><strong>Action:</strong> Alerts when suspicious</li>
+                        <li><strong>Analogy:</strong> Smoke alarm</li>
+                    </ul>
+                    <div class="text-left text-sm border-t pt-3">
+                        <strong>False Positive Impact:</strong><br>
+                        Analyst wastes a morning investigating nothing.
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 rounded-lg border border-stone-200 shadow-sm layer-box">
+                    <div class="text-5xl mb-4">&#128166;</div>
+                    <h3 class="text-2xl font-bold mb-2">IPS</h3>
+                    <p class="text-sm font-semibold text-stone-500 uppercase tracking-widest mb-4">Intrusion Prevention System</p>
+                    <ul class="text-left text-sm space-y-3 mb-6 bg-stone-50 p-4 rounded">
+                        <li><strong>Nature:</strong> Active (sits inline in traffic path)</li>
+                        <li><strong>Action:</strong> Blocks when suspicious</li>
+                        <li><strong>Analogy:</strong> Sprinkler system</li>
+                    </ul>
+                    <div class="text-left text-sm border-t pt-3">
+                        <strong>False Positive Impact:</strong><br>
+                        Legitimate business traffic is dropped, causing outages.
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-stone-100 p-6 rounded border border-stone-200 mb-8">
+                <h4 class="font-bold mb-3">Example Behavioural Rule: The "Port-Scan"</h4>
+                <p class="font-mono text-sm bg-stone-800 text-stone-100 p-3 rounded mb-3">IF source_IP touches &ge; N distinct ports within M seconds &rarr; ALERT</p>
+                <p class="text-sm text-stone-600">Maps to MITRE ATT&CK Tactic: <em>Discovery</em>. Covers threats that have no specific file signature yet.</p>
+                <p class="text-sm text-stone-600 mt-2"><strong>Common Tools:</strong> Snort, Suricata, Zeek, Splunk, QRadar.</p>
+            </div>
+
+            <div class="bg-stone-800 text-stone-50 p-6 rounded-lg shadow-md border-l-4 border-stone-500">
+                <h4 class="font-bold text-lg mb-2">&#128161; Key Takeaway</h4>
+                <p>IDS detects. IPS decides. Start with IDS. Promote to IPS only when your rules are trustworthy enough to block.</p>
+            </div>
+        </section>
+
+        <section id="edr" class="content-section fade-in hidden">
+            <header class="mb-8 border-b border-stone-200 pb-4">
+                <h2 class="text-3xl font-bold text-stone-800">Endpoint Detection & Response (EDR)</h2>
+                <p class="text-stone-600 mt-2 text-lg">What happened when AV admitted signatures were not enough.</p>
+            </header>
+
+            <p class="mb-6 text-stone-700 leading-relaxed">
+                EDR systems record massive amounts of endpoint telemetry (process launches, file writes, network connections) and ship it to the cloud to hunt for patterns. Below is an interactive demonstration of how EDR catches a malware attack chain. Notice how any single step in isolation looks benign, but the correlated sequence reveals the attack.
+            </p>
+
+            <div class="bg-white border border-stone-200 rounded-lg p-6 mb-8 shadow-sm">
+                <h3 class="text-xl font-bold mb-2">Interactive Attack Chain Analysis</h3>
+                <p class="text-sm text-stone-500 mb-6">Click "Next Event" to see telemetry flow into the EDR console.</p>
+                
+                <div id="edr-timeline" class="space-y-4 mb-6 relative border-l-2 border-stone-200 ml-4 pl-6">
+                    <!-- JS will populate events here -->
+                </div>
+
+                <div class="flex justify-between items-center border-t pt-4 mt-6">
+                    <button id="edr-next-btn" class="bg-stone-800 text-white px-6 py-2 rounded hover:bg-stone-700 transition font-medium">Capture Next Event</button>
+                    <div id="edr-verdict" class="text-lg font-bold text-stone-400">Verdict: Gathering Data...</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div>
+                    <h4 class="font-bold mb-2">Why this defeats plain AV</h4>
+                    <p class="text-sm text-stone-600">No single file in this chain matches a signature. EDR rules compare across events, not within one. The correlation layer is the key.</p>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-2">EDR vs XDR</h4>
+                    <p class="text-sm text-stone-600"><strong>EDR:</strong> Endpoints only. Deep visibility. <br><strong>XDR:</strong> Extended. Merges EDR + network + email + identity to reduce alert fatigue.</p>
+                </div>
+            </div>
+
+            <div class="bg-stone-800 text-stone-50 p-6 rounded-lg shadow-md border-l-4 border-stone-500">
+                <h4 class="font-bold text-lg mb-2">&#128161; Key Takeaway</h4>
+                <p>AV looks at <strong>files</strong>. EDR looks at <strong>behaviour chains</strong>. Correlation beats single-point detection.</p>
+            </div>
+        </section>
+
+        <section id="encryption" class="content-section fade-in hidden">
+            <header class="mb-8 border-b border-stone-200 pb-4">
+                <h2 class="text-3xl font-bold text-stone-800">Encryption & Password Managers</h2>
+                <p class="text-stone-600 mt-2 text-lg">Two categories that share one cryptographic engine: data at rest and credentials.</p>
+            </header>
+
+            <p class="mb-6 text-stone-700 leading-relaxed">
+                Whether encrypting a hard drive (BitLocker) or securing a vault (Bitwarden), the shared primitive is symmetric authenticated encryption (like AES). A major challenge is converting a weak human password into a strong 256-bit cryptographic key. Use the simulator below to understand how Key Derivation Functions (KDFs) use intentional slowness to thwart attackers.
+            </p>
+
+            <div class="bg-white border border-stone-200 rounded-lg p-6 mb-8 shadow-sm">
+                <h3 class="text-xl font-bold mb-4">Key Derivation Function (KDF) Simulator</h3>
+                <p class="text-sm text-stone-600 mb-6">A KDF turns a password into a key by running a deliberately slow hash many times. OWASP recommends 600,000 iterations for PBKDF2. Simulate the process below.</p>
+                
+                <div class="flex flex-col md:flex-row gap-4 items-end mb-6">
+                    <div class="w-full md:w-1/2">
+                        <label class="block text-sm font-semibold text-stone-700 mb-1">Human Password:</label>
+                        <input type="text" id="kdf-input" value="HolaMadrid2026!" class="w-full border border-stone-300 p-2 rounded focus:ring focus:ring-stone-200 outline-none">
+                    </div>
+                    <button id="kdf-btn" class="bg-stone-800 text-white px-6 py-2 rounded hover:bg-stone-700 transition font-medium w-full md:w-auto">Derive Key (Simulated)</button>
+                </div>
+
+                <div class="bg-stone-50 border border-stone-200 rounded p-4 font-mono text-sm overflow-hidden relative min-h-[120px]">
+                    <div id="kdf-output" class="text-stone-400">Awaiting input...</div>
+                    <div id="kdf-progress" class="absolute bottom-0 left-0 h-1 bg-stone-800 w-0 transition-all duration-100 ease-linear"></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div>
+                    <h4 class="font-bold border-b pb-1 mb-3">Why Slow Hashes?</h4>
+                    <p class="text-sm text-stone-600 mb-2">The trade-off: A human waits &lt; 0.2 seconds once a day to unlock their vault. An attacker is ~1,000&times; slower trying to brute-force offline.</p>
+                    <p class="text-sm text-stone-600">A random <strong>salt</strong> per vault blocks pre-computed rainbow-table attacks.</p>
+                </div>
+                <div>
+                    <h4 class="font-bold border-b pb-1 mb-3">Zero-Knowledge Sync</h4>
+                    <ol class="list-decimal pl-5 text-sm text-stone-600 space-y-1">
+                        <li>Vault is encrypted <strong>on your device</strong>.</li>
+                        <li>Only the encrypted blob is uploaded to cloud.</li>
+                        <li>Provider's server cannot decrypt it.</li>
+                        <li>Master password never leaves device.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="bg-stone-800 text-stone-50 p-6 rounded-lg shadow-md border-l-4 border-stone-500">
+                <h4 class="font-bold text-lg mb-2">&#128161; Key Takeaway</h4>
+                <p>The master password is the whole castle. <strong>5+ random words</strong> &gt; Password1234!</p>
+            </div>
+        </section>
+
+        <section id="vpn" class="content-section fade-in hidden">
+            <header class="mb-8 border-b border-stone-200 pb-4">
+                <h2 class="text-3xl font-bold text-stone-800">VPNs & Vulnerability Scanners</h2>
+                <p class="text-stone-600 mt-2 text-lg">The last two tools in the stack: moving trust and auditing surfaces.</p>
+            </header>
+
+            <p class="mb-6 text-stone-700 leading-relaxed">
+                This final section covers Virtual Private Networks (which encrypt transit but don't provide absolute anonymity) and Vulnerability Scanners (which map your infrastructure against known CVE databases). It's critical to understand the legal boundaries of scanning. Interact with the cards below to clear up common VPN misconceptions.
+            </p>
+
+            <h3 class="text-xl font-bold mb-4">VPN: What it is vs What it is not</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div class="layer-box bg-white border border-stone-200 p-5 rounded text-center cursor-pointer" onclick="this.classList.toggle('bg-stone-100')">
+                    <div class="text-2xl mb-2">&#10060;</div>
+                    <div class="font-semibold text-stone-800 mb-2">A VPN = Anonymity</div>
+                    <div class="text-xs text-stone-600 border-t pt-2 mt-2"><strong>False.</strong> The VPN provider sees everything. You are shifting trust from your ISP to the VPN company.</div>
+                </div>
+                <div class="layer-box bg-white border border-stone-200 p-5 rounded text-center cursor-pointer" onclick="this.classList.toggle('bg-stone-100')">
+                    <div class="text-2xl mb-2">&#10060;</div>
+                    <div class="font-semibold text-stone-800 mb-2">A VPN = Bulletproof</div>
+                    <div class="text-xs text-stone-600 border-t pt-2 mt-2"><strong>False.</strong> It only changes your apparent source IP. You can still be tracked by cookies and browser fingerprinting.</div>
+                </div>
+                <div class="layer-box bg-white border border-stone-200 p-5 rounded text-center cursor-pointer" onclick="this.classList.toggle('bg-stone-100')">
+                    <div class="text-2xl mb-2">&#10060;</div>
+                    <div class="font-semibold text-stone-800 mb-2">A VPN = Malware Shield</div>
+                    <div class="text-xs text-stone-600 border-t pt-2 mt-2"><strong>False.</strong> If you download a malicious executable over a VPN, it will still compromise your machine.</div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg border border-red-200 shadow-sm mb-8">
+                <h4 class="font-bold text-red-700 flex items-center mb-3"><span class="text-xl mr-2">&#9888;&#65039;</span> Vulnerability Scanners: Legal & Ethical Boundary</h4>
+                <p class="text-sm text-stone-700 mb-4">Unauthorised scanning is a crime (e.g., EU Directive 2013/40/EU). Scanners like nmap, Nessus, or OpenVAS enumerate open ports and cross-reference a <strong>CVE</strong> database. <strong>Always scan only hosts you own:</strong></p>
+                <ul class="list-disc pl-5 text-sm text-stone-700">
+                    <li>Your own localhost (127.0.0.1)</li>
+                    <li>Your own home lab</li>
+                    <li>A machine with documented written permission</li>
+                </ul>
+            </div>
+
+            <div class="bg-stone-800 text-stone-50 p-6 rounded-lg shadow-md border-l-4 border-stone-500 mb-8">
+                <h4 class="font-bold text-lg mb-2">&#128161; Key Takeaway</h4>
+                <p>VPNs <strong>move</strong> trust — they do not <strong>remove</strong> it. Scanners find what is already there — only aim them at what you own.</p>
+            </div>
+
+            <div class="border-t border-stone-200 pt-6 text-center text-stone-500 text-sm">
+                <h4 class="font-bold mb-2">Putting It All Together</h4>
+                <p>Individually, each tool has blind spots. Together, they force attackers through multiple layers. Most attackers go where work is easy. By implementing all layers, <strong>you become a boring target</strong>. That is the entire goal.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Data and State Setup
+        const malwareData = {
+            labels: ['Ransomware', 'Info-stealer', 'RATs', 'Cryptominer', 'Dropper / Wiper'],
+            datasets: [{
+                data: [35, 25, 15, 15, 10], // Representative percentages for visualization
+                backgroundColor: ['#292524', '#44403c', '#57534e', '#78716c', '#a8a29e'],
+                borderWidth: 1,
+                borderColor: '#ffffff'
+            }]
+        };
+
+        const edrAttackChain = [
+            { time: "09:01:12", process: "Outlook.exe", action: "Opens email attachment (Benign in isolation)", icon: "&#128231;" },
+            { time: "09:01:45", process: "Word.exe", action: "Opens macro document (Benign in isolation)", icon: "&#128196;" },
+            { time: "09:01:46", process: "Word.exe", action: "Spawns PowerShell w/ encoded command (Suspicious)", icon: "&#9881;&#65039;" },
+            { time: "09:01:47", process: "PowerShell.exe", action: "Spawns cmd.exe & runs certutil to download payload", icon: "&#128187;" },
+            { time: "09:01:50", process: "Unknown.exe", action: "Unsigned exe writes to auto-start registry key (Critical)", icon: "&#128128;" }
+        ];
+        
+        let edrStep = 0;
+        let malwareChartInstance = null;
+
+        // Navigation Logic
+        const navButtons = document.querySelectorAll('#nav-menu button');
+        const sections = document.querySelectorAll('.content-section');
+
+        navButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetId = btn.getAttribute('data-target');
+                
+                // Update active state on nav
+                navButtons.forEach(b => {
+                    b.classList.remove('nav-active');
+                    b.classList.remove('font-semibold', 'border-l-4', 'border-stone-800');
+                });
+                btn.classList.add('nav-active');
+
+                // Show/hide sections
+                sections.forEach(sec => {
+                    sec.classList.add('hidden');
+                    sec.classList.remove('block');
+                });
+                document.getElementById(targetId).classList.remove('hidden');
+                document.getElementById(targetId).classList.add('block');
+
+                // Trigger specific initializations
+                if(targetId === 'av') {
+                    initChart();
+                }
+            });
+        });
+
+        // Initialize Chart.js
+        function initChart() {
+            if (malwareChartInstance) return; // Only init once
+            const ctx = document.getElementById('malwareChart').getContext('2d');
+            malwareChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: malwareData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right', labels: { font: { family: 'Inter' } } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) { return ' ' + context.label + ': ~' + context.raw + '%'; }
+                            }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+
+        // Firewall Interactive Logic
+        const fwDisplay = document.getElementById('fw-display');
+        document.getElementById('btn-domain').addEventListener('click', () => updateFw('Domain', 'Enterprise network.<br>Most permissive profile. Trust level: HIGH.', '&#127986;&#65039;', 'border-green-300', 'bg-green-50'));
+        document.getElementById('btn-private').addEventListener('click', () => updateFw('Private', 'Home / Trusted network.<br>Balanced rules. File sharing allowed.', '&#127968;', 'border-blue-300', 'bg-blue-50'));
+        document.getElementById('btn-public').addEventListener('click', () => updateFw('Public', 'Café / Airport Wi-Fi.<br>Strictest rules. Drops unsolicited inbound traffic.', '&#9749;', 'border-red-300', 'bg-red-50'));
+
+        function updateFw(name, desc, icon, borderColor, bgColor) {
+            // Reset button styles
+            ['btn-domain', 'btn-private', 'btn-public'].forEach(id => {
+                document.getElementById(id).classList.remove('bg-stone-800', 'text-white', 'border-stone-800');
+                document.getElementById(id).classList.add('bg-transparent', 'text-stone-600', 'border-stone-300');
+            });
+            // Set active button style
+            const activeBtn = document.getElementById(`btn-${name.toLowerCase()}`);
+            activeBtn.classList.add('bg-stone-800', 'text-white', 'border-stone-800');
+            activeBtn.classList.remove('bg-transparent', 'text-stone-600', 'border-stone-300');
+
+            fwDisplay.className = `p-6 rounded-lg text-center border-2 ${borderColor} ${bgColor} min-h-[200px] flex flex-col justify-center items-center fade-in`;
+            fwDisplay.innerHTML = `
+                <div class="text-5xl mb-3">${icon}</div>
+                <h4 class="text-2xl font-bold text-stone-800 mb-2">${name} Profile Active</h4>
+                <p class="text-stone-700">${desc}</p>
+            `;
+        }
+
+        // EDR Interactive Logic
+        const edrBtn = document.getElementById('edr-next-btn');
+        const edrTimeline = document.getElementById('edr-timeline');
+        const edrVerdict = document.getElementById('edr-verdict');
+
+        edrBtn.addEventListener('click', () => {
+            if (edrStep < edrAttackChain.length) {
+                const event = edrAttackChain[edrStep];
+                const eventHtml = `
+                    <div class="relative fade-in">
+                        <div class="absolute -left-9 top-1 bg-stone-200 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center text-xs"></div>
+                        <div class="mb-4">
+                            <span class="text-xs font-mono text-stone-400 mr-2">${event.time}</span>
+                            <strong class="text-stone-800">${event.process}</strong>
+                            <p class="text-sm text-stone-600 mt-1">${event.icon} ${event.action}</p>
+                        </div>
+                    </div>
+                `;
+                edrTimeline.insertAdjacentHTML('beforeend', eventHtml);
+                edrStep++;
+
+                if(edrStep === 3) edrVerdict.innerHTML = '<span class="text-yellow-600">Verdict: Suspicious Activity Detected</span>';
+                if(edrStep === 5) {
+                    edrVerdict.innerHTML = '<span class="text-red-600">Verdict: ATTACK CHAIN BLOCKED</span>';
+                    edrBtn.innerText = "Reset Scenario";
+                }
+            } else {
+                // Reset
+                edrTimeline.innerHTML = '';
+                edrStep = 0;
+                edrVerdict.innerHTML = '<span class="text-stone-400">Verdict: Gathering Data...</span>';
+                edrBtn.innerText = "Capture Next Event";
+            }
+        });
+
+        // KDF Simulator Logic
+        const kdfBtn = document.getElementById('kdf-btn');
+        const kdfOutput = document.getElementById('kdf-output');
+        const kdfProgress = document.getElementById('kdf-progress');
+        const kdfInput = document.getElementById('kdf-input');
+
+        kdfBtn.addEventListener('click', () => {
+            const pwd = kdfInput.value || "Password";
+            kdfBtn.disabled = true;
+            kdfBtn.classList.add('opacity-50');
+            kdfOutput.innerHTML = `Starting PBKDF2-SHA-256 for <span class="text-stone-800 bg-stone-200 px-1 rounded">${pwd}</span>...<br>`;
+            kdfProgress.style.width = '0%';
+
+            let iterationCount = 0;
+            const targetIterations = 600000;
+            const updateInterval = 50; // ms
+
+            const timer = setInterval(() => {
+                iterationCount += 60000; // Fake chunking
+                const percent = (iterationCount / targetIterations) * 100;
+                kdfProgress.style.width = `${percent}%`;
+                
+                // Generate a fake hash string to look cool
+                const fakeHash = Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join('');
+                kdfOutput.innerHTML = `
+                    Iteration: ${iterationCount.toLocaleString()}<br>
+                    Current state: <span class="text-stone-500">${fakeHash.substring(0,32)}...</span>
+                `;
+
+                if (iterationCount >= targetIterations) {
+                    clearInterval(timer);
+                    const finalKey = Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join('');
+                    kdfOutput.innerHTML = `
+                        <div class="text-green-700 font-bold mb-1">✓ Complete (600,000 iterations)</div>
+                        <div class="break-all text-xs">Final 256-bit Key:<br><span class="text-stone-800 font-bold">${finalKey}</span></div>
+                    `;
+                    kdfBtn.disabled = false;
+                    kdfBtn.classList.remove('opacity-50');
+                    kdfProgress.style.width = '0%'; // hide bar after done
+                }
+            }, updateInterval);
+        });
+
+    </script>
+</body>
+</html>
+
+
