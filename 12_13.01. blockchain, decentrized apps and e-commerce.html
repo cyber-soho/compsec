@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emerging Topics: Blockchain, DApps & E-Commerce</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Chosen Palette: Warm Neutrals with Terracotta Accents (Stone-50 background, Stone-800 text, Orange-700/600 accents for a calm, academic feel). -->
+    <!-- Application Structure Plan: A tabbed dashboard layout. Divided into Overview, Blockchain, DApps, E-Commerce, and Synthesis. This allows the user to digest the dense lecture material chapter-by-chapter without being overwhelmed, mimicking a study guide or interactive presentation. -->
+    <!-- Visualization & Content Choices:
+         Report Info: Blockchain Types -> Goal: Compare trade-offs -> Viz: Radar Chart (Chart.js) -> Interaction: Hover for values -> Justification: Radar charts perfectly illustrate multi-axis trade-offs (Speed, Cost, Decentralization) -> Library: Chart.js (NO SVG/Mermaid).
+         Report Info: Transaction Flow -> Goal: Explain process -> Viz: Interactive HTML/CSS Stepper -> Interaction: Click "Next" -> Justification: Sequential processes are best learned by stepping through them at the user's pace.
+         Report Info: E-Commerce Issues -> Goal: Organize & Detail -> Viz: Interactive Sidebar/Detail view -> Interaction: Click issue to load details -> Justification: Keeps the UI clean while allowing deep dives into each of the 7 complex issues.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        body {
+            background-color: #fafaf9;
+            color: #292524;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow-x: hidden;
+        }
+        
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 550px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 280px;
+            }
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-box {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .step-box.active {
+            border-color: #c2410c;
+            background-color: #fff7ed;
+            transform: scale(1.02);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .issue-btn {
+            transition: all 0.2s;
+        }
+
+        .issue-btn.active {
+            background-color: #c2410c;
+            color: white;
+            border-color: #c2410c;
+        }
+
+        .takeaway-box {
+            background: linear-gradient(to right, #fff7ed, #ffffff);
+            border-left: 4px solid #ea580c;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+    <header class="bg-stone-900 text-stone-50 shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row justify-between items-center">
+            <div>
+                <h1 class="text-xl font-bold tracking-tight">Cyber.SoHo Hub</h1>
+                <p class="text-xs text-stone-400">Part IV &mdash; Emerging Topics</p>
+            </div>
+            <nav class="mt-4 md:mt-0 flex flex-wrap gap-2 justify-center">
+                <button onclick="switchTab('overview')" id="nav-overview" class="px-4 py-2 rounded-md text-sm font-medium bg-stone-800 hover:bg-stone-700 transition-colors text-orange-400">Overview</button>
+                <button onclick="switchTab('blockchain')" id="nav-blockchain" class="px-4 py-2 rounded-md text-sm font-medium bg-stone-800 hover:bg-stone-700 transition-colors">Blockchain</button>
+                <button onclick="switchTab('dapps')" id="nav-dapps" class="px-4 py-2 rounded-md text-sm font-medium bg-stone-800 hover:bg-stone-700 transition-colors">DApps</button>
+                <button onclick="switchTab('ecommerce')" id="nav-ecommerce" class="px-4 py-2 rounded-md text-sm font-medium bg-stone-800 hover:bg-stone-700 transition-colors">E-Commerce</button>
+                <button onclick="switchTab('synthesis')" id="nav-synthesis" class="px-4 py-2 rounded-md text-sm font-medium bg-stone-800 hover:bg-stone-700 transition-colors">Synthesis</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+
+        <section id="overview" class="tab-content active">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-stone-900 mb-4">Setting the Stage</h2>
+                <p class="text-lg text-stone-600 mb-6 leading-relaxed">Welcome to Part IV of the Computer Science curriculum. This module connects three deeply intertwined digital domains. We will separate the engineering reality from the investment narrative, exploring how decentralized networks operate and how they integrate into the massive machinery of global digital commerce.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow cursor-pointer" onclick="switchTab('blockchain')">
+                    <div class="text-3xl mb-3">&#128279;</div>
+                    <h3 class="text-xl font-bold mb-2">1. Blockchain</h3>
+                    <p class="text-stone-600 text-sm">The foundational data structure and network model. A solution to the double-spend problem without a central referee.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow cursor-pointer" onclick="switchTab('dapps')">
+                    <div class="text-3xl mb-3">&#128187;</div>
+                    <h3 class="text-xl font-bold mb-2">2. DApps</h3>
+                    <p class="text-stone-600 text-sm">Decentralized Applications. What we build on top of a blockchain by replacing server databases with smart contracts.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow cursor-pointer" onclick="switchTab('ecommerce')">
+                    <div class="text-3xl mb-3">&#128722;</div>
+                    <h3 class="text-xl font-bold mb-2">3. E-Commerce</h3>
+                    <p class="text-stone-600 text-sm">The real-world commercial domain where these technologies try to prove themselves against 7 persistent operational issues.</p>
+                </div>
+            </div>
+
+            <div class="takeaway-box p-6 rounded-r-lg mb-8">
+                <h4 class="font-bold text-orange-800 uppercase text-sm tracking-wider mb-2">Key Takeaway</h4>
+                <p class="text-stone-800 font-medium">Blockchain is a tool. DApps are products built with that tool. E-commerce is a market where both are tested. Keep these three layers separate in your head.</p>
+            </div>
+        </section>
+
+        <section id="blockchain" class="tab-content">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-stone-900 mb-4">Lesson 1: Blockchain Architecture</h2>
+                <p class="text-lg text-stone-600 leading-relaxed">A blockchain is an append-only, cryptographically chained, distributed ledger. This section breaks down its components, network types, and the real-world mechanics of how transactions are processed probabilistically.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <h3 class="text-xl font-bold mb-4">The Four Ingredients</h3>
+                    <p class="text-sm text-stone-500 mb-4">Nothing in blockchain is genuinely new. The <i>combination</i> is what is new.</p>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <span class="text-orange-600 font-bold mr-2">1.</span>
+                            <div><strong>Cryptographic hash functions</strong> <span class="text-stone-600 text-sm block">Fingerprints the data (e.g., SHA-256).</span></div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-orange-600 font-bold mr-2">2.</span>
+                            <div><strong>Public-key cryptography</strong> <span class="text-stone-600 text-sm block">Sign transactions, prove ownership privately.</span></div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-orange-600 font-bold mr-2">3.</span>
+                            <div><strong>P2P networking</strong> <span class="text-stone-600 text-sm block">No central server, nodes gossip directly.</span></div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-orange-600 font-bold mr-2">4.</span>
+                            <div><strong>Consensus mechanism</strong> <span class="text-stone-600 text-sm block">Rules to decide canonical history (PoW/PoS).</span></div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <h3 class="text-xl font-bold mb-4 border-b pb-2">Real-Life Frame: The Madrid Tab</h3>
+                    <p class="text-stone-700 mb-4">Imagine six friends sharing a tapas tab in Madrid. How do you keep an honest ledger when one friend keeps "forgetting" their orders?</p>
+                    <div class="bg-stone-50 p-4 rounded border border-stone-200 text-sm text-stone-600 italic">
+                        "You create an append-only notebook. Every new page references the hash of the previous page. If someone alters a past order, the math breaks, and anyone re-running the math detects the tamper."
+                    </div>
+                    <p class="mt-4 font-medium text-stone-800">Bitcoin is just this notebook scaled to the planet.</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200 mb-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold">Interactive: The 8-Step Transaction Flow</h3>
+                    <button id="next-step-btn" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded text-sm font-bold transition-colors">Next Step &#8594;</button>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="tx-flow-container">
+                    <div class="step-box p-4 rounded bg-stone-50 text-center text-sm border-stone-200" id="step-0">1. Sign with Private Key</div>
+                    <div class="step-box p-4 rounded bg-stone-50 text-center text-sm border-stone-200" id="step-1">2. Broadcast to P2P</div>
+                    <div class="step-box p-4 rounded bg-stone-50 text-center text-sm border-stone-200" id="step-2">3. Nodes Validate</div>
+                    <div class="step-box p-4 rounded bg-stone-50 text-center text-sm border-stone-200" id="step-3">4. Lands in Mempool</div>
+                    <div class="step-box p-4 rounded bg-stone-50 text-center text-sm border-stone-200" id="step-4">5. Validator Selects</div>
+                    <div class="step-box p-4 rounded bg-stone-50 text-center text-sm border-stone-200" id="step-5">6. Block Proposed</div>
+                    <div class="step-box p-4 rounded bg-stone-50 text-center text-sm border-stone-200" id="step-6">7. Consensus Reached</div>
+                    <div class="step-box p-4 rounded bg-stone-50 text-center text-sm border-stone-200" id="step-7">8. Confirmed (Probabilistic)</div>
+                </div>
+                <div class="mt-4 text-center text-sm text-stone-500 italic" id="step-desc">Click 'Next Step' to trace the transaction lifecycle.</div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200 mb-8">
+                <h3 class="text-xl font-bold mb-2">Chain Types: Trade-off Analysis</h3>
+                <p class="text-sm text-stone-500 mb-6">Comparing Public, Private, and Consortium models. Notice how maximizing Trust Minimization (Decentralization) inversely affects Speed and Cost.</p>
+                <div class="w-full">
+                    <div class="chart-container">
+                        <canvas id="blockchainChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <section id="dapps" class="tab-content">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-stone-900 mb-4">Lesson 2: Decentralized Apps (DApps)</h2>
+                <p class="text-lg text-stone-600 leading-relaxed">Moving from a pure ledger to programmable money. A DApp replaces the traditional server-side database with deterministic, immutable smart contracts residing on a blockchain.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <h3 class="text-lg font-bold mb-4 text-center">Traditional Web App</h3>
+                    <div class="flex flex-col items-center space-y-2">
+                        <div class="bg-stone-200 w-full py-3 text-center rounded font-mono text-sm">Browser / Front-end</div>
+                        <div class="text-xl">&#8595; HTTP &#8593;</div>
+                        <div class="bg-stone-800 text-white w-full py-3 text-center rounded font-mono text-sm">Centralized Web Server</div>
+                        <div class="text-xl">&#8595; SQL &#8593;</div>
+                        <div class="bg-stone-800 text-white w-full py-3 text-center rounded font-mono text-sm">Company Database</div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-orange-200 ring-1 ring-orange-50">
+                    <h3 class="text-lg font-bold mb-4 text-center text-orange-800">Decentralized App (DApp)</h3>
+                    <div class="flex flex-col items-center space-y-2">
+                        <div class="bg-orange-100 w-full py-3 text-center rounded font-mono text-sm border border-orange-200">Browser Front-end (IPFS/CDN)</div>
+                        <div class="text-xl text-orange-600">&#8595; RPC / Wallet Signatures &#8593;</div>
+                        <div class="bg-orange-600 text-white w-full py-3 text-center rounded font-mono text-sm shadow-sm">Smart Contract (e.g., Solidity)</div>
+                        <div class="text-xl text-orange-600">&#8595; State Change &#8593;</div>
+                        <div class="bg-orange-600 text-white w-full py-3 text-center rounded font-mono text-sm shadow-sm">Public Blockchain Ledger</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <h3 class="text-xl font-bold mb-4">Gas & Smart Contracts</h3>
+                    <p class="text-stone-700 mb-4">A smart contract is a <strong>vending machine</strong> for software: deterministic, public, and impossible to argue with. It only runs when triggered by a transaction.</p>
+                    <div class="bg-stone-50 p-4 rounded border-l-4 border-stone-400 mb-4">
+                        <h4 class="font-bold text-sm mb-1">Why GAS exists:</h4>
+                        <ol class="list-decimal list-inside text-sm text-stone-600 space-y-1">
+                            <li>Pays validators for CPU/memory expenditure.</li>
+                            <li>Prevents infinite loops by enforcing a hard computation budget.</li>
+                        </ol>
+                        <p class="text-sm font-bold mt-2 text-red-600">No gas = no execution.</p>
+                    </div>
+                    <h4 class="font-bold text-sm text-stone-800 mb-2 mt-6">Code is Law (The Dark Side)</h4>
+                    <p class="text-sm text-stone-600">Smart contracts are immutable. Bugs become permanent vulnerabilities until patched via complex proxy upgrade patterns. The 2016 DAO hack proved that "Code is Law" in production means bugs cost real money.</p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <h3 class="text-xl font-bold mb-4">DApp Categories</h3>
+                    <div class="chart-container" style="height: 220px; max-height: 250px;">
+                        <canvas id="dappsChart"></canvas>
+                    </div>
+                    <p class="text-xs text-center text-stone-500 mt-4">DeFi and NFTs get headlines, but Infrastructure is where durable engineering happens.</p>
+                </div>
+            </div>
+
+            <div class="takeaway-box p-6 rounded-r-lg mb-8">
+                <h4 class="font-bold text-orange-800 uppercase text-sm tracking-wider mb-2">Real-Life Frame: Rent Escrow</h4>
+                <p class="text-stone-800 font-medium text-sm">"Pisos Compartidos": Four students sharing an apartment. Instead of trusting one person or the landlord with the deposit, a smart-contract escrow holds the funds. Rent is paid to the contract. At lease-end, it releases the deposit automatically unless a flag is raised. It is a clearer set of rules, written in code, agreed upon in advance.</p>
+            </div>
+        </section>
+
+        <section id="ecommerce" class="tab-content">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-stone-900 mb-4">Lesson 3: E-Commerce Issues</h2>
+                <p class="text-lg text-stone-600 leading-relaxed">The biggest invisible industry. Any digital commercial domain must navigate seven persistent structural and operational issues. If a vendor only talks about payments and security, they are ignoring five other massive engineering challenges.</p>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden mb-8">
+                <div class="flex flex-col md:flex-row">
+                    <div class="md:w-1/3 bg-stone-50 border-r border-stone-200 p-4">
+                        <h3 class="font-bold text-stone-800 mb-4 uppercase text-xs tracking-wider">The 7 Persistent Issues</h3>
+                        <div class="flex flex-col space-y-2" id="issue-buttons">
+                            <button class="issue-btn active text-left px-4 py-3 rounded border border-stone-300 bg-white font-medium text-sm" data-issue="security">1. Security</button>
+                            <button class="issue-btn text-left px-4 py-3 rounded border border-stone-300 bg-white font-medium text-sm" data-issue="privacy">2. Privacy</button>
+                            <button class="issue-btn text-left px-4 py-3 rounded border border-stone-300 bg-white font-medium text-sm" data-issue="trust">3. Trust</button>
+                            <button class="issue-btn text-left px-4 py-3 rounded border border-stone-300 bg-white font-medium text-sm" data-issue="payments">4. Payments</button>
+                            <button class="issue-btn text-left px-4 py-3 rounded border border-stone-300 bg-white font-medium text-sm" data-issue="logistics">5. Logistics</button>
+                            <button class="issue-btn text-left px-4 py-3 rounded border border-stone-300 bg-white font-medium text-sm" data-issue="regulation">6. Regulation</button>
+                            <button class="issue-btn text-left px-4 py-3 rounded border border-stone-300 bg-white font-medium text-sm" data-issue="accessibility">7. Accessibility</button>
+                        </div>
+                    </div>
+                    <div class="md:w-2/3 p-6 lg:p-10" id="issue-content">
+                        <!-- Content injected via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-stone-800 text-stone-50 p-6 rounded-xl">
+                    <h3 class="text-lg font-bold mb-4 text-green-400">&#10003; Where Blockchain Actually Helps</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li>&bull; Cross-border payments in volatile regions.</li>
+                        <li>&bull; Provenance tracking for high-value goods (pharma, luxury).</li>
+                        <li>&bull; Loyalty programs surviving brand acquisitions.</li>
+                        <li>&bull; Digital ownership of in-game items/certificates.</li>
+                    </ul>
+                </div>
+                <div class="bg-stone-100 p-6 rounded-xl border border-stone-200">
+                    <h3 class="text-lg font-bold mb-4 text-red-600">&#10007; Where Blockchain Does Not Help</h3>
+                    <ul class="space-y-2 text-sm text-stone-700">
+                        <li>&bull; Standard card-based EU retail.</li>
+                        <li>&bull; Fast checkout for low-value goods.</li>
+                        <li>&bull; Customer-service workflows.</li>
+                        <li>&bull; Anywhere a DB + signed audit logs does the job.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="synthesis" class="tab-content">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-stone-900 mb-4">Synthesis & Review</h2>
+                <p class="text-lg text-stone-600 leading-relaxed">Lesson 1 gave us the data structure. Lesson 2 showed us how to build apps on it. Lesson 3 reminded us of the commercial reality these tools must survive in.</p>
+            </div>
+
+            <div class="bg-white p-8 rounded-xl shadow-sm border border-stone-200 mb-8 max-w-3xl mx-auto">
+                <h3 class="text-2xl font-bold mb-6 text-center border-b pb-4">The Engineer's Blockchain Checklist</h3>
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <div class="text-orange-600 text-xl mr-3">&#9635;</div>
+                        <p class="font-medium text-stone-800">Which of the 7 e-commerce issues does this product actually solve?</p>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="text-orange-600 text-xl mr-3">&#9635;</div>
+                        <p class="font-medium text-stone-800">Does it solve them better than a standard database + good security policy?</p>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="text-orange-600 text-xl mr-3">&#9635;</div>
+                        <p class="font-medium text-stone-800">Who is paying for the gas, and is the user informed before clicking?</p>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="text-orange-600 text-xl mr-3">&#9635;</div>
+                        <p class="font-medium text-stone-800">What happens mechanically when the smart contract has a bug?</p>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="text-orange-600 text-xl mr-3">&#9635;</div>
+                        <p class="font-medium text-stone-800">What happens when local regulations (like GDPR or IVA) change?</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center p-8 bg-stone-900 text-stone-50 rounded-xl shadow-lg">
+                <h3 class="text-xl font-bold mb-2">Final Course Takeaway</h3>
+                <p class="text-stone-300 italic">"Mature engineers do not ask 'Is this blockchain?'. They ask 'Is this the right tool for this problem, on this budget, in this jurisdiction, for this user?'"</p>
+                <p class="mt-6 font-bold text-orange-400 text-lg uppercase tracking-widest">Hype dies. Engineering survives. Build the second one.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        const issueData = {
+            security: {
+                title: "Security",
+                desc: "Defending against card theft, account takeover, fake checkouts, and insider threats.",
+                standards: "PCI DSS, TLS/HTTPS, MFA, WAF, SIEM.",
+                carmen: "Shopify (PCI DSS Level 1) + MFA on admin panels.",
+                takeaway: "Security is continuous, layered, and boring. Exciting security is a bad day."
+            },
+            privacy: {
+                title: "Privacy",
+                desc: "Handling personal data lawfully. Requires a lawful basis and data minimization.",
+                standards: "GDPR (EU), AEPD (Spain), CCPA (California). User rights to access/erasure.",
+                carmen: "GDPR compliance + AEPD registration + clear cookie banner.",
+                takeaway: "Not a checkbox. It is a data-architecture decision made before writing code."
+            },
+            trust: {
+                title: "Trust",
+                desc: "Convincing strangers you are real, their data is safe, and products will arrive.",
+                standards: "Real addresses, independent reviews, clear return policies.",
+                carmen: "Trustpilot integration + Instagram reels showing the physical ceramic workshop.",
+                takeaway: "Trust is earned slowly and lost in one tweet. Engineer for it like uptime."
+            },
+            payments: {
+                title: "Payments",
+                desc: "Accepting money cleanly across rails. Involves acquirers, gateways, and card networks.",
+                standards: "3-D Secure 2 (3DS2), PSD2 (Strong Customer Authentication).",
+                carmen: "Shopify Payments + Bizum (Spain local rail) + PayPal.",
+                takeaway: "Adding a payment method is a risk decision. Each rail adds revenue AND a fraud surface."
+            },
+            logistics: {
+                title: "Logistics",
+                desc: "The physical reality. Last-mile delivery is the most expensive part. Highly reliant on messy carrier APIs.",
+                standards: "Handling failed deliveries, customs, damaged parcels, return tracking.",
+                carmen: "SEUR API for Iberia + DHL API for rest of EU.",
+                takeaway: "The Internet did not abolish physics. Most post-launch engineering pain hides here."
+            },
+            regulation: {
+                title: "Regulation",
+                desc: "Navigating local and international laws governing sales, taxes, and consumer rights.",
+                standards: "14-day EU withdrawal right, IVA (21%), OSS scheme for cross-border.",
+                carmen: "IVA 21% applied automatically + OSS scheme configured for EU sales.",
+                takeaway: "Regulation is part of the architecture. Engineers who ignore it ship illegal software."
+            },
+            accessibility: {
+                title: "Accessibility & Inclusion",
+                desc: "Designing for everyone. Sufficient contrast, keyboard navigation, clear language.",
+                standards: "WCAG compliance, screen-reader friendly markup, alt-text.",
+                carmen: "WCAG-compliant theme + strict alt-text requirement on all product photos.",
+                takeaway: "An accessible site is not 'extra effort'. It is the default a competent team ships."
+            }
+        };
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('text-orange-400');
+                btn.classList.add('text-stone-300');
+            });
+            
+            document.getElementById(tabId).classList.add('active');
+            const activeBtn = document.getElementById('nav-' + tabId);
+            activeBtn.classList.remove('text-stone-300');
+            activeBtn.classList.add('text-orange-400');
+            
+            if(tabId === 'blockchain' && !window.bcChartRendered) initBlockchainChart();
+            if(tabId === 'dapps' && !window.dappChartRendered) initDappChart();
+        }
+
+        let currentStep = -1;
+        const txDescriptions = [
+            "User signs the payload with their cryptographic private key, proving authorization.",
+            "The signed transaction is broadcast to the peer-to-peer network of nodes.",
+            "Nodes independently verify the cryptographic signature and check for sufficient funds.",
+            "The valid transaction sits in the mempool (memory pool) waiting to be picked up.",
+            "A miner (PoW) or validator (PoS) selects the transaction to include in the next block.",
+            "The new block, containing the transaction and a hash of the previous block, is proposed.",
+            "The network applies its consensus rules to agree this block is the canonical truth.",
+            "The block is appended. The transaction is 'confirmed' (finality grows with subsequent blocks)."
+        ];
+
+        document.getElementById('next-step-btn').addEventListener('click', () => {
+            currentStep++;
+            if(currentStep > 7) {
+                currentStep = 0; 
+                document.querySelectorAll('.step-box').forEach(b => b.classList.remove('active'));
+            }
+            
+            if(currentStep > 0) document.getElementById('step-' + (currentStep - 1)).classList.remove('active');
+            document.getElementById('step-' + currentStep).classList.add('active');
+            document.getElementById('step-desc').innerText = txDescriptions[currentStep];
+        });
+
+        const issueContentDiv = document.getElementById('issue-content');
+        const issueButtons = document.querySelectorAll('.issue-btn');
+
+        function loadIssue(key) {
+            const data = issueData[key];
+            issueContentDiv.innerHTML = `
+                <h3 class="text-2xl font-bold mb-2 text-stone-900">${data.title}</h3>
+                <p class="text-stone-600 mb-6">${data.desc}</p>
+                
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="text-xs font-bold uppercase text-stone-400 tracking-wider">Standards / Mechanics</h4>
+                        <p class="text-sm font-medium text-stone-800">${data.standards}</p>
+                    </div>
+                    <div class="bg-orange-50 p-4 rounded border border-orange-100">
+                        <h4 class="text-xs font-bold uppercase text-orange-800 tracking-wider mb-1">Carmen's Real-Life Solution</h4>
+                        <p class="text-sm text-orange-900">${data.carmen}</p>
+                    </div>
+                    <div class="border-l-4 border-stone-800 pl-4 py-1 mt-6">
+                        <p class="text-sm italic text-stone-700"><strong>Takeaway:</strong> ${data.takeaway}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        issueButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                issueButtons.forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                loadIssue(e.target.getAttribute('data-issue'));
+            });
+        });
+
+        loadIssue('security');
+
+        Chart.defaults.font.family = "system-ui, -apple-system, sans-serif";
+        Chart.defaults.color = "#57534e";
+
+        function initBlockchainChart() {
+            const ctx = document.getElementById('blockchainChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Decentralization', 'Speed (TPS)', 'Low Cost', 'Privacy', 'Censorship Resistance'],
+                    datasets: [
+                        {
+                            label: 'Public Chain',
+                            data: [10, 2, 2, 1, 10],
+                            backgroundColor: 'rgba(234, 88, 12, 0.2)',
+                            borderColor: 'rgba(234, 88, 12, 1)',
+                            pointBackgroundColor: 'rgba(234, 88, 12, 1)'
+                        },
+                        {
+                            label: 'Private Chain',
+                            data: [1, 10, 10, 10, 1],
+                            backgroundColor: 'rgba(63, 63, 70, 0.2)',
+                            borderColor: 'rgba(63, 63, 70, 1)',
+                            pointBackgroundColor: 'rgba(63, 63, 70, 1)'
+                        },
+                        {
+                            label: 'Consortium',
+                            data: [5, 6, 7, 8, 5],
+                            backgroundColor: 'rgba(168, 162, 158, 0.2)',
+                            borderColor: 'rgba(168, 162, 158, 1)',
+                            borderDash: [5, 5]
+                        }
+                    ]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 10,
+                            ticks: { display: false },
+                            grid: { color: '#e7e5e4' },
+                            angleLines: { color: '#e7e5e4' }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.formattedValue + '/10';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            window.bcChartRendered = true;
+        }
+
+        function initDappChart() {
+            const ctx = document.getElementById('dappsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['DeFi', 'NFTs', 'Identity', 'DAOs', 'Gaming', 'Infrastructure'],
+                    datasets: [{
+                        data: [30, 20, 10, 10, 15, 15],
+                        backgroundColor: [
+                            '#c2410c', '#ea580c', '#f97316', 
+                            '#fdba74', '#78716c', '#292524'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                boxWidth: 12,
+                                font: { size: 11 }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ' ' + context.label + ' (Concept Share)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            window.dappChartRendered = true;
+        }
+
+    </script>
+</body>
+</html>
+
+
+

@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emerging Topics: Study Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Flashcard Flip Animations */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+        .transition-transform-700 {
+            transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1);
+        }
+        
+        /* Custom Scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f5f5f4; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d6d3d1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a29e; 
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800 font-sans antialiased min-h-screen flex flex-col">
+
+    <header class="bg-stone-900 text-stone-50 shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col md:flex-row justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight text-orange-500">Emerging Topics</h1>
+                <p class="text-sm text-stone-400">Interactive Study Guide</p>
+            </div>
+            <nav class="mt-4 md:mt-0 flex gap-2 bg-stone-800 p-1 rounded-lg">
+                <button onclick="switchTab('flashcards')" id="tab-btn-flashcards" class="px-6 py-2 rounded-md text-sm font-bold bg-orange-600 text-white transition-all shadow-sm">
+                    Flashcards (25)
+                </button>
+                <button onclick="switchTab('quiz')" id="tab-btn-quiz" class="px-6 py-2 rounded-md text-sm font-bold text-stone-300 hover:text-white hover:bg-stone-700 transition-all">
+                    Practice Quiz (10)
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
+
+        <section id="tab-flashcards" class="block animate-fade-in">
+            <div class="mb-8 text-center">
+                <h2 class="text-3xl font-bold text-stone-900 mb-2">Concept Memorization</h2>
+                <p class="text-stone-600">Click any card to flip it and reveal the definition.</p>
+            </div>
+            
+            <div id="flashcard-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                </div>
+        </section>
+
+        <section id="tab-quiz" class="hidden animate-fade-in">
+            <div class="mb-8 text-center max-w-3xl mx-auto">
+                <h2 class="text-3xl font-bold text-stone-900 mb-2">Knowledge Check</h2>
+                <p class="text-stone-600">Test your understanding of how Blockchain, DApps, and E-commerce principles apply to real-world scenarios. Select the best answer for each question.</p>
+            </div>
+
+            <div id="quiz-container" class="max-w-4xl mx-auto space-y-8">
+                </div>
+        </section>
+
+    </main>
+
+    <script>
+        // --- DATA: FLASHCARDS ---
+        const flashcardsData = [
+            { front: "Double-spend problem", back: "The challenge of preventing digital cash from being spent more than once without relying on a central server or referee." },
+            { front: "Blockchain definition", back: "An append-only, cryptographically chained, distributed ledger maintained by an open network of independent computers." },
+            { front: "Four ingredients of a blockchain", back: "Cryptographic hash functions, public-key cryptography, peer-to-peer (P2P) networking, and a consensus mechanism." },
+            { front: "Transaction finality in a blockchain", back: "Probabilistic finality, meaning certainty grows stronger with each new block appended on top of the transaction." },
+            { front: "Three axes of decentralization", back: "Architectural (number of physical machines), political (who controls the machines), and logical (whether the system behaves as one consistent unit)." },
+            { front: "Public blockchain", back: "A permissionless chain with maximum trust-minimization that allows anyone to read and write, though it is generally the slowest and most expensive." },
+            { front: "Proof of Work (PoW)", back: "A consensus mechanism where miners spend electricity to solve cryptographic hash puzzles to secure the network." },
+            { front: "Proof of Stake (PoS)", back: "A consensus mechanism where validators lock up capital as collateral, which can be slashed for misbehavior." },
+            { front: "DApp (Decentralized Application)", back: "An application combining a traditional front-end (HTML/JS) with a smart contract back-end on a public blockchain, bypassing central servers." },
+            { front: "Smart contract", back: "A public, deterministic program stored on a blockchain that executes automatically when triggered by a transaction, acting like a software vending machine." },
+            { front: "Purpose of Gas in smart contracts", back: "A unit of computation required to pay validators for resources and to prevent infinite loops by giving every transaction a hard budget." },
+            { front: "Layer 1 (L1) blockchain", back: "The base chain itself, responsible for underlying security and settlement (e.g., Ethereum, Bitcoin, Solana)." },
+            { front: "Layer 2 (L2) blockchain", back: "A scaling chain built on top of an L1 that batches transactions for cheaper, faster execution while inheriting the L1's security." },
+            { front: "The danger of 'Code is Law'", back: "Because smart contracts are immutable by default, bugs become permanent vulnerabilities causing real financial loss unless an upgrade pattern is used." },
+            { front: "The seven persistent e-commerce issues", back: "Security, privacy, trust, payments, logistics, regulation, and accessibility." },
+            { front: "PCI DSS", back: "Payment Card Industry Data Security Standard, a critical standard for defending against card-data theft in e-commerce." },
+            { front: "Core e-commerce privacy principles", back: "Establishing a lawful basis for every piece of data collected, and practicing data minimization." },
+            { front: "E-commerce trust signals", back: "Verifiable elements like real physical addresses, independent reviews, clear return policies, and a domain that looks legitimate." },
+            { front: "3DS2 and PSD2", back: "The EU regulatory standard and technical mechanism that mandates Strong Customer Authentication for online card payments." },
+            { front: "Chargeback", back: "An event where a buyer's bank reverses a payment, forcing the merchant to absorb the cost of the lost funds." },
+            { front: "Most expensive phase of e-commerce logistics", back: "Last-mile delivery." },
+            { front: "Key EU/Spanish e-commerce regulations", back: "The 14-day right of withdrawal, standard 21% IVA, and the OSS (One-Stop-Shop) scheme for cross-border digital sales." },
+            { front: "WCAG", back: "Web Content Accessibility Guidelines, the standard for making web content accessible to people with disabilities." },
+            { front: "Valid e-commerce use cases for blockchain", back: "Cross-border payments in volatile regions, provenance tracking for high-value goods, digital ownership, and resilient loyalty programs." },
+            { front: "Areas where blockchain does not help e-commerce", back: "Standard retail checkouts, customer service workflows, or any system where a standard database and signed audit logs would suffice." }
+        ];
+
+        // --- DATA: QUIZ ---
+        const quizData = [
+            {
+                question: "Alice wants to send a digital token to Bob, but she also attempts to send the exact same token to Charlie at the exact same time. What fundamental issue is the underlying blockchain technology designed to prevent in this scenario?",
+                options: [
+                    { text: "The double-spend problem", correct: true, rationale: "Digital assets can be copied infinitely, so a decentralized ledger ensures that once an asset is spent, it cannot be duplicated and spent again elsewhere." },
+                    { text: "The Byzantine Generals problem", correct: false, rationale: "This is a related computer science challenge about coordinating nodes, but it is a theoretical concept rather than the specific transactional issue of spending money twice." },
+                    { text: "The scalability trilemma", correct: false, rationale: "This refers to the trade-off between decentralization, security, and scalability, not the mechanics of a single fraudulent transaction." },
+                    { text: "A 51% attack", correct: false, rationale: "This represents a specific security vulnerability where a single entity gains majority network control, not the baseline transactional problem the system solves." }
+                ]
+            },
+            {
+                question: "Five rival shipping companies want to share a single, tamper-proof audit trail of cargo manifests. They do not want the general public to view or write to this ledger, nor do they want any single company to have total control. Which architecture is most appropriate?",
+                options: [
+                    { text: "Consortium blockchain", correct: true, rationale: "This architecture provides a permissioned environment controlled by a specific group of organizations, offering the perfect middle ground for cross-company workflows." },
+                    { text: "Public blockchain", correct: false, rationale: "While highly secure and decentralized, this model allows anyone to read and write to the ledger, which violates the companies' privacy requirements." },
+                    { text: "Private blockchain", correct: false, rationale: "This model is typically permissioned and controlled by a single entity, failing to meet the requirement that no single rival company has total control." },
+                    { text: "Centralized database", correct: false, rationale: "A traditional database requires a single administrator, creating a central point of control that rival companies are unwilling to trust." }
+                ]
+            },
+            {
+                question: "A merchant accepts a cryptocurrency payment and sees the transaction has just been included in a newly proposed block. Why should the merchant wait for several more blocks to be appended before shipping a high-value item?",
+                options: [
+                    { text: "Transaction finality is probabilistic and grows stronger as more blocks are appended.", correct: true, rationale: "Because the network can occasionally split into competing chains, a transaction is only considered permanently secure after a sufficient number of subsequent blocks bury it." },
+                    { text: "The transaction is still waiting in the mempool to be validated.", correct: false, rationale: "If a transaction has already been included in a proposed block, it has left the memory pool and is actively being processed." },
+                    { text: "Smart contracts require a multi-signature approval for high-value goods.", correct: false, rationale: "While multi-signature wallets exist, waiting for confirmations is a fundamental network mechanic, not a specific smart contract requirement." },
+                    { text: "Gas fees are not calculated and deducted until the end of the day.", correct: false, rationale: "Computation costs are paid at the exact moment a transaction is executed and included in a block, not batched at the end of the day." }
+                ]
+            },
+            {
+                question: "A developer deploys a smart contract for a decentralized escrow service but discovers a bug that allows funds to be drained. Why is it difficult for the developer to simply upload a hotfix to immediately overwrite the buggy code?",
+                options: [
+                    { text: "Smart contracts are immutable by default once deployed.", correct: true, rationale: "Code on a blockchain cannot be directly altered after deployment, meaning bugs become permanent unless complex proxy upgrade patterns were implemented in advance." },
+                    { text: "The developer ran out of gas before the patch could be applied.", correct: false, rationale: "While deploying new code costs money, the core issue is the architectural inability to modify existing on-chain data, not a lack of funds." },
+                    { text: "The front-end needs to be updated on IPFS first.", correct: false, rationale: "Updating the user interface has no impact on the underlying logic executing on the blockchain network." },
+                    { text: "The PoW consensus mechanism rejects any code changes.", correct: false, rationale: "Consensus mechanisms validate transactions and blocks; they do not natively analyze or reject application-level bug fixes." }
+                ]
+            },
+            {
+                question: "A user attempts to execute a complex smart contract function, but the transaction fails with an 'out of gas' error. What fundamental system protection mechanism just occurred?",
+                options: [
+                    { text: "The network enforced a computation budget to prevent infinite loops.", correct: true, rationale: "Because the network is decentralized, requiring payment for every computational step ensures that poorly written code cannot endlessly consume validator resources." },
+                    { text: "The validator nodes rejected the transaction due to a low decentralization score.", correct: false, rationale: "Validators process transactions based on fee priority and cryptographic validity, not subjective evaluations of a project's architecture." },
+                    { text: "The user's wallet lost its connection to the decentralized front-end.", correct: false, rationale: "A network connection error would prevent the transaction from being broadcast entirely, rather than failing during execution with a specific resource error." },
+                    { text: "The Layer 2 bridge temporarily paused asset transfers.", correct: false, rationale: "Bridges move assets between different chains, but this error relates to the execution limits of a specific transaction on a single chain." }
+                ]
+            },
+            {
+                question: "An online store decides to stop saving users' purchase history indefinitely and now only collects the minimum data required to ship the current order. Which e-commerce issue are they primarily addressing?",
+                options: [
+                    { text: "Privacy", correct: true, rationale: "This addresses the ethical and lawful handling of user information, adhering to the principle of only retaining data for its strictly necessary purpose." },
+                    { text: "Security", correct: false, rationale: "While storing less data reduces the impact of a breach, this specific action is a policy decision about data rights rather than a technical defense mechanism." },
+                    { text: "Trust", correct: false, rationale: "Although good data practices build confidence, this action is a backend compliance measure, whereas confidence signals are typically public-facing guarantees." },
+                    { text: "Logistics", correct: false, rationale: "This refers strictly to the physical movement and tracking of goods, not how long customer records are retained." }
+                ]
+            },
+            {
+                question: "A new online boutique wants to improve its conversion rate for first-time visitors who are hesitant to enter their credit card details. According to the course framework, what is the most direct engineering/design intervention to address this?",
+                options: [
+                    { text: "Integrating independent reviews and publishing a clear return policy.", correct: true, rationale: "Providing verifiable social proof and removing the fear of a bad purchase are direct methods for bridging the gap between a stranger and a customer." },
+                    { text: "Switching from a consortium blockchain to a public Layer 1.", correct: false, rationale: "Backend infrastructure choices are completely invisible to a retail consumer evaluating the legitimacy of a storefront." },
+                    { text: "Migrating the underlying payment rails from Proof of Work to Proof of Stake.", correct: false, rationale: "Consensus mechanisms have no bearing on a standard consumer's psychological willingness to purchase a physical product." },
+                    { text: "Upgrading the Web Application Firewall to mitigate bot traffic.", correct: false, rationale: "While crucial for protecting the server, firewall configurations are invisible to an end-user seeking reassurance." }
+                ]
+            },
+            {
+                question: "A European retail brand is overhauling its digital infrastructure. For which of the following features would integrating a blockchain provide a genuine architectural advantage over a standard database?",
+                options: [
+                    { text: "Creating a provenance tracking system for luxury leather goods.", correct: true, rationale: "An immutable, shared ledger allows multiple parties in a supply chain, and eventually the consumer, to cryptographically verify the origin and authenticity of high-value items." },
+                    { text: "Processing fast checkout payments for low-value daily items.", correct: false, rationale: "Traditional centralized payment rails are currently much faster and cheaper for high-volume, low-value retail transactions." },
+                    { text: "Managing customer service workflows and ticketing.", correct: false, rationale: "Internal company operations require speed, editability, and privacy, making a standard database far superior for this task." },
+                    { text: "Storing user passwords and login credentials.", correct: false, rationale: "Sensitive authentication data should never be stored on a public ledger, even if encrypted, as it creates permanent attack surfaces." }
+                ]
+            },
+            {
+                question: "A team is building a decentralized exchange (DeFi DApp). If they want to adhere strictly to a Web3 architecture, how should they handle user authentication?",
+                options: [
+                    { text: "Rely entirely on the user's cryptographic wallet as their account identity.", correct: true, rationale: "In a true decentralized application, there is no central database to hold credentials; a user proves their identity by signing transactions with their private key." },
+                    { text: "Build a centralized database to store encrypted passwords.", correct: false, rationale: "Introducing a central database creates a single point of failure and control, violating the core philosophy of a decentralized application." },
+                    { text: "Implement a standard email-based 'forgot password' flow.", correct: false, rationale: "Without a central server to store emails and reset tokens, this traditional Web2 flow is technically impossible in a pure Web3 environment." },
+                    { text: "Require users to complete an identity check via a Layer 2 bridge.", correct: false, rationale: "Bridges are used to transfer assets between different blockchains, not to authenticate user identities." }
+                ]
+            },
+            {
+                question: "An online store operating in Spain sees an increase in abandoned carts because users are being prompted by their banks to approve the purchase via a mobile app notification. This friction is a direct result of complying with which standard?",
+                options: [
+                    { text: "PSD2 mandating Strong Customer Authentication", correct: true, rationale: "The Payment Services Directive 2 requires European banks to implement 3-D Secure 2 (3DS2), forcing merchants to support flows where users verify their identity with a second factor." },
+                    { text: "GDPR enforcing data minimization", correct: false, rationale: "This regulation governs how personal data is collected and stored, not the specific technical flow of a credit card transaction." },
+                    { text: "WCAG requiring accessible checkout flows", correct: false, rationale: "Accessibility guidelines ensure sites are usable by people with disabilities; they do not dictate banking security protocols." },
+                    { text: "PCI DSS enforcing Level 1 compliance", correct: false, rationale: "This standard dictates how card data is securely stored and transmitted by the merchant's servers, not the consumer-facing banking approval process." }
+                ]
+            }
+        ];
+
+        // --- UI LOGIC & RENDERING ---
+
+        // Tab Switching
+        function switchTab(tabId) {
+            document.getElementById('tab-flashcards').classList.add('hidden');
+            document.getElementById('tab-quiz').classList.add('hidden');
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+
+            const btnCards = document.getElementById('tab-btn-flashcards');
+            const btnQuiz = document.getElementById('tab-btn-quiz');
+
+            if (tabId === 'flashcards') {
+                btnCards.classList.replace('bg-transparent', 'bg-orange-600');
+                btnCards.classList.replace('text-stone-300', 'text-white');
+                btnCards.classList.remove('hover:bg-stone-700');
+                
+                btnQuiz.classList.replace('bg-orange-600', 'bg-transparent');
+                btnQuiz.classList.replace('text-white', 'text-stone-300');
+                btnQuiz.classList.add('hover:bg-stone-700');
+            } else {
+                btnQuiz.classList.replace('bg-transparent', 'bg-orange-600');
+                btnQuiz.classList.replace('text-stone-300', 'text-white');
+                btnQuiz.classList.remove('hover:bg-stone-700');
+                
+                btnCards.classList.replace('bg-orange-600', 'bg-transparent');
+                btnCards.classList.replace('text-white', 'text-stone-300');
+                btnCards.classList.add('hover:bg-stone-700');
+            }
+        }
+
+        // Render Flashcards
+        function renderFlashcards() {
+            const grid = document.getElementById('flashcard-grid');
+            flashcardsData.forEach((card, index) => {
+                const cardHTML = `
+                    <div class="h-64 w-full perspective-1000 cursor-pointer" onclick="this.querySelector('.flip-card-inner').classList.toggle('rotate-y-180')">
+                        <div class="flip-card-inner relative w-full h-full transform-style-3d transition-transform-700 rounded-xl shadow-md">
+                            <div class="absolute w-full h-full backface-hidden bg-white border border-stone-200 rounded-xl flex flex-col items-center justify-center p-6 text-center">
+                                <span class="text-xs font-bold text-orange-500 uppercase tracking-widest mb-4">Card ${index + 1}</span>
+                                <h3 class="text-xl font-bold text-stone-800">${card.front}</h3>
+                                <span class="absolute bottom-4 text-xs text-stone-400">Click to flip &rarr;</span>
+                            </div>
+                            <div class="absolute w-full h-full backface-hidden bg-stone-800 text-stone-50 border border-stone-700 rounded-xl flex flex-col items-center justify-center p-8 text-center rotate-y-180">
+                                <p class="text-md leading-relaxed font-medium">${card.back}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.insertAdjacentHTML('beforeend', cardHTML);
+            });
+        }
+
+        // Shuffle array utility for quiz options
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex > 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        // Render Quiz
+        function renderQuiz() {
+            const container = document.getElementById('quiz-container');
+            quizData.forEach((q, qIndex) => {
+                
+                let optionsHTML = '';
+                const shuffledOptions = shuffle([...q.options]);
+
+                shuffledOptions.forEach((opt, oIndex) => {
+                    const optId = `q${qIndex}-o${oIndex}`;
+                    optionsHTML += `
+                        <button id="btn-${optId}" 
+                                onclick="handleAnswer(${qIndex}, ${oIndex}, ${opt.correct}, '${opt.rationale.replace(/'/g, "\\'")}')" 
+                                class="w-full text-left p-4 rounded-lg border border-stone-300 bg-white hover:bg-orange-50 hover:border-orange-300 transition-colors focus:outline-none">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 mt-0.5">
+                                    <div id="icon-${optId}" class="w-5 h-5 rounded-full border-2 border-stone-300 flex items-center justify-center mr-3"></div>
+                                </div>
+                                <span class="text-stone-800 font-medium">${opt.text}</span>
+                            </div>
+                        </button>
+                    `;
+                });
+
+                const questionHTML = `
+                    <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-stone-200" id="question-card-${qIndex}">
+                        <div class="flex items-center mb-4">
+                            <span class="bg-stone-100 text-stone-600 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">Question ${qIndex + 1} of 10</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-stone-900 mb-6 leading-relaxed">${q.question}</h3>
+                        
+                        <div class="space-y-3" id="options-container-${qIndex}">
+                            ${optionsHTML}
+                        </div>
+
+                        <div id="feedback-${qIndex}" class="mt-6 hidden rounded-lg p-5 border-l-4">
+                            <p id="rationale-text-${qIndex}" class="text-sm font-medium"></p>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', questionHTML);
+            });
+        }
+
+        // Handle Quiz Answer Selection
+        function handleAnswer(qIndex, selectedOptIndex, isCorrect, rationale) {
+            const optionsContainer = document.getElementById(`options-container-${qIndex}`);
+            const buttons = optionsContainer.querySelectorAll('button');
+            const feedbackBox = document.getElementById(`feedback-${qIndex}`);
+            const rationaleText = document.getElementById(`rationale-text-${qIndex}`);
+
+            // Disable all buttons in this question
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-orange-50', 'hover:border-orange-300', 'cursor-pointer');
+                btn.classList.add('opacity-70', 'cursor-not-allowed');
+            });
+
+            // Style the selected button
+            const selectedBtn = document.getElementById(`btn-q${qIndex}-o${selectedOptIndex}`);
+            const selectedIcon = document.getElementById(`icon-q${qIndex}-o${selectedOptIndex}`);
+            
+            selectedBtn.classList.remove('opacity-70', 'bg-white', 'border-stone-300');
+            
+            if (isCorrect) {
+                selectedBtn.classList.add('bg-green-50', 'border-green-500', 'opacity-100');
+                selectedIcon.classList.replace('border-stone-300', 'border-green-500');
+                selectedIcon.classList.add('bg-green-500');
+                selectedIcon.innerHTML = `<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>`;
+                
+                feedbackBox.classList.add('bg-green-50', 'border-green-500', 'text-green-900', 'block');
+                feedbackBox.classList.remove('hidden');
+                rationaleText.innerHTML = `<strong>Correct!</strong> ${rationale}`;
+            } else {
+                selectedBtn.classList.add('bg-red-50', 'border-red-500', 'opacity-100');
+                selectedIcon.classList.replace('border-stone-300', 'border-red-500');
+                selectedIcon.classList.add('bg-red-500');
+                selectedIcon.innerHTML = `<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>`;
+                
+                feedbackBox.classList.add('bg-red-50', 'border-red-500', 'text-red-900', 'block');
+                feedbackBox.classList.remove('hidden');
+                rationaleText.innerHTML = `<strong>Incorrect.</strong> ${rationale}`;
+            }
+        }
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            renderFlashcards();
+            renderQuiz();
+        });
+    </script>
+</body>
+</html>
+
+
+
